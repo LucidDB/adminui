@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	title="About Flex SQLAdmin" 
+	close="closeWin(event);" 
+	creationComplete="init();" 
+	layout="absolute" width="384" height="214">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			public function init():void{
+        		PopUpManager.centerPopUp(this);
+   			}
+   			public function closeWin(e:Event):void{
+        		PopUpManager.removePopUp(this);
+        	}
+		]]>
+	</mx:Script>
+	<mx:Label x="117" y="22" text="Flex SQLAdmin" fontSize="15" fontWeight="bold"/>
+	<mx:Label x="27" y="101" text="Copyright 2006 Kevin Kazmierczak. All rights reserved."/>
+	<mx:Label x="83" y="146" text="Icons courtesy of" fontSize="10"/>
+	<mx:LinkButton x="107" y="71" label="www.flexsqladmin.com" click="navigateToURL(new URLRequest('http://www.flexsqladmin.com'), '_blank')"/>
+	<mx:LinkButton x="179" y="144" label="www.famfamfam.com" click="navigateToURL(new URLRequest('http://www.famfamfam.com'), '_blank')"/>
+	<mx:Label x="148" y="45" text="Version 2.1"/>
+</mx:TitleWindow>

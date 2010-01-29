@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+	close="closeWin(event);" 
+	keyUp="keyHandler(event);"
+	creationComplete="init();" 
+	layout="absolute" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+			import com.flexsqladmin.sqladmin.events.InsertRowEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import mx.controls.TextInput;
+			import mx.controls.Button;
+			import mx.containers.GridItem;
+			import mx.containers.GridRow;
+			import mx.containers.HBox;
+			import mx.controls.Text;
+			import mx.controls.Label;
+			import mx.controls.Alert;
+        	import mx.managers.PopUpManager;
+        	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+        	import com.flexsqladmin.sqladmin.components.DebugWindow;
+		
+			private var tablemetadata:OpenTableData;	
+			private var tablexml:XML;
+			private var formdata:Array = new Array();
+			private var tablewindow:OpenTableWindow;
+		
+			public function init():void{
+				PopUpManager.centerPopUp(this);
+			}
+			public function closeWin(e:Event):void{
+        		PopUpManager.removePopUp(this);
+        	}
+        	public function setMetaData(metadata:OpenTableData):void{
+        		tablemetadata = metadata;
+        		this.title = "Insert Into Table: " + tablemetadata.getTable();
+        		tablexml = tablemetadata.getTableXML();
+        		buildForm();
+        	}
+        	public function getFormData():Array{
+        		return formdata;
+        	}
+        	public function buildForm():void{
+        		for each(var item:XML in tablexml.NewDataSet.Table){
+        			var formRow:GridRow = new GridRow();
+        			var formItem:GridItem = new GridItem();
+        			var l:Label = new Label(); 
+        			l.text = item.column_name + " (" + item.data_type;
+        			if (item.character_maximum_length != "0")
+        				l.text += ", " + item.character_maximum_length;
+        			l.text += ") :";
+        			formItem.addChild(l);
+        			
+        			var formItem2:GridItem = new GridItem();
+        			var ti:TextInput = new TextInput();
+        			ti.id = "col_" + item.column_name;
+        			formdata.push(ti);
+					formItem2.addChild(ti);
+					
+					formRow.addChild(formItem);
+					formRow.addChild(formItem2);
+					
+        			form.addChild(formRow);
+        		}
+        		var endRow:GridRow = new GridRow();
+        		var endItem:GridItem = new GridItem();
+        		var b:Button = new Button();
+        		b.label = "Insert Record";
+        		b.addEventListener(MouseEvent.CLICK, insertClick);
+        		endItem.addChild(b);
+        		endRow.addChild(endItem);
+        		form.addChild(endRow);
+        	}
+        	private function insertClick(event:Event):void{
+        		DebugWindow.log("InsertRowWindow.mxml:insertClick()");
+        		var insertrowevent:InsertRowEvent = new InsertRowEvent(tablemetadata, this);
+            	CairngormEventDispatcher.getInstance().dispatchEvent(insertrowevent);
+        	}
+        	private function keyHandler(e:KeyboardEvent):void{
+               	// Submit form on enter
+                if(e.keyCode == 13)
+                	insertClick(new Event(""));
+            }
+            public function setParentWindow(win:OpenTableWindow):void{
+            	tablewindow = win;
+            }
+            public function getParentWindow():OpenTableWindow{
+            	return tablewindow;
+            }
+		]]>
+	</mx:Script>
+	<mx:Grid id="form"></mx:Grid>
+</mx:TitleWindow>

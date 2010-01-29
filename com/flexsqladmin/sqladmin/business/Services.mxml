@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cairngorm:ServiceLocator 
+	xmlns:cairngorm="com.adobe.cairngorm.business.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+		]]>
+	</mx:Script>
+	
+	<mx:WebService 
+		id="sqlWebService" 
+		useProxy="false" 
+		makeObjectsBindable="false"
+		showBusyCursor="true"
+		fault="mx.controls.Alert.show('Error loading WSDL', 'Webservice Error');" >
+        <mx:operation name="execSQL" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <connection></connection>
+                <sqlquerytype></sqlquerytype>
+                <sql></sql>
+                <toomany></toomany>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="getDBMetaData" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+            	<connection></connection>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="handleUpdate" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <connection></connection>
+                <testsql></testsql>
+                <sql></sql>
+                <toomany></toomany>
+            </mx:request>
+        </mx:operation>
+    </mx:WebService>
+	
+</cairngorm:ServiceLocator>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="800" height="500" 
+	layout="absolute"
+	close="closeWin(event);" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
+			import com.flexsqladmin.sqladmin.view.InsertRowWindow;
+			import mx.events.DataGridEvent;
+			import mx.events.DataGridEventReason;
+			import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
+			import com.flexsqladmin.sqladmin.events.TableMetaDataEvent;
+			import com.flexsqladmin.sqladmin.events.OpenTableEvent;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import com.flexsqladmin.sqladmin.vo.OpenTableData;
+			import mx.managers.PopUpManager;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+		
+			private var opentabledata:OpenTableData;	
+		
+			public function init():void{
+        		PopUpManager.centerPopUp(this);
+        	}
+        	
+        	public function refreshData():void{
+        		var opentablevent:OpenTableEvent = new OpenTableEvent(opentabledata.getTable(), tabledatagrid);
+            	CairngormEventDispatcher.getInstance().dispatchEvent(opentablevent);
+   				getTableMetaData();
+        	} 
+        	
+        	public function getTableMetaData():void{
+        		var tablemetadataevent:TableMetaDataEvent = new TableMetaDataEvent(opentabledata);
+            	CairngormEventDispatcher.getInstance().dispatchEvent(tablemetadataevent);
+        	}
+        	
+        	public function setTablename(table:String):void{
+        		opentabledata = new OpenTableData(table);
+        		this.title = "Open Table: " + opentabledata.getTable();
+        		refreshData();
+        	}
+        	
+        	public function showData():void{
+        		DebugWindow.log("Meta Data" + opentabledata.tablemetadata.toString());
+        	}
+        	
+        	private function deleteRow():void{
+            	mx.controls.Alert.show("Are you sure you want to remove this record?", "Delete?", Alert.YES|Alert.NO, this, deleteListener, null, Alert.OK);	
+            }
+            private function deleteListener(eventObj:CloseEvent):void{
+            	if (tabledatagrid.selectedItem != null && eventObj.detail == Alert.YES){
+	                var deleterowevent:DeleteRowEvent = new DeleteRowEvent(opentabledata, tabledatagrid, this);
+            		CairngormEventDispatcher.getInstance().dispatchEvent(deleterowevent);
+            	}
+            }
+            private function updateData(event:DataGridEvent):void{
+            	if (event.reason == DataGridEventReason.OTHER || event.reason == DataGridEventReason.CANCELLED){
+                    event.preventDefault();
+                    return;
+                }
+                var updatedataevent:UpdateDataEvent = new UpdateDataEvent(opentabledata, tabledatagrid, this, event);
+            	CairngormEventDispatcher.getInstance().dispatchEvent(updatedataevent);
+            }
+        	public function openInsertWindow():void{
+        		var insertForm:InsertRowWindow = InsertRowWindow(PopUpManager.createPopUp(this, InsertRowWindow, true));
+	            insertForm.setStyle("borderAlpha", 0.8);
+	           	insertForm.showCloseButton = true; 
+	           	insertForm.setMetaData(opentabledata);
+	           	insertForm.setParentWindow(this);
+        	}
+        	public function closeWin(e:Event):void{
+        		PopUpManager.removePopUp(this);
+        	}
+		]]>
+	</mx:Script>
+	
+	 <mx:VBox width="100%" height="100%">
+    	<mx:HBox>
+    		<mx:Button click="openInsertWindow();" label="Insert" icon="@Embed(source='/icons/application_add.png')"/>
+    		<mx:Button click="deleteRow();" label="Delete" icon="@Embed(source='/icons/application_delete.png')"/>
+    		<mx:Button click="refreshData();" label="Refresh Data" icon="@Embed(source='/icons/database_gear.png')"/>
+    	</mx:HBox>
+    	<mx:DataGrid itemEditEnd="updateData(event);" id="tabledatagrid" sortableColumns="false" editable="true" horizontalScrollPolicy="auto" minColumnWidth="75" width="100%" height="100%"></mx:DataGrid>
+	</mx:VBox>
+</mx:TitleWindow>

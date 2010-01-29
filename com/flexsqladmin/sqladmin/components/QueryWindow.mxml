@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	icon="@Embed(source='/icons/script_select.png')" 
+	creationComplete="init();">
+	<mx:TextArea id="querytext" 
+		dragEnter="doDragEnter(event);" 
+		dragDrop="doDragDrop(event);"
+		keyUp="parseQuery(event);"/>
+	<mx:Script>
+		<![CDATA[
+		
+			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import mx.events.DragEvent;
+			import mx.managers.DragManager;
+		
+			public function init():void{
+				querytext.percentHeight = 100;
+				querytext.percentWidth = 100;
+				querytext.setFocus();
+			}
+			
+			public function setLabel(s:String):void{
+				this.label = s;
+			}
+			
+			public function setText(s:String):void{
+				DebugWindow.log("QueryWindow.mxml:setText(" + s + ")");
+				querytext.text = querytext.text + s;
+				parseQuery(new KeyboardEvent(""));
+			}
+			
+			public function getQueryText():String{
+				if (querytext.selectionBeginIndex != querytext.selectionEndIndex)
+                    return querytext.text.substring(querytext.selectionBeginIndex, querytext.selectionEndIndex);
+                else
+                    return querytext.text;
+			}
+			
+			public function resetSelection():void{
+            	querytext.selectionBeginIndex = querytext.text.length;
+            	querytext.selectionEndIndex = querytext.text.length;
+			}
+			
+			public function clearQuery():void{
+				querytext.text = "";
+			}
+			
+			public function parseQuery(e:KeyboardEvent):void{
+				if (e.keyCode != 116 && querytext.text != null){
+	                var pattern:RegExp = /\b(add|column|modify|truncate|create|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
+	                var aggpattern:RegExp = /\b(count|avg|sum|max|min)\b/gi;
+	                var regexNewLine:RegExp = /\r/g;
+	                var lt:RegExp = /</g;
+	                var tempQueryString:String = querytext.text;
+	                tempQueryString = tempQueryString.replace(lt, "&lt;");
+	                tempQueryString = tempQueryString.replace(pattern, "<FONT COLOR='#0000FF'><B>$1</B></FONT>");
+	                tempQueryString = tempQueryString.replace(aggpattern, "<FONT COLOR='#FF33FF'><B>$1</B></FONT>");
+	                tempQueryString = tempQueryString.replace(regexNewLine, "<br>");
+	                querytext.htmlText = tempQueryString;
+	            }
+			}
+			
+			private function doDragEnter(event:DragEvent):void {
+            	var dropTarget:TextArea=TextArea(event.currentTarget);
+				DragManager.acceptDragDrop(dropTarget);
+	        }
+
+	        private function doDragDrop(event:DragEvent):void {
+	            var dropTarget:TextArea=TextArea(event.currentTarget);       
+	            var items:Array = event.dragSource.dataForFormat("treeItems") as Array;
+	            var tempstr:String = items[0].@column;
+	            if (tempstr.length == 0)
+	            	tempstr = items[0].@label
+                dropTarget.text += tempstr;
+                resetSelection();
+                querytext.setFocus();
+                parseQuery(new KeyboardEvent(""));
+	        }
+			
+		]]>
+	</mx:Script>
+</mx:Canvas>

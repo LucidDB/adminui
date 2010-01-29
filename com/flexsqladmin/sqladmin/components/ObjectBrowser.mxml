@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Tree xmlns:mx="http://www.adobe.com/2006/mxml"
+	dragMoveEnabled="false" 
+	defaultLeafIcon="@Embed(source='/icons/database_table.png')" 
+	folderOpenIcon="@Embed(source='/icons/database.png')" 
+	folderClosedIcon="@Embed(source='/icons/database.png')" 
+	height="95%" width="100%" 
+	dragEnabled="true" 
+	labelField="@label" 
+	showRoot="false" 
+	rowHeight="25" 
+	creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+			import mx.containers.TabNavigator;
+            import mx.core.Application;
+            import mx.controls.Menu;
+            import mx.events.MenuEvent;
+            import mx.events.ListEvent;
+            import mx.managers.PopUpManager;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            
+            [Embed(source="/icons/script_select.png")]
+            private var selecticon:Class;
+            [Embed(source="/icons/script_add.png")]
+            private var inserticon:Class;
+            [Embed(source="/icons/script_edit.png")]
+            private var updateicon:Class;
+            [Embed(source="/icons/script_delete.png")]
+            private var deleteicon:Class;
+            [Embed(source="/icons/open_table.png")]
+            private var opentableicon:Class;
+            [Embed(source="/icons/script_exec.png")]
+            private var scriptexec:Class;
+            private var clickx:int = 0;
+            private var clicky:int = 0;
+            private var model:ModelLocator = ModelLocator.getInstance();
+            public var tabnav:TabNavigator;
+            
+            public function init():void{
+            	this.addEventListener(MouseEvent.CLICK, clickHandler, false, 1);
+            	this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
+            }
+            
+            private function clickHandler(e:MouseEvent):void{
+            	clickx = e.stageX;
+            	clicky = e.stageY;
+            }
+            
+			private function listItemClickHandler(event:Event):void {
+            	if(this.selectedItem.@sqlquery != null && this.selectedItem.@sqlquery.toString().length != 0){
+            		var objMenu:Array;
+            		if (this.getParentItem(this.selectedItem).@label == "Procedures")
+            			objMenu = [{label: "Script as Execute", icon:scriptexec}];
+            		else if (this.getParentItem(this.selectedItem).@label == "Tables")
+	            		objMenu = [{label: "Script as Select", icon:selecticon}, {label: "Script as Insert", icon:inserticon}, {label: "Script as Update", icon:updateicon}, {label: "Script as Delete", icon:deleteicon}, {type: "separator"}, {label:"Open Table", icon:opentableicon}];
+	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
+	            		objMenu = [{label: "Script as Select", icon:selecticon}];
+	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){	
+	            		var myMenu:Menu = Menu.createMenu(null, objMenu);
+						myMenu.show(clickx + 25, clicky);
+						myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
+	            	}
+            	}
+            }
+            
+            private function menuHandler(e:MenuEvent):void{
+            	var scriptquery:String = "";
+            	var x:int = 0;
+            	if (e.index == 0){
+            		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
+            			scriptquery = "EXECUTE " + this.selectedItem.@label + " ";
+            			for (x = 0; x < this.selectedItem.children().length(); x++){
+            				if (this.selectedItem.node[x].@column != "None")
+            					scriptquery += this.selectedItem.node[x].@column;
+ 							if (x + 1 < this.selectedItem.children().length())
+            					scriptquery += ", ";
+            			}
+            		} else {
+	            		scriptquery = "SELECT ";
+	            		for (x = 0; x < this.selectedItem.children().length(); x++){
+	            			scriptquery += "[" + this.selectedItem.node[x].@column + "]";
+	            			if (x + 1 < this.selectedItem.children().length())
+	            				scriptquery += ", ";
+	            		}
+						scriptquery += "\rFROM [" + this.selectedItem.@label + "]";
+            		}
+            	}
+            	else if(e.index == 1){
+            		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
+            			scriptquery += "EXEC s" + this.selectedItem.@label;
+            		} else {
+	            		scriptquery = "INSERT INTO [" + this.selectedItem.@label + "] \r(\r";
+	            		for (x = 0; x < this.selectedItem.children().length(); x++){
+	            			scriptquery += "[" + this.selectedItem.node[x].@column + "]";
+	            			if (x + 1 < this.selectedItem.children().length())
+	            				scriptquery += ", \r";
+	            		}
+						scriptquery += "\r)\r VALUES\r (\r";
+						for (x = 0; x < this.selectedItem.children().length(); x++){
+	            			scriptquery += "{" + this.selectedItem.node[x].@label + "}";
+	            			if (x + 1 < this.selectedItem.children().length())
+	            				scriptquery += ", \r";
+	            		}
+	            		scriptquery += "\r)";
+	            	}
+            	}
+            	else if(e.index == 2){
+            		scriptquery = "UPDATE [" + this.selectedItem.@label + "] \rSET\r";
+            		for (x = 0; x < this.selectedItem.children().length(); x++){
+            			scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
+            			if (x + 1 < this.selectedItem.children().length())
+            				scriptquery += ", \r";
+            		}
+            		scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
+            	}
+            	else if(e.index == 3){
+            		scriptquery = "DELETE FROM [" + this.selectedItem.@label + "]\rWHERE {SEARCH_CONDITIONS}";
+            	}
+            	else if(e.index == 5){
+            		// Open the table window
+					//Application.application.openTableWindow(this.selectedItem.@label);
+					var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this.parentDocument.parentDocument, OpenTableWindow, true));
+		            opentablewindow.setStyle("borderAlpha", 0.8);
+		           	opentablewindow.showCloseButton = true; 
+		           	opentablewindow.setTablename(this.selectedItem.@label);
+            	}
+            	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + scriptquery);
+            	DebugWindow.log("Tab Nav Index - " + tabnav.selectedIndex.toString());
+            	model.aryQueryWindows[tabnav.selectedIndex].setText(scriptquery);
+            }
+		]]>
+	</mx:Script>
+	
+</mx:Tree>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	This Debug Window component is based on and example by Jesse Warden
+-->
+<mx:TitleWindow 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="absolute" 
+	width="400" 
+	height="300" 
+	title="Debug Window" creationComplete="init();">
+	
+	<mx:Script>
+		<![CDATA[
+		
+			import mx.managers.PopUpManager;
+			
+			public static var debug:DebugWindow;
+			public static var iscreated:Boolean = false;
+	
+			public function init():void{
+				debug = this;
+				iscreated = true;
+				//PopUpManager.centerPopUp(this);
+				this.move(600,200);
+			}
+		
+			public static function log(s:String):void
+			{
+				if(iscreated)
+					debug.writelog(s);
+			}
+			
+			public function writelog(s:String):void{
+				debug_ta.text += "----------------------\n";
+				debug_ta.text += s + "\n";
+				callLater(scrollIt);
+			}
+			
+			private function scrollIt():void
+			{
+				debug_ta.verticalScrollPosition = debug_ta.maxVerticalScrollPosition;
+			}
+			private function clear():void
+			{
+				debug_ta.text = "";
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:TextArea id="debug_ta" width="100%" height="220" y="40"/>
+	<mx:Button x="10" y="10" label="Clear" click="clear();"/>
+	
+</mx:TitleWindow>

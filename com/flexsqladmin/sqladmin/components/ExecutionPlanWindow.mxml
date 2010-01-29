@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+		
+			import mx.controls.Image;
+			import mx.controls.Label;
+			import mx.core.UIComponent;  
+			import com.flexsqladmin.sqladmin.components.DebugWindow;
+		
+			public function clearWindow():void{
+				this.removeAllChildren();
+			}
+		
+			public function draw():void{
+				DebugWindow.log("draw()");
+			}
+		
+			public function drawPlan(queryplaninfo:XML):void{
+				
+				DebugWindow.log("drawPlan()");
+				DebugWindow.log("XML - " + queryplaninfo);
+				
+                var r:String = "";
+                var startx:int = 10;
+                var spacerx:int = 100;
+                var starty:int = 10;
+                var spacery:int = 60;
+                var nodecounter:int = 0;
+                var prevlevel:int = 0;
+                var totalcost:Number = 0;
+                
+                var nodes:Array = new Array();
+                for each (var node:XML in queryplaninfo.showplan.Table){
+                	
+                	// Time to move down a line and set ident
+                	if(prevlevel >= node.level && prevlevel != 0){
+                        starty = starty + spacery;
+                        nodecounter = node.level;
+                    }
+                    totalcost += Number(node.TotalSubtreeCost);
+                	var nodecoord:Object = new Object();
+                	nodecoord.x = spacerx * nodecounter + startx;
+                	nodecoord.y = starty;
+                	nodes[node.NodeId] = nodecoord;
+                	prevlevel = node.level;
+                	nodecounter++;
+                }
+
+                for each (var prop:XML in queryplaninfo.showplan.Table) {
+                    
+                    var imageicon:String = "";
+                    var nodelabel:String = "";
+                    var nodetooltip:String = "";
+                    
+                    if ( prop.Type != "PLAN_ROW"){
+                        imageicon = prop.Type;
+                        nodelabel = prop.Type;
+                    }
+                    else if (prop.PhysicalOp.toString() == prop.LogicalOp.toString()){
+                        imageicon = prop.PhysicalOp;
+                        nodelabel = prop.PhysicalOp;
+                    }
+                    else{
+                        imageicon = prop.PhysicalOp;
+                        nodelabel = prop.PhysicalOp + "/" + prop.LogicalOp;
+                    }
+					var cost:Number = Number(prop.TotalSubtreeCost) / totalcost * 100;
+					cost = Math.round(cost);
+					nodetooltip += nodelabel + "\n\n";
+					nodetooltip += "Physical Operation: " + prop.PhysicalOp + "\n";
+					nodetooltip += "Logical Operation: " + prop.LogicalOp + "\n";
+					if (prop.EstimateRows.toString() != "")
+						nodetooltip += "Row Count: " + prop.EstimateRows + "\n";
+					if (prop.AvgRowSize.toString() != "")
+						nodetooltip += "Average Row Size: " + prop.AvgRowSize + "\n";
+					if (prop.EstimateIO.toString() != "")
+						nodetooltip += "IO Cost: " + prop.EstimateIO + "\n";
+					if (prop.EstimateCPU.toString() != "")
+						nodetooltip += "CPU Cost: " + prop.EstimateCPU + "\n";
+					if (prop.EstimateExecutions.toString() != "")
+						nodetooltip += "Number of Executes: " + prop.EstimateExecutions + "\n";
+					if (prop.EstimateCPU.toString() != "")
+						nodetooltip += "CPU Cost: " + prop.EstimateCPU + "\n";
+					if (prop.TotalSubtreeCost.toString() != "")
+						nodetooltip += "Total Subtree Cost: " + prop.TotalSubtreeCost + " (Cost:" + cost + "%)\n";
+					if (prop.Argument.toString() != "")
+						nodetooltip += "\nArgument:\n" + prop.Argument + "\n";
+					
+					if (nodelabel.length > 15)
+                    	nodelabel = nodelabel.substr(0, 14) + "...";
+					
+                    // Add Image
+                    var i:Image = new Image();
+                    //i.load("icons/" + imageicon + ".png");
+                    var spicon:showPlanIcon = new showPlanIcon(imageicon);
+                    i.load(spicon.getIcon());
+                    i.x = nodes[prop.NodeId].x;
+                    i.y = nodes[prop.NodeId].y;
+                    i.toolTip = nodetooltip;
+                    this.addChild(i);
+                    
+                    // Add Label
+                    var l:Label = new Label();
+                    l.text = nodelabel;
+                    l.x = nodes[prop.NodeId].x - 10;
+                    l.y = nodes[prop.NodeId].y + 35;
+                    i.toolTip = nodetooltip;
+                    this.addChild(l);
+                    
+                    // Add Label
+                    l = new Label();
+                    l.text = "Cost: " + cost + "%";
+                    l.x = nodes[prop.NodeId].x - 10;
+                    l.y = nodes[prop.NodeId].y + 45;
+                    i.toolTip = nodetooltip;
+                    this.addChild(l);
+                    
+                    //Draw Connecting Line
+                    if (prop.Parent != 0){
+                    	var mySprite:Sprite = new UIComponent();
+                        mySprite.graphics.lineStyle(2, 0x00000, 0.5);
+                        mySprite.graphics.moveTo(nodes[prop.NodeId].x - 15, nodes[prop.NodeId].y + 15);
+                        mySprite.graphics.lineTo(nodes[prop.Parent].x + 50, nodes[prop.Parent].y + 15);
+                        this.addChild(mySprite);
+                    }
+                    
+                }                 
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>
