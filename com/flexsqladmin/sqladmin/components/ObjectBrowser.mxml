@@ -83,11 +83,11 @@
             		} else {
 	            		scriptquery = "SELECT ";
 	            		for (x = 0; x < this.selectedItem.children().length(); x++){
-	            			scriptquery += "[" + this.selectedItem.node[x].@column + "]";
+	            			scriptquery += "\"" + this.selectedItem.node[x].@column + "\"";
 	            			if (x + 1 < this.selectedItem.children().length())
 	            				scriptquery += ", ";
 	            		}
-						scriptquery += "\rFROM [" + this.selectedItem.@label + "]";
+						scriptquery += "\rFROM \"" + this.selectedItem.@label + "\"";
             		}
             	}
             	else if(e.index == 1){
