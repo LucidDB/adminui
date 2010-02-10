@@ -19,7 +19,7 @@ package com.flexsqladmin.sqladmin.commands
 			DebugWindow.log("TableMetaDataCommand.as:execute()");
 			tablemetadata = TableMetaDataEvent(event).tablemetadata;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL("SELECT column_name, data_type, is_nullable, ISNULL(character_maximum_length, '') AS character_maximum_length FROM information_schema.columns WHERE table_name = '" + tablemetadata.getTable() + "'", "meta", model.connectionVO);
+			delegate.execSQL("SELECT column_name, datatype, is_nullable AS IS_NULLABLE, \"PRECISION\" AS character_maximum_length FROM SYS_ROOT.DBA_COLUMNS WHERE table_name = '" + tablemetadata.getTable().split(".")[1] + "'", "meta", model.connectionVO);
 		}
 		
 		public function onResult(event:*=null):void
@@ -29,10 +29,10 @@ package com.flexsqladmin.sqladmin.commands
 			var mdarray:Array = new Array();
 			var metadata:XML = new XML(event.result);
 			for (var x:int = 0; x < metadata.NewDataSet.children().length(); x++){
-				mdarray[metadata.NewDataSet.Table.column_name[x]] = metadata.NewDataSet.Table.data_type[x];
+				mdarray[metadata.NewDataSet.Table.COLUMN_NAME[x]] = metadata.NewDataSet.Table.DATATYPE[x];
     		}
     		tablemetadata.setMetaData(mdarray);
-    		tablemetadata.setTableXML(metadata);
+    		tablemetadata.setTableXML(metadata);	
     		//DebugWindow.log("Array - " + mdarray.length.toString());
     		//DebugWindow.log("Length - " + metadata.NewDataSet.children().length().toString());
 		}

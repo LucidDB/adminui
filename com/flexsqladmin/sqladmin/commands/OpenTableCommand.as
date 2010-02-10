@@ -22,7 +22,7 @@ package com.flexsqladmin.sqladmin.commands
 			var table:String = OpenTableEvent(event).table;
 			tabledatagrid = OpenTableEvent(event).tabledatagrid;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL("SELECT * FROM [" + table + "]", "normal", model.connectionVO);
+			delegate.execSQL("SELECT * FROM " + table + "", "normal", model.connectionVO);
 		}
 		
 		public function onResult(event:*=null):void

@@ -30,20 +30,24 @@ package com.flexsqladmin.sqladmin.commands
 			tablewindow = DeleteRowEvent(event).tablewindow;
 			
 			for (var x:int = 0; x < datagrid.selectedItem.children().length(); x++){
-            	deletestring += "[" + datagrid.columns[x].dataField + "]";
+            	deletestring += "\"" + datagrid.columns[x].dataField + "\"";
             	if (datagrid.selectedItem.children()[x] == "<NULL>"){
             		deletestring += " IS NULL";
-            	} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "money" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "smallmoney"){
+            	} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "MONEY" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "SMALLMONEY"){
             		deletestring += " = " + datagrid.selectedItem.children()[x];
-            	} else {
+            	}else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "INTEGER"|| tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "BOOLEAN"){
+            		deletestring += " = " + datagrid.selectedItem.children()[x]; 
+            	}else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "DATE"){
+            		deletestring += " = date'" + datagrid.selectedItem.children()[x] + "'"; 
+            	}else {
             		deletestring += " = '" + datagrid.selectedItem.children()[x] + "'"; 
             	}
             	if (x + 1 < datagrid.selectedItem.children().length())
         			deletestring += " AND ";
             }
 			
-			checksqlstring = "SELECT * FROM [" + tablemetadata.getTable() + "] WHERE " + deletestring;
-			deletesql = "DELETE FROM [" + tablemetadata.getTable() + "] WHERE " + deletestring;
+			checksqlstring = "SELECT * FROM " + tablemetadata.getTable() + " WHERE " + deletestring;
+			deletesql = "DELETE FROM " + tablemetadata.getTable() + " WHERE " + deletestring;
 			
 			DebugWindow.log("Delete String = " + deletesql);
 			DebugWindow.log("Check String = " + checksqlstring);

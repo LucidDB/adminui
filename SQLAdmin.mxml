@@ -48,11 +48,12 @@
             	var wsdl:String = "";
             	try{
             		// If there is a flash variables from the html page, lets use, otherwise default it to the current directory
-            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
-            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
-            		} else {
-            			wsdl = Application.application.parameters.webservice;
-            		}
+//            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
+//            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
+//            		} else {
+//            			wsdl = Application.application.parameters.webservice;
+//            		}
+					wsdl = "http://127.0.0.1:8080/flex/soap/FlexSQLAdminService?wsdl";
             		//DebugWindow.log("Using WSDL location - " + wsdl);
             		var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;

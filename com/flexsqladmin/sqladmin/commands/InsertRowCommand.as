@@ -27,18 +27,24 @@ package com.flexsqladmin.sqladmin.commands
 			insertrowwindow = InsertRowEvent(event).insertrowwindow;
 			formdata = insertrowwindow.getFormData();
 			var tablexml:XML = tablemetadata.getTableXML();
-			insertsql = "INSERT INTO [" + tablemetadata.getTable() + "] (";
+			insertsql = "INSERT INTO " + tablemetadata.getTable() + " (";
     		for (var x:int = 0; x < tablexml.NewDataSet.children().length(); x++){
     			if (formdata[x].text != "")
-        			insertsql += "[" + tablexml.NewDataSet.Table.column_name[x] + "],";
+        			insertsql += "\"" + tablexml.NewDataSet.Table.COLUMN_NAME[x] + "\",";
     		}
     		insertsql = insertsql.substring(0, insertsql.length - 1);
     		insertsql += ") VALUES (";
     		for (x = 0; x < tablexml.NewDataSet.children().length(); x++){
     			if (formdata[x].text != ""){
-    				if (tablexml.NewDataSet.Table.data_type[x] == "money" || tablexml.NewDataSet.Table.data_type[x] == "smallmoney"){
+    				if (tablexml.NewDataSet.Table.DATATYPE[x] == "MONEY" || tablexml.NewDataSet.Table.DATATYPE[x] == "SMALLMONEY"){
     					insertsql += formdata[x].text + ", ";
-    				} else {
+    				} else if(tablexml.NewDataSet.Table.DATATYPE[x] == "INTEGER" || tablexml.NewDataSet.Table.DATATYPE[x] == "BOOLEAN"){
+    					insertsql += formdata[x].text + ", ";
+    				} else if(tablexml.NewDataSet.Table.DATATYPE[x] == "DATE"){
+    					insertsql += "date'" + formdata[x].text + "', ";
+    				}
+    				
+    				else {
     					insertsql += "'" + formdata[x].text + "', ";
     				}
     			}

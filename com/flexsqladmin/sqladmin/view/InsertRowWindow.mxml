@@ -45,9 +45,9 @@
         			var formRow:GridRow = new GridRow();
         			var formItem:GridItem = new GridItem();
         			var l:Label = new Label(); 
-        			l.text = item.column_name + " (" + item.data_type;
-        			if (item.character_maximum_length != "0")
-        				l.text += ", " + item.character_maximum_length;
+        			l.text = item.COLUMN_NAME + " (" + item.DATATYPE;
+        			if (item.CHARACTER_MAXIMUM_LENGTH != "0")
+        				l.text += ", " + item.CHARACTER_MAXIMUM_LENGTH;
         			l.text += ") :";
         			formItem.addChild(l);
         			

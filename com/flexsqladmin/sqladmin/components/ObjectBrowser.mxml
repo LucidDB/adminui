@@ -83,20 +83,20 @@
             		} else {
 	            		scriptquery = "SELECT ";
 	            		for (x = 0; x < this.selectedItem.children().length(); x++){
-	            			scriptquery += "\"" + this.selectedItem.node[x].@column + "\"";
+	            			scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
 	            			if (x + 1 < this.selectedItem.children().length())
 	            				scriptquery += ", ";
 	            		}
-						scriptquery += "\rFROM \"" + this.selectedItem.@label + "\"";
+						scriptquery += "\rFROM " + this.selectedItem.@label ;
             		}
             	}
             	else if(e.index == 1){
             		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
             			scriptquery += "EXEC s" + this.selectedItem.@label;
             		} else {
-	            		scriptquery = "INSERT INTO [" + this.selectedItem.@label + "] \r(\r";
+	            		scriptquery = "INSERT INTO " + this.selectedItem.@label + " \r(\r";
 	            		for (x = 0; x < this.selectedItem.children().length(); x++){
-	            			scriptquery += "[" + this.selectedItem.node[x].@column + "]";
+	            			scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
 	            			if (x + 1 < this.selectedItem.children().length())
 	            				scriptquery += ", \r";
 	            		}
@@ -110,7 +110,7 @@
 	            	}
             	}
             	else if(e.index == 2){
-            		scriptquery = "UPDATE [" + this.selectedItem.@label + "] \rSET\r";
+            		scriptquery = "UPDATE " + this.selectedItem.@label + " \rSET\r";
             		for (x = 0; x < this.selectedItem.children().length(); x++){
             			scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
             			if (x + 1 < this.selectedItem.children().length())
@@ -119,7 +119,7 @@
             		scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
             	}
             	else if(e.index == 3){
-            		scriptquery = "DELETE FROM [" + this.selectedItem.@label + "]\rWHERE {SEARCH_CONDITIONS}";
+            		scriptquery = "DELETE FROM " + this.selectedItem.@label + "\rWHERE {SEARCH_CONDITIONS}";
             	}
             	else if(e.index == 5){
             		// Open the table window
