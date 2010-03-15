@@ -1,11 +1,13 @@
 package com.flexsqladmin.sqladmin.model
 {
     import com.adobe.cairngorm.model.ModelLocator;
-    import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-    import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
-    import mx.collections.XMLListCollection;
-    import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.components.ExecutionPlanWindow;
+    import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+    import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
+    import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+    
+    import mx.collections.ArrayCollection;
+    import mx.collections.XMLListCollection;
     import mx.controls.DataGrid;
     
     [Bindable]
@@ -25,6 +27,7 @@ package com.flexsqladmin.sqladmin.model
     	public var exectimer:ExecutionTimer;
     	public var showplanwindow:ExecutionPlanWindow;
     	public var querydatagrid:DataGrid;
+    	public var catalogdata:XMLListCollection;
     	
         public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
         {
@@ -39,6 +42,7 @@ package com.flexsqladmin.sqladmin.model
 	   		connectionVO = new ConnectionVO();
 	   		tempConnectionVO = new ConnectionVO();
 	   		queryHistoryVO = new QueryHistoryVO();
+
 	 	  	if ( com.flexsqladmin.sqladmin.model.ModelLocator.modelLocator != null )
 	        	throw new Error( "Only one ModelLocator instance should be instantiated" );
 	   }

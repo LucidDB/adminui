@@ -7,10 +7,11 @@ package com.flexsqladmin.sqladmin.events
 	{
 		
 		public static var METADATA:String = "metadata";
-		
-		public function MetaDataEvent()
+		public var catalog_name:String = "LOCALDB"
+		public function MetaDataEvent(s:String)
 		{
-			DebugWindow.log("MetaDataEvent.as:MetaDataEvent()");
+			DebugWindow.log("MetaDataEvent.as:MetaDataEvent('"+catalog_name+"')");
+			catalog_name = s;
 			super(METADATA);
 		}
 		

@@ -8,6 +8,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.vo.ConnectionVO;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.events.MetaDataEvent;
 	
 	public class MetaDataCommand implements Command, Responder
 	{
@@ -17,7 +18,10 @@ package com.flexsqladmin.sqladmin.commands
 		{
 			DebugWindow.log("MetaDataCommand:execute()");
 			var delegate:getDBMetaDataDelegate = new getDBMetaDataDelegate(this);
-			delegate.getDBMetaData(model.connectionVO);
+			var metaevent:MetaDataEvent = MetaDataEvent(event);
+			var catalog:String = metaevent.catalog_name;
+			delegate.getDBMetaData(catalog,model.connectionVO);
+
 		}
 
 		public function onResult(event:*=null):void

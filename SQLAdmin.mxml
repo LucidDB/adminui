@@ -10,6 +10,7 @@
 	
 	<mx:Script> 
 		<![CDATA[
+			import mx.controls.ComboBox;
 			import mx.controls.Alert;
 			import com.flexsqladmin.sqladmin.view.AboutWindow;
 			import com.flexsqladmin.sqladmin.events.InitEvent;
@@ -53,7 +54,7 @@
 //            		} else {
 //            			wsdl = Application.application.parameters.webservice;
 //            		}
-					wsdl = "http://127.0.0.1:8080/flex/soap/FlexSQLAdminService?wsdl";
+ 				   wsdl = "http://127.0.0.1:8080/flex/soap/FlexSQLAdminService?wsdl";
             		//DebugWindow.log("Using WSDL location - " + wsdl);
             		var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;
@@ -84,7 +85,8 @@
             
             private function loadMetaData():void{
             	DebugWindow.log("main.xml:loadMetaData() - Connection " + model.connectionVO.getConnectionString());
-            	var metaevent:MetaDataEvent = new MetaDataEvent();
+            	var catalog:String = mycatalog.selectedItem.CATALOG_NAME
+            	var metaevent:MetaDataEvent = new MetaDataEvent(catalog);
             	CairngormEventDispatcher.getInstance().dispatchEvent(metaevent);
             }
             
@@ -190,6 +192,12 @@
             	tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + tempquery.text.substring(tempquery.selectionEndIndex, tempquery.length);
             	model.aryQueryWindows[tabnavigator.selectedIndex].parseQuery(new KeyboardEvent(""));
             }
+            private function closeHandler(event:Event):void {
+                
+                var my:ComboBox = ComboBox(event.target);
+                var metadata:MetaDataEvent = new MetaDataEvent(ComboBox(event.target).selectedItem.CATALOG_NAME);
+                CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
+              }   
             
 		]]>
 	</mx:Script>
@@ -225,7 +233,9 @@
 		<mx:VBox height="100%" width="30%" >
 			<mx:HBox width="100%">
 				<mx:Button click="loadMetaData();" icon="@Embed(source='icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>
+				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="closeHandler(event)"/>
 				<mx:Button click="showLogin();" label="Reconnect" icon="@Embed(source='icons/connect.png')"/>
+				
 			</mx:HBox>
 			<components:ObjectBrowser tabnav="{tabnavigator}" dataProvider="{model.metadata}"/>
 		</mx:VBox>
