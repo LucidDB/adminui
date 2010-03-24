@@ -53,18 +53,20 @@
                     var nodelabel:String = "";
                     var nodetooltip:String = "";
                     
-                    if ( prop.Type != "PLAN_ROW"){
-                        imageicon = prop.Type;
-                        nodelabel = prop.Type;
-                    }
-                    else if (prop.PhysicalOp.toString() == prop.LogicalOp.toString()){
+                    if (prop.PhysicalOp.toString() == prop.LogicalOp.toString()){
                         imageicon = prop.PhysicalOp;
                         nodelabel = prop.PhysicalOp;
+                    }
+              
+                    else if ( prop.Type != "PLAN_ROW"){
+                        imageicon = prop.Type;
+                        nodelabel = prop.Type;
                     }
                     else{
                         imageicon = prop.PhysicalOp;
                         nodelabel = prop.PhysicalOp + "/" + prop.LogicalOp;
                     }
+                   
 					var cost:Number = Number(prop.TotalSubtreeCost) / totalcost * 100;
 					cost = Math.round(cost);
 					nodetooltip += nodelabel + "\n\n";
@@ -103,6 +105,7 @@
                     // Add Label
                     var l:Label = new Label();
                     l.text = nodelabel;
+//                    l.text = prop.PhysicalOp;
                     l.x = nodes[prop.NodeId].x - 10;
                     l.y = nodes[prop.NodeId].y + 35;
                     i.toolTip = nodetooltip;
