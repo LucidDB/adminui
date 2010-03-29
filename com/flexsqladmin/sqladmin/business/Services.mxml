@@ -11,6 +11,7 @@
 	
 	<mx:WebService 
 		id="sqlWebService" 
+		service='FlexSQLAdminService'
 		useProxy="false" 
 		makeObjectsBindable="false"
 		showBusyCursor="true"
