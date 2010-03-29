@@ -6,7 +6,6 @@ package com.flexsqladmin.sqladmin.model
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
     
-    import mx.collections.ArrayCollection;
     import mx.collections.XMLListCollection;
     import mx.controls.DataGrid;
     
@@ -28,6 +27,7 @@ package com.flexsqladmin.sqladmin.model
     	public var showplanwindow:ExecutionPlanWindow;
     	public var querydatagrid:DataGrid;
     	public var catalogdata:XMLListCollection;
+    	public var currentcatalogname:String = '';
     	
         public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
         {

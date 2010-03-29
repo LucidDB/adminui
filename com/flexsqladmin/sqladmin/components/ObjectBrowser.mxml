@@ -69,11 +69,13 @@
             }
             
             private function menuHandler(e:MenuEvent):void{
+            	
+            	var catalogname : String = model.currentcatalogname;
             	var scriptquery:String = "";
             	var x:int = 0;
             	if (e.index == 0){
             		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
-            			scriptquery = "EXECUTE " +"\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " ";
+            			scriptquery = "EXECUTE " + "\"" + catalogname + "\".\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " ";
             			for (x = 0; x < this.selectedItem.children().length(); x++){
             				if (this.selectedItem.node[x].@column != "None")
             					scriptquery += this.selectedItem.node[x].@column;
@@ -87,14 +89,14 @@
 	            			if (x + 1 < this.selectedItem.children().length())
 	            				scriptquery += ", ";
 	            		}
-						scriptquery += "\rFROM " +"\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
+						scriptquery += "\rFROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
             		}
             	}
             	else if(e.index == 1){
             		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
-            			scriptquery += "EXEC s" + "\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
+            			scriptquery += "EXEC " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
             		} else {
-	            		scriptquery = "INSERT INTO " + "\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \r(\r";
+	            		scriptquery = "INSERT INTO " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \r(\r";
 	            		for (x = 0; x < this.selectedItem.children().length(); x++){
 	            			scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
 	            			if (x + 1 < this.selectedItem.children().length())
@@ -110,7 +112,7 @@
 	            	}
             	}
             	else if(e.index == 2){
-            		scriptquery = "UPDATE " + "\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
+            		scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
             		for (x = 0; x < this.selectedItem.children().length(); x++){
             			scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
             			if (x + 1 < this.selectedItem.children().length())
@@ -119,7 +121,7 @@
             		scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
             	}
             	else if(e.index == 3){
-            		scriptquery = "DELETE FROM " + "\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
+            		scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
             	}
             	else if(e.index == 5){
             		// Open the table window

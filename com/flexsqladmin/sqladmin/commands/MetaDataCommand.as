@@ -20,6 +20,7 @@ package com.flexsqladmin.sqladmin.commands
 			var delegate:getDBMetaDataDelegate = new getDBMetaDataDelegate(this);
 			var metaevent:MetaDataEvent = MetaDataEvent(event);
 			var catalog:String = metaevent.catalog_name;
+			model.currentcatalogname = catalog;
 			delegate.getDBMetaData(catalog,model.connectionVO);
 
 		}
