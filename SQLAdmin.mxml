@@ -54,7 +54,7 @@
 //            		} else {
 //            			wsdl = Application.application.parameters.webservice;
 //            		}
- 				   wsdl = "http://127.0.0.1:8080/flex/soap/FlexSQLAdminService?wsdl";
+ 				   wsdl = "http://localhost:8080/adminws/ns0.wsdl";
             		//DebugWindow.log("Using WSDL location - " + wsdl);
             		var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;
