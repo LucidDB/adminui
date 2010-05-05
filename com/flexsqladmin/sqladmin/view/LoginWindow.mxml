@@ -48,7 +48,7 @@
             	model.tempConnectionVO.server = server.text;
             	model.tempConnectionVO.database = database.text;
             	
-				var event:LoginEvent = new LoginEvent("select '' from ray.mytest", "normal", this);
+				var event:LoginEvent = new LoginEvent("select '' from (values (1))", "normal", this);
             	CairngormEventDispatcher.getInstance().dispatchEvent(event);
             	
 				loginbtn.enabled = false;
