@@ -11,16 +11,27 @@ package com.flexsqladmin.sqladmin.business
 	import com.adobe.cairngorm.business.Responder;
 	import com.flexsqladmin.sqladmin.vo.ConnectionVO;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
-	
+	import mx.utils.Base64Encoder;
+	import com.flexsqladmin.sqladmin.model.ModelLocator;
+
 	public class execSQLDelegate
 	{
 		private var responder:Responder;
         private var service:WebService;
         
+        private var model:ModelLocator = ModelLocator.getInstance();
+        
         public function execSQLDelegate(r:Responder)
         {
         	DebugWindow.log("execSQLDelegate.as:execSQLDelegate()");
             service = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
+            
+            // Encode creds
+			var encoder:Base64Encoder = new Base64Encoder();
+			encoder.insertNewLines = false;
+			encoder.encode(model.tempConnectionVO.username+":"+ model.tempConnectionVO.password);			
+			// Set creds on proxy
+			service.httpHeaders = {"Authorization" : "Basic " + encoder.toString()};
             responder = r;
         }
         

@@ -12,7 +12,6 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.view.LoginWindow;
 	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
 	import flash.events.Event;
-	
 	import mx.controls.Alert;
 	
 	public class LoginCommand implements Command, Responder
@@ -52,7 +51,7 @@ package com.flexsqladmin.sqladmin.commands
     			model.connectionVO.server = model.tempConnectionVO.server;
     			model.connectionVO.database = model.tempConnectionVO.database;
     			model.connectionVO.toomany = model.tempConnectionVO.toomany;
-				model.connectionText = "Connected to " + model.connectionVO.server + " as " + model.connectionVO.username + " using database " + model.connectionVO.database;
+				model.connectionText = "Connected to " + model.connectionVO.server + " as " + model.connectionVO.username;
 				
 				var listcatalogsevent :ListCatalogsEvent= new ListCatalogsEvent();	
 				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);	
@@ -62,6 +61,8 @@ package com.flexsqladmin.sqladmin.commands
 		public function onFault(event:*=null):void
 		{
 			DebugWindow.log("LoginCommand:onFault()");
+		    mx.controls.Alert.show("User is not available", "Login Error");
+    		loginWindow.loginbtn.enabled = true;
 		}
 	}
 }

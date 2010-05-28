@@ -7,7 +7,7 @@
 	creationComplete="init();" 
 	layout="absolute" 
 	width="314" 
-	height="190">
+	height="150">
 	
 	<mx:Script>
 		<![CDATA[
@@ -18,7 +18,6 @@
 			import com.flexsqladmin.sqladmin.events.LoginEvent;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
-			
 			private var model:ModelLocator = ModelLocator.getInstance();
 			private var resultlimit:int;
 			
@@ -30,8 +29,6 @@
         		if (Number(parentApplication.parameters.resultlimit) && parentApplication.parameters.resultlimit > 0)
             		model.tempConnectionVO.toomany = parentApplication.parameters.resultlimit;
             		
-				server.text = parentApplication.parameters.server;
-				database.text = parentApplication.parameters.database;
 				username.text = parentApplication.parameters.username;
 				password.text = parentApplication.parameters.password;
    			}
@@ -45,10 +42,8 @@
         		
 				model.tempConnectionVO.username = username.text;
             	model.tempConnectionVO.password = password.text;
-            	model.tempConnectionVO.server = server.text;
-            	model.tempConnectionVO.database = database.text;
             	
-				var event:LoginEvent = new LoginEvent("select '' from (values (1))", "normal", this);
+				var event:LoginEvent = new LoginEvent("select '' from  (values (1))", "normal", this);
             	CairngormEventDispatcher.getInstance().dispatchEvent(event);
             	
 				loginbtn.enabled = false;
@@ -65,12 +60,8 @@
 	
 	<mx:Label x="34" y="12" text="Username"/>
 	<mx:Label x="40" y="38" text="Password"/>
-	<mx:Label x="56" y="64" text="Server"/>
-	<mx:Label x="38" y="92" text="Database"/>
 	<mx:TextInput x="104" y="10" id="username" text=""/>
 	<mx:TextInput x="104" y="36" id="password" text="" displayAsPassword="true"/>
-	<mx:TextInput x="104" y="62" id="server" text=""/>
-	<mx:TextInput x="104" y="90" id="database" text=""/>
-	<mx:Button id="loginbtn" x="104" y="118" label="Login" click="setProperties();"/>
+	<mx:Button id="loginbtn" x="104" y="68" label="Login" click="setProperties();"/>
 	
 </mx:TitleWindow>

@@ -25,6 +25,10 @@
             </mx:request>
         </mx:operation>
         <mx:operation name="getDBMetaData" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+			<mx:request>   
+			<connection></connection>
+			<schema></schema> 
+			</mx:request>    
         </mx:operation>
         <mx:operation name="handleUpdate" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>

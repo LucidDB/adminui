@@ -28,7 +28,8 @@ package com.flexsqladmin.sqladmin.business
         	DebugWindow.log("getDBMetaDataDelegate.as:getDBMetaData()");
 			var o:AbstractOperation = service.getOperation("getDBMetaData");
 //			o.arguments.connection = connectionVO.getConnectionString();
-            o.arguments.connection = s;
+            o.arguments.connection = "";
+            o.arguments.schema = s;
 			var token:AsyncToken = service.getDBMetaData();
 			token.resultHandler = responder.onResult;
 			token.faultHandler = responder.onFault;
