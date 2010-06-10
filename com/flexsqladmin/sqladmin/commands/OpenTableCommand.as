@@ -1,15 +1,16 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
+	import com.adobe.cairngorm.commands.Command;
+	import com.adobe.cairngorm.control.CairngormEvent;
+	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.OpenTableEvent;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	
+	import mx.collections.XMLListCollection;
 	import mx.controls.DataGrid;
 	import mx.controls.dataGridClasses.DataGridColumn;
-	import mx.collections.XMLListCollection;
 
 	public class OpenTableCommand implements Command, Responder
 	{
@@ -20,9 +21,11 @@ package com.flexsqladmin.sqladmin.commands
 		{
 			DebugWindow.log("OpenTableCommand.as:execute()");
 			var table:String = OpenTableEvent(event).table;
+			var tableParts:Array = table.split(".");
+			table = tableParts.join('"."');
 			tabledatagrid = OpenTableEvent(event).tabledatagrid;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL("SELECT * FROM " + table + "", "normal", model.connectionVO);
+			delegate.execSQL("SELECT * FROM \"" + table + "\"", "normal", model.connectionVO);
 		}
 		
 		public function onResult(event:*=null):void

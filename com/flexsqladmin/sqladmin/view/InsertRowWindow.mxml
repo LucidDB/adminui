@@ -41,7 +41,9 @@
         		return formdata;
         	}
         	public function buildForm():void{
+				DebugWindow.log("Building Form");
         		for each(var item:XML in tablexml.NewDataSet.Table){
+					DebugWindow.log(item.toString());
         			var formRow:GridRow = new GridRow();
         			var formItem:GridItem = new GridItem();
         			var l:Label = new Label(); 

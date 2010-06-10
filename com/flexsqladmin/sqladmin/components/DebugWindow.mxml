@@ -20,7 +20,7 @@
 			public function init():void{
 				debug = this;
 				iscreated = true;
-				//PopUpManager.centerPopUp(this);
+				PopUpManager.centerPopUp(this);
 				this.move(600,200);
 			}
 		

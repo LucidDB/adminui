@@ -31,7 +31,10 @@ package com.flexsqladmin.sqladmin.commands
 			tablewindow = UpdateDataEvent(event).tablewindow;
 			itemevent = UpdateDataEvent(event).itemevent;
 			var newdatafield:TextInput = TextInput(itemevent.currentTarget.itemEditorInstance);
-            updatesql = "UPDATE " + tablemetadata.getTable() + " SET \"" + itemevent.dataField + "\""; 
+			var table:String = tablemetadata.getTable();
+			var tableParts:Array = table.split(".");
+			table = tableParts.join('"."');
+            updatesql = "UPDATE \"" + table + "\" SET \"" + itemevent.dataField + "\""; 
 			if (newdatafield.text == "<NULL>")
 				updatesql += " = NULL";
 			else if(tablemetadata.getMetaData()[itemevent.dataField] == "MONEY" || tablemetadata.getMetaData()[itemevent.dataField] == "SMALLMONEY")
@@ -62,7 +65,7 @@ package com.flexsqladmin.sqladmin.commands
 					whereclause += " AND ";
 			}
 			updatesql += whereclause;
-			var checksql:String = "SELECT * FROM " + tablemetadata.getTable() + " WHERE " + whereclause;
+			var checksql:String = "SELECT * FROM \"" + table + "\" WHERE " + whereclause;
 			
 			DebugWindow.log("Update String = " + updatesql);
 			DebugWindow.log("Check String = " + checksql);

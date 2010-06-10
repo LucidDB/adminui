@@ -10,34 +10,41 @@
 	
 	<mx:Script> 
 		<![CDATA[
-			import mx.controls.ComboBox;
-			import mx.controls.Alert;
-			import com.flexsqladmin.sqladmin.view.AboutWindow;
-			import com.flexsqladmin.sqladmin.events.InitEvent;
-			import com.flexsqladmin.sqladmin.view.LoginWindow;
-			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-			import mx.rpc.soap.mxml.WebService;
-			import mx.managers.PopUpManager;
-			import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-			import com.flexsqladmin.sqladmin.model.ModelLocator;
-			import com.flexsqladmin.sqladmin.vo.ConnectionVO;
 			import com.adobe.cairngorm.business.ServiceLocator;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
 			import com.flexsqladmin.sqladmin.components.QueryWindow;
+			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+			import com.flexsqladmin.sqladmin.events.InitEvent;
+			import com.flexsqladmin.sqladmin.events.MetaDataEvent;
+			import com.flexsqladmin.sqladmin.model.ModelLocator;
+			import com.flexsqladmin.sqladmin.view.AboutWindow;
+			import com.flexsqladmin.sqladmin.view.LoginWindow;
+			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+			import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+			
+			import mx.controls.Alert;
+			import mx.controls.ComboBox;
+			import mx.managers.PopUpManager;
+			import mx.rpc.soap.mxml.WebService;
 
 			public var debug_win:DebugWindow;
 			private var exectimer:Timer;
+			private var DEBUG:Boolean;
 			
 			[Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
 			
 			public function init():void{
 				
-				//Popup Debug
-				//debug_win = PopUpManager.createPopUp(this, DebugWindow, false) as DebugWindow;
-				//DebugWindow.log("main.mxml:init()");
+				DEBUG = true;
+				
+				if (DEBUG) {
+					//Popup Debug
+					debug_win = PopUpManager.createPopUp(this, DebugWindow, false) as DebugWindow;
+					DebugWindow.log("main.mxml:init()");
+					debug_win.visible = false;
+				}
 				
 				//Regiser Some Things with the model
 				model.aryQueryWindows.push(QueryWindow1);
@@ -85,10 +92,17 @@
             
             private function loadMetaData():void{
             	DebugWindow.log("main.xml:loadMetaData() - Connection " + model.connectionVO.getConnectionString());
-            	var catalog:String = mycatalog.selectedItem.CATALOG_NAME
+            	var catalog:String = mycatalog.selectedItem.CATALOG_NAME;
             	var metaevent:MetaDataEvent = new MetaDataEvent(catalog);
             	CairngormEventDispatcher.getInstance().dispatchEvent(metaevent);
             }
+			
+			private function toggleDebugWindow():void {
+				DebugWindow.log("main.xml:toggleDebugWindow()");
+				if (DEBUG) {
+					debug_win.visible = (debug_win.visible) ? false : true;
+				}
+			}
             
             private function addTab():void{
             	DebugWindow.log("main.mxml:addTab()");
@@ -156,6 +170,8 @@
                     addTab();
                 else if (e.ctrlKey && e.keyCode == 82)
                     loadMetaData();
+				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68)
+					toggleDebugWindow();
 				else if(e.keyCode == 9){	
             			var spacer:String = "\t";
             			var cutter:int = 0;

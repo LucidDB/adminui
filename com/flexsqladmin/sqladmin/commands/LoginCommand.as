@@ -6,12 +6,14 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
 	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
 	import com.flexsqladmin.sqladmin.events.LoginEvent;
 	import com.flexsqladmin.sqladmin.events.MetaDataEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.view.LoginWindow;
-	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
+	
 	import flash.events.Event;
+	
 	import mx.controls.Alert;
 	
 	public class LoginCommand implements Command, Responder
@@ -54,7 +56,13 @@ package com.flexsqladmin.sqladmin.commands
 				model.connectionText = "Connected to " + model.connectionVO.server + " as " + model.connectionVO.username;
 				
 				var listcatalogsevent :ListCatalogsEvent= new ListCatalogsEvent();	
-				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);	
+				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);
+				
+				// Automatic refresh:
+				// TODO (ks): remove hardcoded DB.
+				var metadataevent : MetaDataEvent = new MetaDataEvent("LOCALDB");
+				CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+			
     			
     		}
 		}

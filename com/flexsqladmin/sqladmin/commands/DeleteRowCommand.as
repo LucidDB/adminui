@@ -46,8 +46,11 @@ package com.flexsqladmin.sqladmin.commands
         			deletestring += " AND ";
             }
 			
-			checksqlstring = "SELECT * FROM " + tablemetadata.getTable() + " WHERE " + deletestring;
-			deletesql = "DELETE FROM " + tablemetadata.getTable() + " WHERE " + deletestring;
+			var table:String = tablemetadata.getTable();
+			var tableParts:Array = table.split(".");
+			table = tableParts.join('"."');
+			checksqlstring = "SELECT * FROM \"" + table + "\" WHERE " + deletestring;
+			deletesql = "DELETE FROM \"" + table + "\" WHERE " + deletestring;
 			
 			DebugWindow.log("Delete String = " + deletesql);
 			DebugWindow.log("Check String = " + checksqlstring);

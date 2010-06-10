@@ -27,7 +27,10 @@ package com.flexsqladmin.sqladmin.commands
 			insertrowwindow = InsertRowEvent(event).insertrowwindow;
 			formdata = insertrowwindow.getFormData();
 			var tablexml:XML = tablemetadata.getTableXML();
-			insertsql = "INSERT INTO " + tablemetadata.getTable() + " (";
+			var table:String = tablemetadata.getTable();
+			var tableParts:Array = table.split(".");
+			table = tableParts.join('"."');
+			insertsql = "INSERT INTO \"" + table + "\" (";
     		for (var x:int = 0; x < tablexml.NewDataSet.children().length(); x++){
     			if (formdata[x].text != "")
         			insertsql += "\"" + tablexml.NewDataSet.Table.COLUMN_NAME[x] + "\",";
