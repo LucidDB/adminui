@@ -1,23 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas 
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:components="com.flexsqladmin.sqladmin.components.*"
+	width="100%"
+	height="100%"
 	icon="@Embed(source='/icons/script_select.png')" 
+	keyUp="handleShortcuts(event);"
 	creationComplete="init();">
+	
+	<!-- Submit Query, Checkbox (for explain plan), Clear Query, create table, etc. -->
+  <mx:HBox width="100%">
+      <mx:Button click="submitQuery();" toolTip="(F5) Submit Query" label="Submit Query" icon="@Embed(source='icons/exec.gif')" id="btnQuery" width="108"/>
+      <mx:Button click="clearQuery();" icon="@Embed(source='icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query"/>
+      <mx:Button click="submitShowPlanQuery();" icon="@Embed(source='icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
+      <mx:CheckBox label="Include Execution Plan" id="spflag"/>
+  </mx:HBox>
+	
 	<mx:TextArea id="querytext" 
 		dragEnter="doDragEnter(event);" 
 		dragDrop="doDragDrop(event);"
-		keyUp="parseQuery(event);"/>
+		keyUp="parseQuery(event);" height="40%" left="10" top="30" right="10" />
+		
+	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10">
+		<mx:TabNavigator id="tabresults" width="100%" height="100%" alpha=".8">
+			<mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='icons/result.png')">
+				<mx:DataGrid id="querydatagrid" dataProvider="{model.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto" x="0" y="0"></mx:DataGrid>
+			</mx:Canvas>
+			<mx:Canvas id="messages" label="Messages" icon="@Embed(source='icons/messages.png')">
+				<mx:TextArea text="{model.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
+			</mx:Canvas>
+			<components:ExecutionPlanWindow width="100%" height="100%" id="showplanwin" label="Execution Plan" icon="@Embed(source='icons/exec_plan.png')"/>
+			<mx:Canvas id="history" label="History" icon="@Embed(source='icons/history.png')">
+				<mx:TextArea htmlText="{model.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
+			</mx:Canvas>
+		</mx:TabNavigator>
+	</mx:Box>
+	
 	<mx:Script>
 		<![CDATA[
 		
+			import com.adobe.cairngorm.business.ServiceLocator;
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+			import com.flexsqladmin.sqladmin.model.ModelLocator;
+			
 			import mx.events.DragEvent;
 			import mx.managers.DragManager;
-		
+
+			[Bindable]
+			private var model:ModelLocator = ModelLocator.getInstance();
+			
 			public function init():void{
-				querytext.percentHeight = 100;
+				//querytext.percentHeight = 50;
 				querytext.percentWidth = 100;
 				querytext.setFocus();
+				model.showplanwindow = showplanwin;
+				model.querydatagrid = querydatagrid;
+			}
+			
+			public function handleShortcuts(e:KeyboardEvent) : void {
+				if(e.keyCode == 116) // F5
+					submitQuery();
+				else if (e.keyCode == 117) // F6
+					clearQuery();
+				else if(e.keyCode == 9) { // tab
+					var spacer:String = "\t";
+					var cutter:int = 0;
+					var tempquery:TextArea = querytext;
+					if(tempquery.text.charCodeAt(tempquery.selectionBeginIndex - 1) == 13 || tempquery.selectionBeginIndex == 0)
+						spacer = " \t";
+					if (! e.shiftKey){
+						tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + spacer + tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.length);
+						tempquery.setSelection(tempquery.selectionBeginIndex + spacer.length, tempquery.selectionBeginIndex + spacer.length);	
+					} else {
+						if (tempquery.selectionBeginIndex > 0 && tempquery.text.charCodeAt(tempquery.selectionBeginIndex - 1) == 9){
+							tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex - 1) + tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.length);
+							tempquery.setSelection(tempquery.selectionBeginIndex - 1, tempquery.selectionBeginIndex - 1);
+						}
+					}
+					tempquery.setFocus();
+					parseQuery(new KeyboardEvent(""));
+				}
 			}
 			
 			public function setLabel(s:String):void{
@@ -77,6 +141,27 @@
                 querytext.setFocus();
                 parseQuery(new KeyboardEvent(""));
 	        }
+
+            private function submitQuery():void{
+            	DebugWindow.log("main.mxml:submitQuery()");
+            	DebugWindow.log("main.mxml:Query text - " + getQueryText());
+            	var sqt:String = "normal";
+            	if(spflag.selected)
+	                sqt = "spnormal";
+            	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), sqt);
+            	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+              //tabresults.selectedIndex = 0;
+            }
+
+            private function submitShowPlanQuery():void{
+            	DebugWindow.log("main.mxml:submitShowPlanQuery()");
+            	DebugWindow.log("main.mxml:Query text - " + getQueryText());
+            	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), "showplan");
+            	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+              //tabresults.selectedIndex = 2;
+            }
+            
+
 			
 		]]>
 	</mx:Script>

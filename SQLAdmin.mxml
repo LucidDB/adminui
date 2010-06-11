@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:flexlib="http://code.google.com/p/flexlib/"
 	xmlns:business="com.flexsqladmin.sqladmin.business.*" 
-    xmlns:control="com.flexsqladmin.sqladmin.control.*"
-    xmlns:components="com.flexsqladmin.sqladmin.components.*"
-    layout="absolute" 
-    creationComplete="init();" 
-    keyUp="handleShortCuts(event);">
+	xmlns:control="com.flexsqladmin.sqladmin.control.*"
+	xmlns:components="com.flexsqladmin.sqladmin.components.*"
+	layout="absolute" 
+	creationComplete="init();" 
+	keyUp="handleShortCuts(event);">
 	
 	<mx:Script> 
 		<![CDATA[
 			import com.adobe.cairngorm.business.ServiceLocator;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			
+			import flexlib.controls.SuperTabBar;
+			import flexlib.containers.SuperTabNavigator;
+			import flexlib.controls.tabBarClasses.SuperTab;
+			
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
 			import com.flexsqladmin.sqladmin.components.QueryWindow;
 			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -27,13 +33,18 @@
 			import mx.controls.ComboBox;
 			import mx.managers.PopUpManager;
 			import mx.rpc.soap.mxml.WebService;
-
+			
 			public var debug_win:DebugWindow;
 			private var exectimer:Timer;
 			private var DEBUG:Boolean;
 			
+			[Embed("/icons/close_tab.png")]
+			public var closeTabImg : Class;
+			[Embed("/icons/script_select.png")]
+			public var QWimg : Class;
+			
 			[Bindable]
-            private var model:ModelLocator = ModelLocator.getInstance();
+			private var model:ModelLocator = ModelLocator.getInstance();
 			
 			public function init():void{
 				
@@ -47,55 +58,56 @@
 				}
 				
 				//Regiser Some Things with the model
-				model.aryQueryWindows.push(QueryWindow1);
-				model.showplanwindow = showplanwin;
-				model.querydatagrid = querydatagrid;
+				// Initial tab:
+				callLater(addTab, ["Query 1", tabnavigator]);
 				
 				//Locate and load the wsdl page
-            	var urlpattern:RegExp = /SQLAdmin.swf/i; 
-            	var wsdl:String = "";
-            	try{
-            		// If there is a flash variables from the html page, lets use, otherwise default it to the current directory
-//            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
-//            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
-//            		} else {
-//            			wsdl = Application.application.parameters.webservice;
-//            		}
- 				   wsdl = "http://localhost:8080/adminws/ns0.wsdl";
-            		//DebugWindow.log("Using WSDL location - " + wsdl);
-            		var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
+				var urlpattern:RegExp = /SQLAdmin.swf/i; 
+				var wsdl:String = "";
+				try{
+					// If there is a flash variables from the html page, lets use, otherwise default it to the current directory
+					//            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
+					//            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
+					//            		} else {
+					//            			wsdl = Application.application.parameters.webservice;
+					//            		}
+					wsdl = "http://localhost:8080/adminws/ns0.wsdl";
+					//DebugWindow.log("Using WSDL location - " + wsdl);
+					var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;
 					s.loadWSDL();
-            	} catch (e:Error){
-            		mx.controls.Alert.show("Error Loading WSDL", "WSDL Error");
-            	}				
+				} catch (e:Error){
+					mx.controls.Alert.show("Error Loading WSDL", "WSDL Error");
+				}				
 				
-				//Popup the login box
-				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, false));
-	            loginForm.setStyle("borderAlpha", 0.8);
-	           	loginForm.showCloseButton = true; 
+				//Popup the login box later so it properly steals focus.
+				callLater(showLogin, [true]);
+				
 			}
-
+			
 			private function openTable(table:String):void{
 				var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this, OpenTableWindow, true));
-	            opentablewindow.setStyle("borderAlpha", 0.8);
-	           	opentablewindow.showCloseButton = true; 
-	           	opentablewindow.setTablename(table);
+				opentablewindow.setStyle("borderAlpha", 0.8);
+				opentablewindow.showCloseButton = true; 
+				opentablewindow.setTablename(table);
 			}
-
-            private function showLogin():void{
-            	DebugWindow.log("main.mxml:showLogin()");
-            	var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, true));
-	            loginForm.setStyle("borderAlpha", 0.8);
-	           	loginForm.showCloseButton = true; 
-            }
-            
-            private function loadMetaData():void{
-            	DebugWindow.log("main.xml:loadMetaData() - Connection " + model.connectionVO.getConnectionString());
-            	var catalog:String = mycatalog.selectedItem.CATALOG_NAME;
-            	var metaevent:MetaDataEvent = new MetaDataEvent(catalog);
-            	CairngormEventDispatcher.getInstance().dispatchEvent(metaevent);
-            }
+			
+			private function showLogin(firstTime : Boolean = false):void{
+				DebugWindow.log("main.mxml:showLogin()");
+				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, !firstTime));
+				loginForm.setStyle("borderAlpha", 0.8);
+				loginForm.showCloseButton = true;
+				if (firstTime) { // need to remove closability from initial tab at this point.
+					callLater(initNonClosableTab);
+				}
+			}
+			
+			private function loadMetaData():void{
+				DebugWindow.log("main.xml:loadMetaData() - Connection " + model.connectionVO.getConnectionString());
+				var catalog:String = mycatalog.selectedItem.CATALOG_NAME;
+				var metaevent:MetaDataEvent = new MetaDataEvent(catalog);
+				CairngormEventDispatcher.getInstance().dispatchEvent(metaevent);
+			}
 			
 			private function toggleDebugWindow():void {
 				DebugWindow.log("main.xml:toggleDebugWindow()");
@@ -103,205 +115,152 @@
 					debug_win.visible = (debug_win.visible) ? false : true;
 				}
 			}
-            
-            private function addTab():void{
-            	DebugWindow.log("main.mxml:addTab()");
-            	var qw:QueryWindow = new QueryWindow();
-            	qw.setLabel("Query " + (model.aryQueryWindows.length + 1).toString());
-            	model.aryQueryWindows.push(qw);
-            	tabnavigator.addChild(qw);
-            	tabnavigator.selectedIndex = tabnavigator.numChildren - 1;
-            }
-            
-            private function closeTab():void{
-            	DebugWindow.log("main.mxml:closeTab()");
-            	if(tabnavigator.numChildren > 1){
-                    for(var c:int = tabnavigator.selectedIndex; c < model.aryQueryWindows.length; c++){
-                        model.aryQueryWindows[c] = model.aryQueryWindows[c + 1];
-                    } 
-                    model.aryQueryWindows.pop();
-                    tabnavigator.removeChildAt(tabnavigator.selectedIndex);
-                }
-            }
-            
-            private function submitQuery():void{
-            	DebugWindow.log("main.mxml:submitQuery()");
-            	DebugWindow.log("main.mxml:Query text - " + model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText());
-            	var sqt:String = "normal";
-            	if(spflag.selected)
-	                sqt = "spnormal";
-            	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText(), sqt);
-            	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-            	tabresults.selectedIndex = 0;
-            }
-            
-            private function submitParseQuery():void{
-            	DebugWindow.log("main.mxml:submitParseQuery()");
-            	DebugWindow.log("main.mxml:Query text - " + model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText());
-            	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText(), "parse");
-            	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-            	tabresults.selectedIndex = 0;
-            }
-            
-            private function submitShowPlanQuery():void{
-            	DebugWindow.log("main.mxml:submitShowPlanQuery()");
-            	DebugWindow.log("main.mxml:Query text - " + model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText());
-            	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(model.aryQueryWindows[tabnavigator.selectedIndex].getQueryText(), "showplan");
-            	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-            	tabresults.selectedIndex = 2;
-            }
-            
-            private function clearQuery():void{
-            	model.aryQueryWindows[tabnavigator.selectedIndex].clearQuery();
-            }
-            
-            private function showAboutWindow():void{
-            	var aboutWindow:AboutWindow = AboutWindow(PopUpManager.createPopUp(this, AboutWindow, true));
-	            aboutWindow.setStyle("borderAlpha", 0.8);
-	           	aboutWindow.showCloseButton = true;
-            }
-            
-            private function handleShortCuts(e:KeyboardEvent):void{
-                if(e.keyCode == 116)
-                    submitQuery();
-                else if (e.keyCode == 117)
-                    clearQuery();
-                else if (e.ctrlKey && e.keyCode == 84)
-                    addTab();
-                else if (e.ctrlKey && e.keyCode == 82)
-                    loadMetaData();
+			
+			private function initNonClosableTab():void {
+				// I don't know why this must be called later instead of immediately.
+				tabnavigator.setClosePolicyForTab(0, SuperTab.CLOSE_NEVER);
+			}
+			
+			private function addTab(lbl:String, navigator:SuperTabNavigator, icon:Class=null):void {
+				
+				if(lbl=="")
+					lbl = "Query " + (navigator.numChildren + 1);
+				var child:VBox = new VBox();
+				child.setStyle("closable", true);
+				child.label = lbl;
+				if(icon)
+					child.icon = icon;
+				else
+					child.icon = QWimg;
+				
+				var qw:QueryWindow = new QueryWindow();
+				qw.id = (navigator.numChildren + 1).toString();
+				model.aryQueryWindows.push(qw);
+				
+				child.addChild(qw);
+				navigator.addChild(child);
+				
+				navigator.selectedIndex = navigator.numChildren - 1;
+			}
+			
+			private function destroyTab(e : Event) : void {
+				DebugWindow.log("main.mxml:destroyTabButton()");
+				var index:Number = e.target.id;
+				if(tabnavigator.numChildren > 1) {
+					for(var c:int = index; c < model.aryQueryWindows.length; c++) {
+						model.aryQueryWindows[c] = model.aryQueryWindows[c + 1];
+					} 
+					model.aryQueryWindows.pop();
+				} else {
+					e.preventDefault();
+				}
+			}
+			
+			private function showAboutWindow():void{
+				var aboutWindow:AboutWindow = AboutWindow(PopUpManager.createPopUp(this, AboutWindow, true));
+				aboutWindow.setStyle("borderAlpha", 0.8);
+				aboutWindow.showCloseButton = true;
+			}
+			
+			private function handleShortCuts(e:KeyboardEvent):void{
+				if (e.ctrlKey && e.keyCode == 84) // ctrl+T
+					addTab("", tabnavigator);
+				else if (e.ctrlKey && e.keyCode == 82) // ctrl+R
+					loadMetaData();
 				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68)
 					toggleDebugWindow();
-				else if(e.keyCode == 9){	
-            			var spacer:String = "\t";
-            			var cutter:int = 0;
-            			var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
-            			if(tempquery.text.charCodeAt(tempquery.selectionBeginIndex - 1) == 13 || tempquery.selectionBeginIndex == 0)
-            				spacer = " \t";
-            			if (! e.shiftKey){
-            				tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + spacer + tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.length);
-							tempquery.setSelection(tempquery.selectionBeginIndex + spacer.length, tempquery.selectionBeginIndex + spacer.length);	
-            			} else {
-            				if (tempquery.selectionBeginIndex > 0 && tempquery.text.charCodeAt(tempquery.selectionBeginIndex - 1) == 9){
-	            				tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex - 1) + tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.length);
-								tempquery.setSelection(tempquery.selectionBeginIndex - 1, tempquery.selectionBeginIndex - 1);
-            				}
-            			}
-						tempquery.setFocus();
-						model.aryQueryWindows[tabnavigator.selectedIndex].parseQuery(new KeyboardEvent(""));
-					}
-				else if(e.ctrlKey && e.keyCode == 67){
+				/*else if(e.ctrlKey && e.keyCode == 67){
 					copy();
 				} else if(e.ctrlKey && e.keyCode == 88){
 					cut();
-				} 
-            }
-            
-            private function copy():void{//67
-	            var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
-            	System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
-            }
-            
-            private function cut():void{ //88
-            	var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
-            	System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
-            	tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + tempquery.text.substring(tempquery.selectionEndIndex, tempquery.length);
-            	model.aryQueryWindows[tabnavigator.selectedIndex].parseQuery(new KeyboardEvent(""));
-            }
-            private function closeHandler(event:Event):void {
-                
-                var my:ComboBox = ComboBox(event.target);
-                var metadata:MetaDataEvent = new MetaDataEvent(ComboBox(event.target).selectedItem.CATALOG_NAME);
-                CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
-              }   
-            
+				} */
+			}
+			
+			/*private function copy():void{//67
+				var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
+				System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
+			}
+			
+			private function cut():void{ //88
+				var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
+				System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
+				tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + tempquery.text.substring(tempquery.selectionEndIndex, tempquery.length);
+				model.aryQueryWindows[tabnavigator.selectedIndex].parseQuery(new KeyboardEvent(""));
+			}*/
+			private function closeHandler(event:Event):void {
+				
+				var my:ComboBox = ComboBox(event.target);
+				var metadata:MetaDataEvent = new MetaDataEvent(ComboBox(event.target).selectedItem.CATALOG_NAME);
+				CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
+			}   
+			
 		]]>
 	</mx:Script>
 	
 	<!-- the ServiceLocator where we specify the remote services -->
-    <business:Services id="loginServices" />
-    
-    <!-- the FrontController, containing Commands specific to this appliation -->
-    <control:Controller id="controller" />
+	<business:Services id="loginServices" />
+	
+	<!-- the FrontController, containing Commands specific to this appliation -->
+	<control:Controller id="controller" />
 	
 	<mx:Style>
-        Application{
-            paddingLeft: 10px;
-            paddingRight: 10px;
-            paddingTop: 10px;
-            paddingBottom: 10px;
-           	backgroundGradientColors: #AEC5E7, #5E8ED7;
-        }
-        HDividedBox{
-        	paddingLeft: 10px;
-            paddingRight: 10px;
-            paddingTop: 10px;
-            paddingBottom: 10px;
-        }
-        TextArea {
-        	fontFamily: Verdana; 
-        	fontSize: 12pt;
-        }
-    </mx:Style>
+		Application{
+			paddingLeft: 10px;
+			paddingRight: 10px;
+			paddingTop: 10px;
+			paddingBottom: 10px;
+			backgroundGradientColors: #AEC5E7, #5E8ED7;
+		}
+		HDividedBox{
+			paddingLeft: 10px;
+			paddingRight: 10px;
+			paddingTop: 10px;
+			paddingBottom: 10px;
+		}
+		TextArea {
+			fontFamily: Verdana; 
+			fontSize: 12pt;
+		}
+	</mx:Style>
 	
 	<mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true">
-
+		
 		<mx:VBox height="100%" width="30%" >
 			<mx:HBox width="100%">
 				<mx:Button click="loadMetaData();" icon="@Embed(source='icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>
 				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="closeHandler(event)"/>
-				<mx:Button click="showLogin();" label="Reconnect" icon="@Embed(source='icons/connect.png')"/>
 				
 			</mx:HBox>
 			<components:ObjectBrowser tabnav="{tabnavigator}" dataProvider="{model.metadata}"/>
 		</mx:VBox>
-    
-    	<mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">
-    	
+		
+		<mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">
+			
 			<mx:Box width="100%" height="50%">
 				<mx:HBox width="100%">
-					<mx:Button click="submitParseQuery();" icon="@Embed(source='icons/parse.png')" label="Parse Query" toolTip="Parse Query"/>
-			    	<mx:Button click="submitQuery();" toolTip="(F5) Submit Query" label="Submit Query" icon="@Embed(source='icons/exec.gif')" id="btnQuery" width="108"/>
-			    	<mx:Button click="clearQuery();" icon="@Embed(source='icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query"/>
-			    	<mx:Button click="submitShowPlanQuery();" icon="@Embed(source='icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
-			    	<mx:CheckBox label="Include Execution Plan" id="spflag"/>
-			    	<mx:Spacer width="100%"/>
-			    	<mx:Button click="showAboutWindow();" icon="@Embed(source='icons/information.png')" label="About" toolTip="About"/>
-				</mx:HBox>
-				<mx:HBox width="100%">
-					<mx:Button click="addTab();" icon="@Embed(source='icons/add_tab.png')" toolTip="(CTRL-T) Add Tab" id="addtab" label="Add Tab" width="79"/>
+					<mx:Button click="addTab('', tabnavigator);" icon="@Embed(source='icons/add_tab.png')" toolTip="(CTRL-T) Add Query Tab" id="addtab" label="Add Query Tab" />
 					<!--
 					This might come out in a future release. The functionality is there, just no paste ability yet. 
 					<mx:Button icon="@Embed(source='icons/cut.png')" toolTip="(CTRL-X) Cut" label="Cut" click="cut();"/>
 					<mx:Button icon="@Embed(source='icons/copy.png')" toolTip="(CTRL-C) Copy" label="Copy" click="copy();"/>
 					-->
 					<mx:Spacer width="100%"/>
-   					<mx:Button click="closeTab();" icon="@Embed(source='icons/close_tab.png')" label="Close Tab" id="closetab"/>
+					<mx:Button click="showAboutWindow();" icon="@Embed(source='icons/information.png')" label="About" toolTip="About"/>
 				</mx:HBox>
-			    <mx:TabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8">
-			        <components:QueryWindow id="QueryWindow1" label="Query 1"/>
-			    </mx:TabNavigator>
-		    </mx:Box>
-
-	    	<mx:Box width="100%" height="50%">
-		    	<mx:TabNavigator id="tabresults" width="100%" height="90%" alpha=".8">
-			        <mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='icons/result.png')">
-			            <mx:DataGrid id="querydatagrid" dataProvider="{model.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto"></mx:DataGrid>
-			        </mx:Canvas>
-			        <mx:Canvas id="messages" label="Messages" icon="@Embed(source='icons/messages.png')">
-			            <mx:TextArea text="{model.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
-			        </mx:Canvas>
-			        <components:ExecutionPlanWindow width="100%" height="100%" id="showplanwin" label="Execution Plan" icon="@Embed(source='icons/exec_plan.png')"/>
-			        <mx:Canvas id="history" label="History" icon="@Embed(source='icons/history.png')">
-			            <mx:TextArea htmlText="{model.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
-			        </mx:Canvas>
-			    </mx:TabNavigator>
-		    	<mx:HBox width="100%">
-		    	 	<mx:Label fontWeight="bold" text="Elapsed Execution Time: {model.exectimer.time} sec(s)"/>
-		    	 	<mx:Spacer width="100%"/>
-		    	 	<mx:Label fontWeight="bold" text="{model.connectionText}"/>
-		    	</mx:HBox>
-		    </mx:Box>	
+				<flexlib:SuperTabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8"
+										   stopScrollingEvent="{MouseEvent.MOUSE_OUT}" startScrollingEvent="{MouseEvent.MOUSE_OVER}"
+										   horizontalGap="0" tabClose="destroyTab(event);"
+										   closePolicy="{SuperTab.CLOSE_ALWAYS}"
+										   />
+				
+			</mx:Box>
+			<mx:HBox width="100%">
+				<mx:Label fontWeight="bold" text="Elapsed Execution Time: {model.exectimer.time} sec(s)"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button click="showLogin();" label="Reconnect" icon="@Embed(source='icons/connect.png')"/>
+				<mx:Label fontWeight="bold" text="{model.connectionText}"/>
+			</mx:HBox>
+	
 		</mx:VDividedBox>
-    </mx:HDividedBox>
+	</mx:HDividedBox>
 </mx:Application>
