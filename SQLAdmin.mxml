@@ -13,11 +13,6 @@
 		<![CDATA[
 			import com.adobe.cairngorm.business.ServiceLocator;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
-			
-			import flexlib.controls.SuperTabBar;
-			import flexlib.containers.SuperTabNavigator;
-			import flexlib.controls.tabBarClasses.SuperTab;
-			
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
 			import com.flexsqladmin.sqladmin.components.QueryWindow;
 			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -28,6 +23,10 @@
 			import com.flexsqladmin.sqladmin.view.LoginWindow;
 			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
 			import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+			
+			import flexlib.containers.SuperTabNavigator;
+			import flexlib.controls.SuperTabBar;
+			import flexlib.controls.tabBarClasses.SuperTab;
 			
 			import mx.controls.Alert;
 			import mx.controls.ComboBox;
@@ -58,6 +57,7 @@
 				}
 				
 				//Regiser Some Things with the model
+				model.main_tabnav = tabnavigator;
 				// Initial tab:
 				callLater(addTab, ["Query 1", tabnavigator]);
 				
@@ -121,7 +121,8 @@
 				tabnavigator.setClosePolicyForTab(0, SuperTab.CLOSE_NEVER);
 			}
 			
-			private function addTab(lbl:String, navigator:SuperTabNavigator, icon:Class=null):void {
+			private function addTab(lbl:String, navigator:SuperTabNavigator,
+												icon:Class=null, child_obj:String = "") : void {
 				
 				if(lbl=="")
 					lbl = "Query " + (navigator.numChildren + 1);
@@ -133,11 +134,12 @@
 				else
 					child.icon = QWimg;
 				
-				var qw:QueryWindow = new QueryWindow();
-				qw.id = (navigator.numChildren + 1).toString();
-				model.aryQueryWindows.push(qw);
-				
-				child.addChild(qw);
+				if (child_obj == "") {
+					var qw:QueryWindow = new QueryWindow();
+					qw.id = (navigator.numChildren + 1).toString();
+					qw.update_model();
+					child.addChild(qw);
+				}
 				navigator.addChild(child);
 				
 				navigator.selectedIndex = navigator.numChildren - 1;
@@ -149,8 +151,10 @@
 				if(tabnavigator.numChildren > 1) {
 					for(var c:int = index; c < model.aryQueryWindows.length; c++) {
 						model.aryQueryWindows[c] = model.aryQueryWindows[c + 1];
+						model.query_results[c] = model.query_results[c + 1];
 					} 
 					model.aryQueryWindows.pop();
+					model.query_results.pop();
 				} else {
 					e.preventDefault();
 				}

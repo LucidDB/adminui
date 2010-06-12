@@ -67,7 +67,7 @@ package com.flexsqladmin.sqladmin.commands
     		if(insertresult.datamap == "Error"){
     			mx.controls.Alert.show(insertresult.NewDataSet.Table.Error, "Insert Error");
     		} else{
-    			model.queryHistoryVO.writeHistory(insertsql, "");
+    			model.query_results[model.main_tabnav.selectedIndex].queryHistoryVO.writeHistory(insertsql, "");
     			insertrowwindow.closeWin(new Event("CLOSED"));
     			insertrowwindow.getParentWindow().refreshData();
         	}

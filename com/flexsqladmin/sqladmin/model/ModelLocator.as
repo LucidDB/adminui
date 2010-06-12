@@ -1,10 +1,11 @@
 package com.flexsqladmin.sqladmin.model
 {
     import com.adobe.cairngorm.model.ModelLocator;
-    import com.flexsqladmin.sqladmin.components.ExecutionPlanWindow;
     import com.flexsqladmin.sqladmin.vo.ConnectionVO;
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+    
+    import flexlib.containers.SuperTabNavigator;
     
     import mx.collections.XMLListCollection;
     import mx.controls.DataGrid;
@@ -16,16 +17,18 @@ package com.flexsqladmin.sqladmin.model
     	
     	public var querycount:int = 1;
     	public var aryQueryWindows:Array = new Array();
+		public var query_results : Array = new Array(); // contains QueryResultInfo's.
+		public var main_tabnav : SuperTabNavigator;
     	public var connectionVO:ConnectionVO;
     	public var tempConnectionVO:ConnectionVO;
     	public var connectionText:String = "";
     	public var metadata:XML;
-    	public var queryHistoryVO:QueryHistoryVO;
-    	public var querydata:XMLListCollection;
-    	public var querymessages:String;
+    	//public var queryHistoryVO:QueryHistoryVO;
+    	//public var querydata:XMLListCollection;
+    	//public var querymessages:String;
     	public var exectimer:ExecutionTimer;
-    	public var showplanwindow:ExecutionPlanWindow;
-    	public var querydatagrid:DataGrid;
+    	//public var showplanwindow:ExecutionPlanWindow;
+    	//public var querydatagrid:DataGrid;
     	public var catalogdata:XMLListCollection;
     	public var currentcatalogname:String = '';
     	
@@ -41,7 +44,6 @@ package com.flexsqladmin.sqladmin.model
 	   		exectimer = new ExecutionTimer();
 	   		connectionVO = new ConnectionVO();
 	   		tempConnectionVO = new ConnectionVO();
-	   		queryHistoryVO = new QueryHistoryVO();
 
 	 	  	if ( com.flexsqladmin.sqladmin.model.ModelLocator.modelLocator != null )
 	        	throw new Error( "Only one ModelLocator instance should be instantiated" );

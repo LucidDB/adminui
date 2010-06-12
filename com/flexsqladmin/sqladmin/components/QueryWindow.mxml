@@ -24,26 +24,27 @@
 	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10">
 		<mx:TabNavigator id="tabresults" width="100%" height="100%" alpha=".8">
 			<mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='icons/result.png')">
-				<mx:DataGrid id="querydatagrid" dataProvider="{model.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto" x="0" y="0"></mx:DataGrid>
+				<mx:DataGrid id="querydatagrid" dataProvider="{result_info.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto" x="0" y="0"></mx:DataGrid>
 			</mx:Canvas>
 			<mx:Canvas id="messages" label="Messages" icon="@Embed(source='icons/messages.png')">
-				<mx:TextArea text="{model.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
+				<mx:TextArea text="{result_info.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
 			</mx:Canvas>
 			<components:ExecutionPlanWindow width="100%" height="100%" id="showplanwin" label="Execution Plan" icon="@Embed(source='icons/exec_plan.png')"/>
 			<mx:Canvas id="history" label="History" icon="@Embed(source='icons/history.png')">
-				<mx:TextArea htmlText="{model.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
+				<mx:TextArea htmlText="{result_info.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
 			</mx:Canvas>
 		</mx:TabNavigator>
 	</mx:Box>
 	
 	<mx:Script>
 		<![CDATA[
-		
 			import com.adobe.cairngorm.business.ServiceLocator;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
 			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
 			import com.flexsqladmin.sqladmin.model.ModelLocator;
+			import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
+			import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
 			
 			import mx.events.DragEvent;
 			import mx.managers.DragManager;
@@ -51,12 +52,23 @@
 			[Bindable]
 			private var model:ModelLocator = ModelLocator.getInstance();
 			
-			public function init():void{
-				//querytext.percentHeight = 50;
+			[Bindable]
+			public var result_info : QueryResultInfo;
+			
+			public function init() : void {
 				querytext.percentWidth = 100;
 				querytext.setFocus();
-				model.showplanwindow = showplanwin;
-				model.querydatagrid = querydatagrid;
+								
+				result_info = new QueryResultInfo();
+				result_info.queryHistoryVO = new QueryHistoryVO();
+				result_info.showplanwindow = showplanwin;
+				result_info.querydatagrid = querydatagrid;
+				model.query_results.push(result_info);
+
+			}
+			
+			public function update_model() : void {
+				model.aryQueryWindows.push(this);
 			}
 			
 			public function handleShortcuts(e:KeyboardEvent) : void {
@@ -150,7 +162,7 @@
 	                sqt = "spnormal";
             	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), sqt);
             	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-              //tabresults.selectedIndex = 0;
+				tabresults.selectedIndex = 0;
             }
 
             private function submitShowPlanQuery():void{
@@ -158,7 +170,7 @@
             	DebugWindow.log("main.mxml:Query text - " + getQueryText());
             	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), "showplan");
             	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-              //tabresults.selectedIndex = 2;
+				tabresults.selectedIndex = 2;
             }
             
 

@@ -1,17 +1,19 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
-	import com.flexsqladmin.sqladmin.components.DebugWindow;
-	import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
 	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
+	
 	import mx.collections.XMLListCollection;
+	import mx.controls.DataGrid;
 	import mx.controls.dataGridClasses.DataGridColumn;
 	import mx.core.Application;
-	import mx.controls.DataGrid;
 	
 	public class ExecuteSQLCommand implements Command, Responder
 	{
@@ -26,21 +28,22 @@ package com.flexsqladmin.sqladmin.commands
 			sqlquerytype = ExecuteSQLEvent(event).sqlquerytype;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
 			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
-			model.queryHistoryVO.writeHistory(sql, sqlquerytype);
+			model.query_results[model.main_tabnav.selectedIndex].queryHistoryVO.writeHistory(sql, sqlquerytype);
 		}
+		
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("ExecuteSQLCommand.as:onResult()");
 			DebugWindow.log("Web Service Result\n" + event.result.toString());
-			
+			var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedIndex];
 			model.exectimer.stopTimer();
-			model.showplanwindow.clearWindow();
+			result_info.showplanwindow.clearWindow();
 			
 			var querycols:Array = new Array();
            	var datagridcols:Array = new Array();
 			
 			var queryxml:XML = new XML(event.result);
-			model.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
+			result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
 			 
 			if(sqlquerytype != "showplan")
                 querycols = queryxml.datamap.split(",");
@@ -53,16 +56,17 @@ package com.flexsqladmin.sqladmin.commands
                 datagridcols.push(querycolumn);
             }
             
-            model.querydatagrid.columns = datagridcols;
+            result_info.querydatagrid.columns = datagridcols;
 			
 			if(queryxml.recordcount != ''){
-                model.querymessages = queryxml.recordcount + " row(s) returned.  Execution time: " + queryxml.executiontime + " ms";
+                result_info.querymessages = queryxml.recordcount + " row(s) returned.  Execution time: " + queryxml.executiontime + " ms";
             } else {
-                model.querymessages = "";
+                result_info.querymessages = "";
             } 
             
+			DebugWindow.log("messages: " + result_info.querymessages);
             if((sqlquerytype == "showplan" || sqlquerytype == "spnormal") && queryxml.datamap.toString() != "Error"){
-            	model.showplanwindow.drawPlan(queryxml);
+            	result_info.showplanwindow.drawPlan(queryxml);
             }
             //resetSelection();
 		}
