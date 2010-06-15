@@ -15,6 +15,7 @@ package com.flexsqladmin.sqladmin.commands
 	import flash.events.Event;
 	
 	import mx.controls.Alert;
+    import mx.core.Application;
 	
 	public class LoginCommand implements Command, Responder
 	{
@@ -36,7 +37,7 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("LoginCommand:onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
 			var r:XML = new XML(event.result);
     		if(r.datamap == "Error"){
     			var errormsg:String = r.NewDataSet.Table.Error;
@@ -59,11 +60,8 @@ package com.flexsqladmin.sqladmin.commands
 				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);
 				
 				// Automatic refresh:
-				// TODO (ks): remove hardcoded DB.
-				var metadataevent : MetaDataEvent = new MetaDataEvent("LOCALDB");
-				CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-			
-    			
+                var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
     		}
 		}
 		public function onFault(event:*=null):void

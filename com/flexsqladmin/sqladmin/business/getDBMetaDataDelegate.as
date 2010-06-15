@@ -38,14 +38,14 @@ package com.flexsqladmin.sqladmin.business
         public function getDBMetaData_onResult(event:ResultEvent):void
 		{
 			DebugWindow.log("getDBMetaDataDelegate.as:getDBMetaData_onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
 			responder.onResult(new ResultEvent(ResultEvent.RESULT, false, true));
 		}
 		
 		public function getDBMetaData_onFault(event:FaultEvent):void
 		{
 			DebugWindow.log("getDBMetaDataDelegate.as:getDBMetaData_onFault()");
-			DebugWindow.log("Web Service Result\n" + event.toString());
+			//DebugWindow.log("Web Service Result\n" + event.toString());
 		}
 	}
 }

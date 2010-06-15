@@ -64,13 +64,10 @@
 				result_info.showplanwindow = showplanwin;
 				result_info.querydatagrid = querydatagrid;
 				model.query_results.push(result_info);
+				model.aryQueryWindows.push(this);
 
 			}
-			
-			public function update_model() : void {
-				model.aryQueryWindows.push(this);
-			}
-			
+						
 			public function handleShortcuts(e:KeyboardEvent) : void {
 				if(e.keyCode == 116) // F5
 					submitQuery();

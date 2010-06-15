@@ -34,7 +34,7 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("ExecuteSQLCommand.as:onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
 			var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedIndex];
 			model.exectimer.stopTimer();
 			result_info.showplanwindow.clearWindow();

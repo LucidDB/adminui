@@ -51,14 +51,14 @@ package com.flexsqladmin.sqladmin.business
         public function execSQL_onResult(event:ResultEvent):void
 		{
 			DebugWindow.log("execSQLDelegate.as:execSQL_onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//Use firebug for this. //DebugWindow.log("Web Service Result\n" + event.result.toString());
 			responder.onResult(new ResultEvent(ResultEvent.RESULT, false, true));
 		}
 		
 		public function execSQL_onFault(event:FaultEvent):void
 		{
 			DebugWindow.log("execSQLDelegate.as:execSQL_onFault()");
-			DebugWindow.log("Web Service Result\n" + event.toString());
+			//DebugWindow.log("Web Service Result\n" + event.toString());
 		}
 	}
 }

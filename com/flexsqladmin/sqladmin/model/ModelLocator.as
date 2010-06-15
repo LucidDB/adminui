@@ -23,14 +23,9 @@ package com.flexsqladmin.sqladmin.model
     	public var tempConnectionVO:ConnectionVO;
     	public var connectionText:String = "";
     	public var metadata:XML;
-    	//public var queryHistoryVO:QueryHistoryVO;
-    	//public var querydata:XMLListCollection;
-    	//public var querymessages:String;
     	public var exectimer:ExecutionTimer;
-    	//public var showplanwindow:ExecutionPlanWindow;
-    	//public var querydatagrid:DataGrid;
     	public var catalogdata:XMLListCollection;
-    	public var currentcatalogname:String = '';
+    	public var currentcatalogname:String = 'LOCALDB';
     	
         public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
         {

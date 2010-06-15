@@ -64,7 +64,7 @@
 				//Locate and load the wsdl page
 				var urlpattern:RegExp = /SQLAdmin.swf/i; 
 				var wsdl:String = "";
-				try{
+				try {
 					// If there is a flash variables from the html page, lets use, otherwise default it to the current directory
 					//            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
 					//            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
@@ -76,7 +76,7 @@
 					var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;
 					s.loadWSDL();
-				} catch (e:Error){
+				} catch (e:Error) {
 					mx.controls.Alert.show("Error Loading WSDL", "WSDL Error");
 				}				
 				
@@ -92,7 +92,12 @@
 				opentablewindow.setTablename(table);
 			}
 			
-			private function showLogin(firstTime : Boolean = false):void{
+            /**
+            * @param firstTime - Used for initializing first query tab and for stealing all focus
+            * for the login window in subsequent times.
+            * 
+            */
+			private function showLogin(firstTime : Boolean = false) : void {
 				DebugWindow.log("main.mxml:showLogin()");
 				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, !firstTime));
 				loginForm.setStyle("borderAlpha", 0.8);
@@ -137,7 +142,6 @@
 				if (child_obj == "") {
 					var qw:QueryWindow = new QueryWindow();
 					qw.id = (navigator.numChildren + 1).toString();
-					qw.update_model();
 					child.addChild(qw);
 				}
 				navigator.addChild(child);

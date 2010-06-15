@@ -6,6 +6,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	
 	import mx.collections.XMLListCollection;
 	
 	public class ListCatalogsCommand implements Command, Responder
@@ -24,10 +25,10 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("ListCatalogsCommand:onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
 			var queryxml:XML = new XML(event.result);
 			model.catalogdata = new XMLListCollection(queryxml.NewDataSet.Table);
-			
+            model.currentcatalogname = model.catalogdata.child(0)[0].toString();			
 		}
 		
 		public function onFault(event:*=null):void

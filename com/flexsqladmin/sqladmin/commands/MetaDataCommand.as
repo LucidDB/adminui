@@ -28,7 +28,7 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("MetaDataCommand:onResult()");
-			DebugWindow.log("Web Service Result\n" + event.result.toString());
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
 			model.metadata = new XML(event.result);
 		}
 		
