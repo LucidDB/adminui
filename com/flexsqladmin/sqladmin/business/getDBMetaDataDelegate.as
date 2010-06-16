@@ -23,13 +23,13 @@ package com.flexsqladmin.sqladmin.business
             responder = r;
         }
         
-        public function getDBMetaData(s:String,connectionVO:ConnectionVO):void
+        public function getDBMetaData(cat:String,connectionVO:ConnectionVO):void
         {
         	DebugWindow.log("getDBMetaDataDelegate.as:getDBMetaData()");
 			var o:AbstractOperation = service.getOperation("getDBMetaData");
 //			o.arguments.connection = connectionVO.getConnectionString();
             o.arguments.connection = "";
-            o.arguments.schema = s;
+            o.arguments.catalog = cat;
 			var token:AsyncToken = service.getDBMetaData();
 			token.resultHandler = responder.onResult;
 			token.faultHandler = responder.onFault;
