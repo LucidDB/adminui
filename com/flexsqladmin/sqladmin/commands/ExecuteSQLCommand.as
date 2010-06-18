@@ -28,14 +28,14 @@ package com.flexsqladmin.sqladmin.commands
 			sqlquerytype = ExecuteSQLEvent(event).sqlquerytype;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
 			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
-			model.query_results[model.main_tabnav.selectedIndex].queryHistoryVO.writeHistory(sql, sqlquerytype);
+			model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
 		}
 		
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("ExecuteSQLCommand.as:onResult()");
 			//DebugWindow.log("Web Service Result\n" + event.result.toString());
-			var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedIndex];
+			var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedChild.id];
 			model.exectimer.stopTimer();
 			result_info.showplanwindow.clearWindow();
 			

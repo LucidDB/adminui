@@ -33,7 +33,7 @@ package com.flexsqladmin.sqladmin.commands
                 var errormsg:String = r.NewDataSet.Table.Error;
                 DebugWindow.log("Error - " + errormsg);
             } else {
-                model.table_details[model.main_tabnav.selectedIndex].details = new XML(event.result);
+                model.table_details[model.main_tabnav.selectedChild.id].details = new XML(event.result);
             }
         }
         

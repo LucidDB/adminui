@@ -13,16 +13,16 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
+			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import com.flexsqladmin.sqladmin.model.ModelLocator;
 			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-			import mx.containers.TabNavigator;
-            import mx.core.Application;
-            import mx.controls.Menu;
-            import mx.events.MenuEvent;
-            import mx.events.ListEvent;
-            import mx.managers.PopUpManager;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
+			
+			import mx.controls.Alert;
+			import mx.controls.Menu;
+			import mx.core.Application;
+			import mx.events.ListEvent;
+			import mx.events.MenuEvent;
+			import mx.managers.PopUpManager;
             
             [Embed(source="/icons/script_select.png")]
             private var selecticon:Class;
@@ -39,7 +39,6 @@
             private var clickx:int = 0;
             private var clicky:int = 0;
             private var model:ModelLocator = ModelLocator.getInstance();
-            public var tabnav:TabNavigator;
             
             public function init():void{
             	this.addEventListener(MouseEvent.CLICK, clickHandler, false, 1);
@@ -57,7 +56,13 @@
             		if (this.getParentItem(this.selectedItem).@label == "Procedures")
             			objMenu = [{label: "Script as Execute", icon:scriptexec}];
             		else if (this.getParentItem(this.selectedItem).@label == "Tables")
-	            		objMenu = [{label: "Script as Select", icon:selecticon}, {label: "Script as Insert", icon:inserticon}, {label: "Script as Update", icon:updateicon}, {label: "Script as Delete", icon:deleteicon}, {type: "separator"}, {label:"Open Table", icon:opentableicon}];
+	            		objMenu = [{label: "Script as Select", icon:selecticon},
+                            {label: "Script as Insert", icon:inserticon},
+                            {label: "Script as Update", icon:updateicon},
+                            {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
+                            {label: "Open Table", icon: opentableicon},
+                            {label: "Edit Table", icon: updateicon}
+                        ];
 	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
 	            		objMenu = [{label: "Script as Select", icon:selecticon}];
 	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){	
@@ -69,7 +74,6 @@
             }
             
             private function menuHandler(e:MenuEvent):void{
-            	
             	var catalogname : String = model.currentcatalogname;
             	var scriptquery:String = "";
             	var x:int = 0;
@@ -82,7 +86,7 @@
  							if (x + 1 < this.selectedItem.children().length())
             					scriptquery += ", ";
             			}
-            		} else {
+            		} else { // label is Tables or Views
 	            		scriptquery = "SELECT ";
 	            		for (x = 0; x < this.selectedItem.children().length(); x++){
 	            			scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
@@ -92,7 +96,7 @@
 						scriptquery += "\rFROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
             		}
             	}
-            	else if(e.index == 1){
+            	else if(e.index == 1) {
             		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
             			scriptquery += "EXEC " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
             		} else {
@@ -130,10 +134,22 @@
 		            opentablewindow.setStyle("borderAlpha", 0.8);
 		           	opentablewindow.showCloseButton = true; 
 		           	opentablewindow.setTablename(getParentItem(getParentItem(this.selectedItem)).@label+"."+this.selectedItem.@label);
-            	}
-            	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + scriptquery);
-            	DebugWindow.log("Tab Nav Index - " + tabnav.selectedIndex.toString());
-            	model.aryQueryWindows[tabnav.selectedIndex].setText(scriptquery);
+            	} else if (e.index == 6) {
+                    // Add New Table
+                    
+                }
+            	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
+                
+                var makenewqw : Boolean = false;
+                var qw : QueryWindow = model.aryQueryWindows[model.main_tabnav.selectedChild.id];
+                trace(model.main_tabnav.selectedIndex);
+                trace(model.main_tabnav.selectedChild.id);
+                if (qw && qw.isEmpty()) {
+                    qw.setText(scriptquery);
+                } else {
+                    qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
+                    qw.setText(scriptquery);
+                }
             }
 		]]>
 	</mx:Script>

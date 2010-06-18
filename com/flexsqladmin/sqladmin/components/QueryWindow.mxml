@@ -63,8 +63,10 @@
 				result_info.queryHistoryVO = new QueryHistoryVO();
 				result_info.showplanwindow = showplanwin;
 				result_info.querydatagrid = querydatagrid;
-				model.query_results.push(result_info);
-				model.aryQueryWindows.push(this);
+				model.query_results[id] = result_info;
+				model.aryQueryWindows[id] = this;
+                model.query_results._len += 1;
+                model.aryQueryWindows._len += 1;
 
 			}
 						
@@ -109,6 +111,10 @@
                 else
                     return querytext.text;
 			}
+            
+            public function isEmpty():Boolean {
+                return querytext.text == "";
+            }
 			
 			public function resetSelection():void{
             	querytext.selectionBeginIndex = querytext.text.length;

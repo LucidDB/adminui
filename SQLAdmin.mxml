@@ -62,7 +62,7 @@
 				//Regiser Some Things with the model
 				model.main_tabnav = tabnavigator;
 				// Initial tab:
-				callLater(addTab, ["Query 1", tabnavigator]);
+				callLater(addTab, ["Default Query Window", tabnavigator]);
 				
 				//Locate and load the wsdl page
 				var urlpattern:RegExp = /SQLAdmin.swf/i; 
@@ -129,8 +129,8 @@
 				}
 			}
 						
-			private function addTab(lbl:String, navigator:SuperTabNavigator,
-												icon:Class=null, child_obj:String = "") : void {
+			public function addTab(lbl:String, navigator:SuperTabNavigator,
+								    icon:Class=null, child_obj:String = "") : Object {
 				
 				if(lbl=="")
 					lbl = "Query Window";// + (navigator.numChildren + 1);
@@ -142,24 +142,30 @@
 				else
 					child.icon = QWimg;
 				
+                var added_obj : DisplayObject = null;
 				if (child_obj == "") {
 					var qw:QueryWindow = new QueryWindow();
-					qw.id = (navigator.numChildren + 1).toString();
-					child.addChild(qw);
+					qw.id = "qw-" + (model.aryQueryWindows._len + 1).toString();
+                    added_obj = qw;
+                    child.id = qw.id;
 				} else if (child_obj == "createTable") {
                     var ctw:CreateEditTableWindow = new CreateEditTableWindow();
-                    ctw.id = (navigator.numChildren + 1).toString();
-                    child.addChild(ctw);
+                    ctw.id = "ctw-" + (model.table_details._len + 1).toString();
+                    added_obj = ctw;
+                    child.id = ctw.id;
                     
-                    model.table_details.push(new TableDetailsVO());
-                    
-                    // grab some table details too
+                    // grab some table details for testing!
                     var td_event:TableDetailsEvent = new TableDetailsEvent();
                     CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
+                } else {
+                    return null;
                 }
+                
+                child.addChild(added_obj);
 				navigator.addChild(child);
-				
+
 				navigator.selectedIndex = navigator.numChildren - 1;
+                return added_obj;
 			}
 			
 			private function destroyTab(e : Event) : void {
@@ -192,24 +198,8 @@
 					toggleDebugWindow();
                 else if (e.ctrlKey && e.keyCode == 78) // ctrl+N
                     addTab("", tabnavigator, null, 'createTable');
-				/*else if(e.ctrlKey && e.keyCode == 67){
-					copy();
-				} else if(e.ctrlKey && e.keyCode == 88){
-					cut();
-				} */
 			}
 			
-			/*private function copy():void{//67
-				var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
-				System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
-			}
-			
-			private function cut():void{ //88
-				var tempquery:TextArea = model.aryQueryWindows[tabnavigator.selectedIndex].querytext;
-				System.setClipboard(tempquery.text.substring(tempquery.selectionBeginIndex, tempquery.selectionEndIndex));
-				tempquery.text = tempquery.text.substring(0, tempquery.selectionBeginIndex) + tempquery.text.substring(tempquery.selectionEndIndex, tempquery.length);
-				model.aryQueryWindows[tabnavigator.selectedIndex].parseQuery(new KeyboardEvent(""));
-			}*/
 			private function closeHandler(event:Event):void {
 				
 				var my:ComboBox = ComboBox(event.target);
@@ -301,7 +291,7 @@
 				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="closeHandler(event)"/>
 				
 			</mx:HBox>
-			<components:ObjectBrowser tabnav="{tabnavigator}" dataProvider="{model.metadata}"/>
+			<components:ObjectBrowser dataProvider="{model.metadata}"/>
             </mx:VBox>
 		
 		<mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">

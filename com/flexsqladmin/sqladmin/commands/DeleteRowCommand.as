@@ -66,7 +66,7 @@ package com.flexsqladmin.sqladmin.commands
     		if(deleteresult.datamap == "Error"){
     			mx.controls.Alert.show(deleteresult.NewDataSet.Table.Error, "Delete Error");
     		} else{
-    			model.query_results[model.main_tabnav.selectedIndex].queryHistoryVO.writeHistory(deletesql, "");
+    			model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(deletesql, "");
     			tablewindow.refreshData();
         	}
 		}

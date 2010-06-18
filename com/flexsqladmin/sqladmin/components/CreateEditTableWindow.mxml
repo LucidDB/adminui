@@ -48,6 +48,7 @@
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
             
             import flash.events.Event;
             
@@ -69,6 +70,8 @@
             public var field_types : Array = getTypes();
 
             public function init() : void {
+                model.table_details[id] = new TableDetailsVO();
+                model.table_details._len += 1;
                 addColumn();
             }
             

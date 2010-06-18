@@ -86,7 +86,7 @@ package com.flexsqladmin.sqladmin.commands
 	        	mx.controls.Alert.show("Update Column Failed", "Update Error");
 	        	tablewindow.refreshData();
 	     	} else{
-    			model.query_results[model.main_tabnav.selectedIndex].queryHistoryVO.writeHistory(updatesql, "");
+    			model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(updatesql, "");
         	}
 		}
 		
