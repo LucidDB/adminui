@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+           xmlns:flexlib="http://code.google.com/p/flexlib/"
+           xmlns:components="com.flexsqladmin.sqladmin.components.*"
+           width="100%" height="100%"
+           keyUp="handleShortcuts(event);"
+           creationComplete="init();"
+           >
+    
+    
+    <mx:HBox width="100%" left="10" right="10">
+        <mx:Button click="submitCreateTable();" toolTip="Create Your Table" label="Create Your Table"
+                   icon="@Embed(source='icons/exec.gif')" />
+        <mx:Button click="addColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
+    </mx:HBox>
+
+    <mx:HBox width="100%" backgroundColor="#A9C0E7" left="10" right="10" top="30">
+        <mx:Form width="100%" top="30">
+            <mx:FormItem label="Catalog">
+                <mx:Label text="{model.currentcatalogname}" />
+            </mx:FormItem>
+            <mx:FormItem label="Schema">
+                <mx:ComboBox id="table_schema" dataProvider="{model.metadata.children()}"
+                             labelField="@label" />
+                <mx:Button click="newSchema();" label="New Schema" />
+            </mx:FormItem>
+        </mx:Form>
+        
+        <mx:Form width="100%" top="30">
+            <mx:FormItem label="Table Name">
+                <mx:TextInput id="table_name" />                
+            </mx:FormItem>
+            <mx:FormItem label="Create Time">
+                <mx:DateField id="table_create_time" />
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
+    
+    <mx:HBox left="10" right="10" top="140" bottom="10" backgroundColor="#A9C0E7">
+      <flexlib:HAccordion id="columns" width="100%" height="100%" backgroundColor="#A9C0E7" />
+    </mx:HBox>
+
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.business.ServiceLocator;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.components.ColumnForm;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import flash.events.Event;
+            
+            import mx.collections.ArrayCollection;
+            import mx.containers.Accordion;
+            import mx.containers.VBox;
+            import mx.controls.CheckBox;
+            import mx.managers.PopUpManager;
+            /* We have to embed a font for the Accordion. Without doing this the
+            * labels that are rotated will be invisible.
+            */
+            [Embed(systemFont='Arial', fontWeight="bold", fontName='accordionHeader', mimeType='application/x-font', advancedAntiAliasing='true')] 
+            private var font1:Class;
+
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            [Bindable]
+            public var field_types : Array = getTypes();
+
+            public function init() : void {
+                addColumn();
+            }
+            
+            public function handleShortcuts(e:KeyboardEvent) : void {
+                if(e.ctrlKey && e.keyCode == 70) { // ctrl + F
+                    addColumn();
+                }
+            }
+            
+            public function addColumn() : void {
+                var wrapper_vbox : VBox = new VBox();
+                wrapper_vbox.label = "Column " + (columns.getChildren().length + 1);
+                wrapper_vbox.horizontalScrollPolicy = "off";
+                var col_form : ColumnForm = new ColumnForm();
+                // Bind the 'name' field to the vbox label:
+                // (It has to be callLater'd because the textInput item is not immediately created.)
+                callLater(function():void {
+                    col_form.col_name.addEventListener(Event.CHANGE, function(event:Event):void {
+                        wrapper_vbox.label = "Column: " + event.target.text;
+                    });
+                });
+                wrapper_vbox.addChild(col_form);
+                columns.addChild(wrapper_vbox);
+                columns.selectedChild = wrapper_vbox;
+            }
+            
+            public function submitCreateTable() : void {
+               for each (var vbox : VBox in columns.getChildren()) {
+                   for each (var col_form : ColumnForm in vbox.getChildren()) {
+                       trace(col_form.col_name.text);
+                   }
+               }
+            }
+            
+            public function newSchema() : void {
+                /*var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this, OpenTableWindow, true));
+                opentablewindow.setStyle("borderAlpha", 0.8);
+                opentablewindow.showCloseButton = true;
+                */
+            }
+                        
+            private function getTypes() : Array {
+                return [{label: "INT", data: "INT"}, {label: "varchar", data: "varchar"}];
+            }
+            
+            private function getDefaults() : ArrayCollection {
+                return new ArrayCollection([{label: "now", data: "now"}, {label: "CUSTOM", data: "CUSTOM"}]);
+            }
+            
+            private function getCollations() : ArrayCollection {
+                return new ArrayCollection([{label: "utf", data: "utf8"}]);
+            }
+            
+            private function getAttributes() : ArrayCollection {
+                return new ArrayCollection([{label: "unsigned", data: "unsigned"}, {label: "on update", data: "on update"}]);
+            }
+            
+            private function getIndicies() : ArrayCollection {
+                return new ArrayCollection([{label: "primary", data: "primary"}]);
+            }
+            
+            
+        ]]>
+    </mx:Script>
+
+</mx:Canvas>

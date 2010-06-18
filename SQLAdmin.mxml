@@ -11,27 +11,30 @@
 	
 	<mx:Script> 
 		<![CDATA[
-			import com.adobe.cairngorm.business.ServiceLocator;
-			import com.adobe.cairngorm.control.CairngormEventDispatcher;
-			import com.flexsqladmin.sqladmin.components.DebugWindow;
-			import com.flexsqladmin.sqladmin.components.QueryWindow;
-			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-			import com.flexsqladmin.sqladmin.events.InitEvent;
-			import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-			import com.flexsqladmin.sqladmin.model.ModelLocator;
-			import com.flexsqladmin.sqladmin.view.AboutWindow;
-			import com.flexsqladmin.sqladmin.view.LoginWindow;
-			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-			import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-			
-			import flexlib.containers.SuperTabNavigator;
-			import flexlib.controls.SuperTabBar;
-			import flexlib.controls.tabBarClasses.SuperTab;
-			
-			import mx.controls.Alert;
-			import mx.controls.ComboBox;
-			import mx.managers.PopUpManager;
-			import mx.rpc.soap.mxml.WebService;
+            import com.adobe.cairngorm.business.ServiceLocator;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.components.QueryWindow;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.InitEvent;
+            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
+            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.view.AboutWindow;
+            import com.flexsqladmin.sqladmin.view.LoginWindow;
+            import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+            import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
+            
+            import flexlib.containers.SuperTabNavigator;
+            import flexlib.controls.SuperTabBar;
+            import flexlib.controls.tabBarClasses.SuperTab;
+            
+            import mx.controls.Alert;
+            import mx.controls.ComboBox;
+            import mx.managers.PopUpManager;
+            import mx.rpc.soap.mxml.WebService;
 			
 			public var debug_win:DebugWindow;
 			private var exectimer:Timer;
@@ -76,6 +79,9 @@
 					var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
 					s.wsdl = wsdl;
 					s.loadWSDL();
+                    var s2:WebService = ServiceLocator.getInstance().getService("TableDetailsService") as WebService;
+                    s2.wsdl = wsdl;
+                    s2.loadWSDL();
 				} catch (e:Error) {
 					mx.controls.Alert.show("Error Loading WSDL", "WSDL Error");
 				}				
@@ -94,7 +100,7 @@
 			
             /**
             * @param firstTime - Used for initializing first query tab and for stealing all focus
-            * for the login window in subsequent times.
+            * for the login window in subsequent calls.
             * 
             */
 			private function showLogin(firstTime : Boolean = false) : void {
@@ -103,7 +109,9 @@
 				loginForm.setStyle("borderAlpha", 0.8);
 				loginForm.showCloseButton = true;
 				if (firstTime) { // need to remove closability from initial tab at this point.
-					callLater(initNonClosableTab);
+					callLater(function():void {
+                        tabnavigator.setClosePolicyForTab(0, SuperTab.CLOSE_NEVER);
+                    });
 				}
 			}
 			
@@ -120,17 +128,12 @@
 					debug_win.visible = (debug_win.visible) ? false : true;
 				}
 			}
-			
-			private function initNonClosableTab():void {
-				// I don't know why this must be called later instead of immediately.
-				tabnavigator.setClosePolicyForTab(0, SuperTab.CLOSE_NEVER);
-			}
-			
+						
 			private function addTab(lbl:String, navigator:SuperTabNavigator,
 												icon:Class=null, child_obj:String = "") : void {
 				
 				if(lbl=="")
-					lbl = "Query " + (navigator.numChildren + 1);
+					lbl = "Query Window";// + (navigator.numChildren + 1);
 				var child:VBox = new VBox();
 				child.setStyle("closable", true);
 				child.label = lbl;
@@ -143,7 +146,17 @@
 					var qw:QueryWindow = new QueryWindow();
 					qw.id = (navigator.numChildren + 1).toString();
 					child.addChild(qw);
-				}
+				} else if (child_obj == "createTable") {
+                    var ctw:CreateEditTableWindow = new CreateEditTableWindow();
+                    ctw.id = (navigator.numChildren + 1).toString();
+                    child.addChild(ctw);
+                    
+                    model.table_details.push(new TableDetailsVO());
+                    
+                    // grab some table details too
+                    var td_event:TableDetailsEvent = new TableDetailsEvent();
+                    CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
+                }
 				navigator.addChild(child);
 				
 				navigator.selectedIndex = navigator.numChildren - 1;
@@ -175,8 +188,10 @@
 					addTab("", tabnavigator);
 				else if (e.ctrlKey && e.keyCode == 82) // ctrl+R
 					loadMetaData();
-				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68)
+				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68) // ctrl+shift+D
 					toggleDebugWindow();
+                else if (e.ctrlKey && e.keyCode == 78) // ctrl+N
+                    addTab("", tabnavigator, null, 'createTable');
 				/*else if(e.ctrlKey && e.keyCode == 67){
 					copy();
 				} else if(e.ctrlKey && e.keyCode == 88){
@@ -211,25 +226,72 @@
 	<!-- the FrontController, containing Commands specific to this appliation -->
 	<control:Controller id="controller" />
 	
-	<mx:Style>
-		Application{
-			paddingLeft: 10px;
-			paddingRight: 10px;
-			paddingTop: 10px;
-			paddingBottom: 10px;
-			backgroundGradientColors: #AEC5E7, #5E8ED7;
-		}
-		HDividedBox{
-			paddingLeft: 10px;
-			paddingRight: 10px;
-			paddingTop: 10px;
-			paddingBottom: 10px;
-		}
-		TextArea {
-			fontFamily: Verdana; 
-			fontSize: 12pt;
-		}
-	</mx:Style>
+    <mx:Style>
+        Application{
+            paddingLeft: 10px;
+            paddingRight: 10px;
+            paddingTop: 10px;
+            paddingBottom: 10px;
+            backgroundGradientColors: #AEC5E7, #5E8ED7;
+        }
+        HDividedBox{
+            paddingLeft: 10px;
+            paddingRight: 10px;
+            paddingTop: 10px;
+            paddingBottom: 10px;
+        }
+        TextArea {
+            fontFamily: Verdana; 
+            fontSize: 12pt;
+        }
+        
+        HAccordion
+        {
+            backgroundColor: #FFFFFF;
+            borderStyle: "solid";
+            
+            paddingBottom: -1;
+            paddingLeft: -1;
+            paddingRight: -1;
+            paddingTop: -1;
+            verticalGap: -1;
+            horizontalGap: -1;
+            textAlign: "left";
+        }
+        
+        AccordionHeader
+        {
+            /*	selectedFillColors: #FFFFFF, #FFFFFF; */ /* overrides the calculated fillcolors */
+            
+            /*	disabledIcon: null; */
+            disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            /*	downIcon: null; */
+            downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            horizontalGap: 5;
+            /*	overIcon: null; */
+            overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            paddingTop: 5;
+            paddingBottom: 5;
+            /*	selectedDisabledIcon: null; */
+            selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            /*	selectedDownIcon: null; */
+            selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            /*	selectedOverIcon: null; */
+            selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            /*	selectedUpIcon: null; */
+            selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            
+            /*	upIcon: null; */
+            upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+            
+            fontFamily: accordionHeader; 
+            fontWeight:bold;
+            fontSize:11;
+            fontSharpness:-200;
+            fontThickness:-100;
+            fontGridFitType: none;
+        }
+    </mx:Style>
     
 	<mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true">
 		
@@ -246,7 +308,11 @@
 			
 			<mx:Box width="100%" height="50%">
 				<mx:HBox width="100%">
-					<mx:Button click="addTab('', tabnavigator);" icon="@Embed(source='icons/add_tab.png')" toolTip="(CTRL-T) Add Query Tab" id="addtab" label="Add Query Tab" />
+					<mx:Button click="addTab('', tabnavigator);" icon="@Embed(source='icons/add_tab.png')"
+                               toolTip="(CTRL-T) Add Query Tab" id="addtab" label="Add Query Tab" />
+                    <mx:Button click="addTab('New Table', tabnavigator, null, 'createTable');"
+                               icon="@Embed(source='icons/add_tab.png')" toolTip="(CTRL-N) Add New Table"
+                               id="addtabletab" label="Add New Table" />
 					<!--
 					This might come out in a future release. The functionality is there, just no paste ability yet. 
 					<mx:Button icon="@Embed(source='icons/cut.png')" toolTip="(CTRL-X) Cut" label="Cut" click="cut();"/>

@@ -11,6 +11,7 @@ package com.flexsqladmin.sqladmin.control
     import com.flexsqladmin.sqladmin.commands.UpdateDataCommand;
     import com.flexsqladmin.sqladmin.commands.InsertRowCommand;
     import com.flexsqladmin.sqladmin.commands.ListCatalogsCommand;
+    import com.flexsqladmin.sqladmin.commands.TableDetailsCommand;
     import com.flexsqladmin.sqladmin.events.InitEvent;
     import com.flexsqladmin.sqladmin.events.LoginEvent;
     import com.flexsqladmin.sqladmin.events.MetaDataEvent;
@@ -21,6 +22,7 @@ package com.flexsqladmin.sqladmin.control
 	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
 	import com.flexsqladmin.sqladmin.events.InsertRowEvent;
 	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
+    import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
 	
 	public class Controller extends FrontController
 	{
@@ -36,6 +38,7 @@ package com.flexsqladmin.sqladmin.control
 			addCommand(UpdateDataEvent.UPDATEDATA, UpdateDataCommand);
 			addCommand(InsertRowEvent.INSERTROW, InsertRowCommand);
 			addCommand(ListCatalogsEvent.LISTCATALOGS, ListCatalogsCommand);
+            addCommand(TableDetailsEvent.TABLEDETAILS, TableDetailsCommand);
 		}
 	}
 }

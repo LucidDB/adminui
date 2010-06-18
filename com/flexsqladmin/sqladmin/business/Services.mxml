@@ -39,5 +39,21 @@
             </mx:request>
         </mx:operation>
     </mx:WebService>
+    
+    <mx:WebService
+        id="TableDetailsService" 
+        service='TableDetailsService'
+        useProxy="false" 
+        makeObjectsBindable="false"
+        showBusyCursor="true"
+        fault="mx.controls.Alert.show('Error loading WSDL', 'DBService Error');" >
+        <mx:operation name="getTableDetails" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+                <table></table>
+            </mx:request>
+        </mx:operation>        
+    </mx:WebService>
 	
 </cairngorm:ServiceLocator>

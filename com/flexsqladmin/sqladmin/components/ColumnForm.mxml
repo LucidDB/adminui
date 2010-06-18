@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
+    <mx:FormItem label="Name">
+        <mx:TextInput id="col_name" />
+    </mx:FormItem>
+</mx:Form>

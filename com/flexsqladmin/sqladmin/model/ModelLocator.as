@@ -4,6 +4,7 @@ package com.flexsqladmin.sqladmin.model
     import com.flexsqladmin.sqladmin.vo.ConnectionVO;
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+    import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
     
     import flexlib.containers.SuperTabNavigator;
     
@@ -18,6 +19,7 @@ package com.flexsqladmin.sqladmin.model
     	public var querycount:int = 1;
     	public var aryQueryWindows:Array = new Array();
 		public var query_results : Array = new Array(); // contains QueryResultInfo's.
+        public var table_details : Array = new Array(); // contains TableDetailVO's
 		public var main_tabnav : SuperTabNavigator;
     	public var connectionVO:ConnectionVO;
     	public var tempConnectionVO:ConnectionVO;
