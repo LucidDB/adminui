@@ -4,7 +4,6 @@ package com.flexsqladmin.sqladmin.model
     import com.flexsqladmin.sqladmin.vo.ConnectionVO;
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
-    import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
     
     import flexlib.containers.SuperTabNavigator;
     

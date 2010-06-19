@@ -25,7 +25,6 @@
             import com.flexsqladmin.sqladmin.view.LoginWindow;
             import com.flexsqladmin.sqladmin.view.OpenTableWindow;
             import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-            import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
             
             import flexlib.containers.SuperTabNavigator;
             import flexlib.controls.SuperTabBar;
@@ -99,13 +98,12 @@
 			}
 			
             /**
-            * @param firstTime - Used for initializing first query tab and for stealing all focus
-            * for the login window in subsequent calls.
+            * @param firstTime - Used for initializing first query tab
             * 
             */
 			private function showLogin(firstTime : Boolean = false) : void {
 				DebugWindow.log("main.mxml:showLogin()");
-				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, !firstTime));
+				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, true));
 				loginForm.setStyle("borderAlpha", 0.8);
 				loginForm.showCloseButton = true;
 				if (firstTime) { // need to remove closability from initial tab at this point.
@@ -130,17 +128,13 @@
 			}
 						
 			public function addTab(lbl:String, navigator:SuperTabNavigator,
-								    icon:Class=null, child_obj:String = "") : Object {
+								   child_obj:String = "") : Object {
 				
 				if(lbl=="")
 					lbl = "Query Window";// + (navigator.numChildren + 1);
 				var child:VBox = new VBox();
 				child.setStyle("closable", true);
 				child.label = lbl;
-				if(icon)
-					child.icon = icon;
-				else
-					child.icon = QWimg;
 				
                 var added_obj : DisplayObject = null;
 				if (child_obj == "") {
@@ -148,15 +142,12 @@
 					qw.id = "qw-" + (model.aryQueryWindows._len + 1).toString();
                     added_obj = qw;
                     child.id = qw.id;
+                    child.icon = QWimg;
 				} else if (child_obj == "createTable") {
                     var ctw:CreateEditTableWindow = new CreateEditTableWindow();
                     ctw.id = "ctw-" + (model.table_details._len + 1).toString();
                     added_obj = ctw;
                     child.id = ctw.id;
-                    
-                    // grab some table details for testing!
-                    var td_event:TableDetailsEvent = new TableDetailsEvent();
-                    CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
                 } else {
                     return null;
                 }
@@ -170,17 +161,12 @@
 			
 			private function destroyTab(e : Event) : void {
 				DebugWindow.log("main.mxml:destroyTabButton()");
-				var index:Number = e.target.id;
-				if(tabnavigator.numChildren > 1) {
-					for(var c:int = index; c < model.aryQueryWindows.length; c++) {
-						model.aryQueryWindows[c] = model.aryQueryWindows[c + 1];
-						model.query_results[c] = model.query_results[c + 1];
-					} 
-					model.aryQueryWindows.pop();
-					model.query_results.pop();
-				} else {
-					e.preventDefault();
-				}
+                if (model.aryQueryWindows[e.target.id] != null)
+                    model.aryQueryWindows[e.target.id] = null;
+                if (model.query_results[e.target.id] != null)
+                    model.query_results[e.target.id] = null;
+                if (model.table_details[e.target.id] != null)
+                    model.query_results[e.target.id] = null;
 			}
 			
 			private function showAboutWindow():void{
@@ -197,7 +183,7 @@
 				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68) // ctrl+shift+D
 					toggleDebugWindow();
                 else if (e.ctrlKey && e.keyCode == 78) // ctrl+N
-                    addTab("", tabnavigator, null, 'createTable');
+                    addTab("", tabnavigator, 'createTable');
 			}
 			
 			private function closeHandler(event:Event):void {
@@ -300,7 +286,7 @@
 				<mx:HBox width="100%">
 					<mx:Button click="addTab('', tabnavigator);" icon="@Embed(source='icons/add_tab.png')"
                                toolTip="(CTRL-T) Add Query Tab" id="addtab" label="Add Query Tab" />
-                    <mx:Button click="addTab('New Table', tabnavigator, null, 'createTable');"
+                    <mx:Button click="addTab('New Table', tabnavigator, 'createTable');"
                                icon="@Embed(source='icons/add_tab.png')" toolTip="(CTRL-N) Add New Table"
                                id="addtabletab" label="Add New Table" />
 					<!--

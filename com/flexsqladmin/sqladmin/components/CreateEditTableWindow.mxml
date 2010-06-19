@@ -28,15 +28,18 @@
         
         <mx:Form width="100%" top="30">
             <mx:FormItem label="Table Name">
-                <mx:TextInput id="table_name" />                
+                <mx:TextInput id="table_name" text="{TD.details.@name}" />                
             </mx:FormItem>
             <mx:FormItem label="Create Time">
-                <mx:DateField id="table_create_time" />
+                <mx:DateField id="table_create_time" formatString="YYYY-MM-DD"
+                              showToday="true"
+                              selectedDate="{new Date()}"
+                              text="{TD.details.@createTime}" />
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>
     
-    <mx:HBox left="10" right="10" top="140" bottom="10" backgroundColor="#A9C0E7">
+    <mx:HBox left="10" right="10" top="135" bottom="10" backgroundColor="#A9C0E7">
       <flexlib:HAccordion id="columns" width="100%" height="100%" backgroundColor="#A9C0E7" />
     </mx:HBox>
 
@@ -65,14 +68,17 @@
 
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
-            
+            [Bindable]
+            public var TD:TableDetailsVO;
+
             [Bindable]
             public var field_types : Array = getTypes();
 
             public function init() : void {
-                model.table_details[id] = new TableDetailsVO();
+                TD = new TableDetailsVO();
+                model.table_details[id] = TD;
                 model.table_details._len += 1;
-                addColumn();
+                //addColumn();
             }
             
             public function handleShortcuts(e:KeyboardEvent) : void {
@@ -81,9 +87,13 @@
                 }
             }
             
-            public function addColumn() : void {
+            public function addColumn(name:String="") : ColumnForm {
                 var wrapper_vbox : VBox = new VBox();
-                wrapper_vbox.label = "Column " + (columns.getChildren().length + 1);
+                wrapper_vbox.label = "Column: ";
+                if (name == "")
+                    wrapper_vbox.label += (columns.getChildren().length + 1);
+                else
+                    wrapper_vbox.label += name;
                 wrapper_vbox.horizontalScrollPolicy = "off";
                 var col_form : ColumnForm = new ColumnForm();
                 // Bind the 'name' field to the vbox label:
@@ -96,14 +106,31 @@
                 wrapper_vbox.addChild(col_form);
                 columns.addChild(wrapper_vbox);
                 columns.selectedChild = wrapper_vbox;
+                return col_form;
+            }
+            
+            public function addColumnsFromDetails() : void {
+                trace(TD.details);
+                for each (var col:XML in TD.details.descendants("column")) {
+                    var added_col:ColumnForm = addColumn(col.@name);
+                    added_col.col_details = col;
+                }
+                columns.selectedIndex = 0;
+                // Also load the schema:
+                for (var i:Number = 0; i < table_schema.dataProvider.length; i++) {
+                    if (table_schema.dataProvider[i].@label == TD.details.@schema) {
+                        table_schema.selectedIndex = i;
+                        break;
+                    }
+                }
             }
             
             public function submitCreateTable() : void {
-               for each (var vbox : VBox in columns.getChildren()) {
-                   for each (var col_form : ColumnForm in vbox.getChildren()) {
-                       trace(col_form.col_name.text);
-                   }
-               }
+                for each (var vbox : VBox in columns.getChildren()) {
+                    for each (var col_form : ColumnForm in vbox.getChildren()) {
+                        trace(col_form.col_name.text);
+                    }
+                }
             }
             
             public function newSchema() : void {

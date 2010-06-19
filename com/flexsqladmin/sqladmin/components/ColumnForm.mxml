@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:FormItem label="Name">
-        <mx:TextInput id="col_name" />
+        <mx:TextInput id="col_name" text="{col_details.@name}" />
     </mx:FormItem>
+    <mx:FormItem label="Nullable">
+        <mx:CheckBox id="col_nullable" selected="{col_details.@isNullable}" />
+    </mx:FormItem>
+    <mx:FormItem label="Data Type">
+        <mx:TextInput id="col_type" text="{col_details.@datatype}" />
+    </mx:FormItem>
+    <mx:FormItem label="Digits">
+        <mx:TextInput id="col_digits" text="{col_details.@decDigits}" />
+    </mx:FormItem>
+    <mx:FormItem label="Precision">
+        <mx:TextInput id="col_prec" text="{col_details.@precision}" />
+    </mx:FormItem>
+    <mx:Script>
+        <![CDATA[
+            // todo: make data type list
+            [Bindable]
+            public var col_details:XML;
+        ]]>
+    </mx:Script>
 </mx:Form>

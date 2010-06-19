@@ -47,7 +47,7 @@
         makeObjectsBindable="false"
         showBusyCursor="true"
         fault="mx.controls.Alert.show('Error loading WSDL', 'DBService Error');" >
-        <mx:operation name="getTableDetails" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+        <mx:operation name="getTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>

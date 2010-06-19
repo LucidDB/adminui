@@ -13,9 +13,13 @@
 	
 	<mx:Script>
 		<![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
 			import com.flexsqladmin.sqladmin.model.ModelLocator;
 			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+            import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
 			
 			import mx.controls.Alert;
 			import mx.controls.Menu;
@@ -135,20 +139,29 @@
 		           	opentablewindow.showCloseButton = true; 
 		           	opentablewindow.setTablename(getParentItem(getParentItem(this.selectedItem)).@label+"."+this.selectedItem.@label);
             	} else if (e.index == 6) {
-                    // Add New Table
-                    
+                    // Add New Table For Editing
+                    var tab_win : CreateEditTableWindow = CreateEditTableWindow(
+                        Application.application.addTab("Edit Table " + this.selectedItem.@label,
+                                                       model.main_tabnav, 'createTable')
+                    );
+                    // Grab the table data.
+                    var td_event:TableDetailsEvent = new TableDetailsEvent(catalogname,
+                        getParentItem(getParentItem(this.selectedItem)).@label,
+                        this.selectedItem.@label, ActionEnum.GET
+                    );
+                    CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
                 }
             	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
                 
-                var makenewqw : Boolean = false;
-                var qw : QueryWindow = model.aryQueryWindows[model.main_tabnav.selectedChild.id];
-                trace(model.main_tabnav.selectedIndex);
-                trace(model.main_tabnav.selectedChild.id);
-                if (qw && qw.isEmpty()) {
-                    qw.setText(scriptquery);
-                } else {
-                    qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
-                    qw.setText(scriptquery);
+                if (scriptquery != "") {
+                    var makenewqw : Boolean = false;
+                    var qw : QueryWindow = model.aryQueryWindows[model.main_tabnav.selectedChild.id];
+                    if (qw && qw.isEmpty()) {
+                        qw.setText(scriptquery);
+                    } else {
+                        qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
+                        qw.setText(scriptquery);
+                    }
                 }
             }
 		]]>
