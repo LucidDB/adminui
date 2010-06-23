@@ -16,6 +16,7 @@
             import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.components.QueryWindow;
+            import com.flexsqladmin.sqladmin.components.ViewWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.events.InitEvent;
             import com.flexsqladmin.sqladmin.events.MetaDataEvent;
@@ -103,7 +104,7 @@
             */
 			private function showLogin(firstTime : Boolean = false) : void {
 				DebugWindow.log("main.mxml:showLogin()");
-				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, true));
+				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, !DEBUG));
 				loginForm.setStyle("borderAlpha", 0.8);
 				loginForm.showCloseButton = true;
 				if (firstTime) { // need to remove closability from initial tab at this point.
@@ -148,6 +149,11 @@
                     ctw.id = "ctw-" + (model.table_details._len + 1).toString();
                     added_obj = ctw;
                     child.id = ctw.id;
+                } else if (child_obj == "viewWindow") {
+                    var vw:ViewWindow = new ViewWindow();
+                    vw.id = "vw-" + (model.table_details._len + 1).toString();
+                    added_obj = vw;
+                    child.id = vw.id;
                 } else {
                     return null;
                 }
@@ -221,7 +227,7 @@
             fontSize: 12pt;
         }
         
-        HAccordion
+        /*HAccordion
         {
             backgroundColor: #FFFFFF;
             borderStyle: "solid";
@@ -233,32 +239,32 @@
             verticalGap: -1;
             horizontalGap: -1;
             textAlign: "left";
-        }
+        }*/
         
-        AccordionHeader
+       /*AccordionHeader
         {
             /*	selectedFillColors: #FFFFFF, #FFFFFF; */ /* overrides the calculated fillcolors */
             
             /*	disabledIcon: null; */
-            disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             /*	downIcon: null; */
-            downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             horizontalGap: 5;
             /*	overIcon: null; */
-            overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             paddingTop: 5;
             paddingBottom: 5;
             /*	selectedDisabledIcon: null; */
-            selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             /*	selectedDownIcon: null; */
-            selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             /*	selectedOverIcon: null; */
-            selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             /*	selectedUpIcon: null; */
-            selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             
             /*	upIcon: null; */
-            upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+        /*    upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
             
             fontFamily: accordionHeader; 
             fontWeight:bold;
@@ -266,7 +272,7 @@
             fontSharpness:-200;
             fontThickness:-100;
             fontGridFitType: none;
-        }
+        }*/
     </mx:Style>
     
 	<mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true">

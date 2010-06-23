@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<components:QueryWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:components="com.flexsqladmin.sqladmin.components.*"
+                        creationComplete="init();init2();">
+    
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+            import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
+            
+            import mx.core.Application;
+            
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            
+            public function init2() : void {    
+                this.window_actions.removeAllChildren();
+                //this.tabresults_holder.removeAllChildren();
+                querytext.setStyle("top", "135");
+                tabresults_holder.percentHeight = 30;
+                view_info.visible = true;
+                view_name.setFocus();
+                submitQuery();
+            }
+            
+            public function guess_schema(guessed_schema:String) : void {
+                for (var i:Number = 0; i < view_schema.dataProvider.length; i++) {
+                    if (view_schema.dataProvider[i].@label == guessed_schema) {
+                        view_schema.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            override public function newSchema() : void {
+                
+            }
+            
+            override public function makeView() : void {
+                var sql:String = getQueryText();
+                var view_sql:String = 'CREATE VIEW "' + model.currentcatalogname + '"."'
+                + view_schema.text + '"."'
+                + view_name.text + '" DESCRIPTION \'' + view_desc.text + '\' AS ' + sql;
+                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(view_sql, "normal");
+                CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+            }
+        ]]>
+    </mx:Script>
+</components:QueryWindow>

@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
     <mx:FormItem label="Name">
-        <mx:TextInput id="col_name" text="{col_details.@name}" />
+        <mx:TextInput editable="{editable}" id="col_name" text="{col_details.@name}" />
     </mx:FormItem>
     <mx:FormItem label="Nullable">
-        <mx:CheckBox id="col_nullable" selected="{col_details.@isNullable}" />
+        <mx:CheckBox enabled="{editable}" id="col_nullable" selected="{col_details.@isNullable}" />
     </mx:FormItem>
     <mx:FormItem label="Data Type">
-        <mx:TextInput id="col_type" text="{col_details.@datatype}" />
+        <mx:ComboBox id="col_type" enabled="{editable}" dataProvider="{types}" />
+        <!--<mx:TextInput editable="{editable}" id="col_type" text="{col_details.@datatype}" />-->
     </mx:FormItem>
     <mx:FormItem label="Digits">
-        <mx:TextInput id="col_digits" text="{col_details.@decDigits}" />
+        <mx:TextInput editable="{editable}" id="col_digits" text="{col_details.@decDigits}" />
     </mx:FormItem>
     <mx:FormItem label="Precision">
-        <mx:TextInput id="col_prec" text="{col_details.@precision}" />
+        <mx:TextInput editable="{editable}" id="col_prec" text="{col_details.@precision}" />
     </mx:FormItem>
     <mx:Script>
         <![CDATA[
+            import mx.collections.ArrayCollection;
             // todo: make data type list
             [Bindable]
             public var col_details:XML;
+            [Bindable]
+            public var editable:Boolean;
+            
+            public var loaded:Boolean = false;
+            
+            [Bindable]
+            public var types:Array = ["INTEGER", "VARCHAR", "BOOLEAN", "TIMESTAMP"];
+            
+            public function findIndex() : void {
+                loaded = true;
+                for (var i:Number = 0; i < types.length; i++) {
+                    if (types[i] == col_details.@datatype) {
+                        col_type.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
         ]]>
     </mx:Script>
 </mx:Form>

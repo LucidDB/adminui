@@ -20,6 +20,7 @@ package com.flexsqladmin.sqladmin.commands
     public class TableDetailsCommand implements Command, Responder {
 
         private var model:ModelLocator = ModelLocator.getInstance();
+        private var request_type:ActionEnum;
         
         public function execute(event:CairngormEvent) : void {
             DebugWindow.log("TableDetails:execute()");
@@ -27,16 +28,25 @@ package com.flexsqladmin.sqladmin.commands
             var schema:String = TableDetailsEvent(event).schema;
             var table:String = TableDetailsEvent(event).table;
             var action:ActionEnum = TableDetailsEvent(event).action;
+            var details:XML = TableDetailsEvent(event).details;
             var delegate:tableDetailsDelegate = new tableDetailsDelegate(this);
+            request_type = action;
             if (action == ActionEnum.GET)
                 delegate.getTableDetails(cat, schema, table);
-            //var delegate:execSQLDelegate = new execSQLDelegate(this);
-            //delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
+            else if (action == ActionEnum.POST)
+                delegate.postTableDetails(cat, schema, table, details);
+        }
+        
+        public function onResult(event:*=null) : void {
+            if (request_type == ActionEnum.GET)
+                onGetResult(event);
+            else if (request_type == ActionEnum.POST)
+                onPostResult(event);
         }
         
         // for gets:
-        public function onResult(event:*=null) : void {
-            DebugWindow.log("TableDetailsCommand:onResult()");
+        public function onGetResult(event:*=null) : void {
+            DebugWindow.log("TableDetailsCommand:onGetResult()");
             var r:XML = new XML(event.result);
             if(r.datamap == "Error"){
                 var errormsg:String = r.NewDataSet.Table.Error;
@@ -44,11 +54,21 @@ package com.flexsqladmin.sqladmin.commands
             } else {
                 model.table_details[model.main_tabnav.selectedChild.id].details = new XML(XML(event.result['return']));
                 CreateEditTableWindow(model.main_tabnav.selectedChild.getChildAt(0)).addColumnsFromDetails();
-            }
-
+            }            
         }
         
         // for posts:
+        public function onPostResult(event:*=null) : void {
+            DebugWindow.log("TableDetailsCommand:onPostResult()");
+            var r:XML = new XML(event.result);
+            if (r.datamap == "Error") {
+                var errormsg:String = r.NewDataSet.Table.Error;
+                DebugWindow.log("Error - " + errormsg);
+            } else {
+                var response:XML = new XML(XML(event.result['return']));
+                trace(response);
+            }
+        }
         
         public function onFault(event:*=null) : void {
             DebugWindow.log("TableDetailsCommand:onFault()");

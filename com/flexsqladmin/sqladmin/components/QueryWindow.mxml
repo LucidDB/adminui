@@ -9,19 +9,44 @@
 	creationComplete="init();">
 	
 	<!-- Submit Query, Checkbox (for explain plan), Clear Query, etc. -->
-  <mx:HBox width="100%" left="10" right="10">
-      <mx:Button click="submitQuery();" toolTip="(F5) Submit Query" label="Submit Query" icon="@Embed(source='icons/exec.gif')" id="btnQuery" width="108"/>
-      <mx:Button click="clearQuery();" icon="@Embed(source='icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query"/>
+  <mx:HBox width="100%" left="10" right="10" id="window_actions">
+      <mx:Button click="submitQuery();" toolTip="(F5) Submit Query" label="Submit Query" icon="@Embed(source='icons/exec.gif')" id="btnQuery" />
+      <mx:Button click="clearQuery();" icon="@Embed(source='icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query" />
       <mx:Button click="submitShowPlanQuery();" icon="@Embed(source='icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
       <mx:CheckBox label="Include Execution Plan" id="spflag"/>
+      <mx:Button click="makeView();" label="Make View From Query" toolTip="Make View From Query" />
   </mx:HBox>
-	
+
+    <mx:HBox width="100%" left="10" right="10" id="view_info" visible="false">
+        <mx:Form>
+            <mx:FormItem label="Catalog">
+                <mx:Label text="{model.currentcatalogname}" />
+            </mx:FormItem>
+            <mx:FormItem label="Schema">
+                <mx:ComboBox id="view_schema" dataProvider="{model.metadata.children()}"
+                             labelField="@label" />
+                <mx:Button click="newSchema();" label="New Schema" />
+            </mx:FormItem>
+        </mx:Form>
+        <mx:Form>
+            <mx:FormItem label="View Name">
+                <mx:TextInput id="view_name" />                
+            </mx:FormItem>
+            <mx:FormItem label="View Description (optional)">
+                <mx:TextInput id="view_desc" />
+            </mx:FormItem>
+            <mx:FormItem>
+                <mx:Button click="makeView();" label="Create View" icon="@Embed(source='icons/exec.gif')" />
+            </mx:FormItem>
+        </mx:Form>
+    </mx:HBox>
+
 	<mx:TextArea id="querytext" 
 		dragEnter="doDragEnter(event);" 
 		dragDrop="doDragDrop(event);"
 		keyUp="parseQuery(event);" height="40%" left="10" top="30" right="10" />
 		
-	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10">
+	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10" id="tabresults_holder">
 		<mx:TabNavigator id="tabresults" width="100%" height="100%" alpha=".8">
 			<mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='icons/result.png')">
 				<mx:DataGrid id="querydatagrid" dataProvider="{result_info.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto" x="0" y="0"></mx:DataGrid>
@@ -38,22 +63,32 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import com.adobe.cairngorm.business.ServiceLocator;
-			import com.adobe.cairngorm.control.CairngormEventDispatcher;
-			import com.flexsqladmin.sqladmin.components.DebugWindow;
-			import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-			import com.flexsqladmin.sqladmin.model.ModelLocator;
-			import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
-			import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
-			
-			import mx.events.DragEvent;
-			import mx.managers.DragManager;
+            import com.adobe.cairngorm.business.ServiceLocator;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+            import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
+            
+            import mx.controls.Alert;
+            import mx.controls.ComboBox;
+            import mx.controls.Label;
+            import mx.controls.Text;
+            import mx.controls.TextInput;
+            import mx.core.Application;
+            import mx.events.DragEvent;
+            import mx.managers.DragManager;
+            import mx.managers.PopUpManager;
 
 			[Bindable]
 			private var model:ModelLocator = ModelLocator.getInstance();
 			
 			[Bindable]
 			public var result_info : QueryResultInfo;
+            
+            public var guessed_schema : String; // this is populated when a 'script as' or similar
+            // query is executed.
 			
 			public function init() : void {
 				querytext.percentWidth = 100;
@@ -75,7 +110,7 @@
 					submitQuery();
 				else if (e.keyCode == 117) // F6
 					clearQuery();
-				else if(e.keyCode == 9) { // tab
+				/*else if(e.keyCode == 9) { // tab
 					var spacer:String = "\t";
 					var cutter:int = 0;
 					var tempquery:TextArea = querytext;
@@ -92,7 +127,7 @@
 					}
 					tempquery.setFocus();
 					parseQuery(new KeyboardEvent(""));
-				}
+				}*/
 			}
 			
 			public function setLabel(s:String):void{
@@ -157,7 +192,7 @@
                 parseQuery(new KeyboardEvent(""));
 	        }
 
-            private function submitQuery():void{
+            protected function submitQuery():void{
             	DebugWindow.log("main.mxml:submitQuery()");
             	DebugWindow.log("main.mxml:Query text - " + getQueryText());
             	var sqt:String = "normal";
@@ -176,6 +211,20 @@
 				tabresults.selectedIndex = 2;
             }
             
+            public function makeView():void {
+                var text:String = getQueryText();
+                if (text.substr(0, 6) == "SELECT") {
+                    var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", model.main_tabnav, "viewWindow"));
+                    vw.setText(getQueryText());
+                    callLater(vw.guess_schema, [guessed_schema]);
+                } else {
+                    mx.controls.Alert.show("Only SELECT queries can be made into views.");
+                }
+            }
+            
+            public function newSchema():void {
+                
+            }
 
 			
 		]]>

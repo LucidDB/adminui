@@ -2,6 +2,7 @@ package com.flexsqladmin.sqladmin.business
 {
     import com.adobe.cairngorm.business.Responder;
     import com.adobe.cairngorm.business.ServiceLocator;
+    import com.flexsqladmin.sqladmin.business.Services;
     import com.flexsqladmin.sqladmin.commands.TableDetailsCommand;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -38,13 +39,18 @@ package com.flexsqladmin.sqladmin.business
            token.faultHandler = responder.onFault;
        }
        
-       public function getTableDetails_onResult(event:ResultEvent) : void {
-           DebugWindow.log("getTableDetails.as:getTableDetails_onResult()");
-           responder.onResult(new ResultEvent(ResultEvent.RESULT, false, true));
+       public function postTableDetails(cat:String, schema:String, table:String, details:XML) : void {
+           DebugWindow.log("tableDetailsDelegate.as:postTableDetails()");
+           var o:AbstractOperation = service.getOperation("postTableDetails");
+           o.arguments.catalog = cat;
+           o.arguments.schema = schema;
+           o.arguments.table = table;
+           //o.arguments.details = "BAHFLSJFS";
+           XML(o.arguments.details).appendChild(details.children());// = new XML(details);
+           var token:AsyncToken = service.postTableDetails();
+           token.resultHandler = responder.onResult;
+           token.faultHandler = responder.onFault;
        }
-       
-       public function getTableDetails_onFault(event:FaultEvent) : void {
-           DebugWindow.log("getTableDetails.as:getTableDetails_onFault()");
-       }   
+   
    }
 }

@@ -162,6 +162,7 @@
                         qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
                         qw.setText(scriptquery);
                     }
+                    qw.guessed_schema = String(getParentItem(getParentItem(this.selectedItem)).@label);
                 }
             }
 		]]>

@@ -11,7 +11,7 @@
     <mx:HBox width="100%" left="10" right="10">
         <mx:Button click="submitCreateTable();" toolTip="Create Your Table" label="Create Your Table"
                    icon="@Embed(source='icons/exec.gif')" />
-        <mx:Button click="addColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
+        <mx:Button click="addNewColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
     </mx:HBox>
 
     <mx:HBox width="100%" backgroundColor="#A9C0E7" left="10" right="10" top="30">
@@ -39,10 +39,16 @@
         </mx:Form>
     </mx:HBox>
     
-    <mx:HBox left="10" right="10" top="135" bottom="10" backgroundColor="#A9C0E7">
-      <flexlib:HAccordion id="columns" width="100%" height="100%" backgroundColor="#A9C0E7" />
+    <mx:HBox id="col_info" left="10" right="10" top="145" bottom="10" width="50%" height="100%">
+        <mx:AdvancedDataGrid id="col_grid" dataProvider="{col_list}" click="selectColumn(event);" height="100%" width="50%">
+            <mx:columns>
+                <mx:AdvancedDataGridColumn id="col_name" headerText="Column Name" dataField="@name" />
+                <mx:AdvancedDataGridColumn id="col_datatype" headerText="Data Type" dataField="@datatype" />
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+        <mx:HBox id="selected_form" visible="false" />
     </mx:HBox>
-
+    
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.business.ServiceLocator;
@@ -50,7 +56,9 @@
             import com.flexsqladmin.sqladmin.components.ColumnForm;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.ActionEnum;
             import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
             
             import flash.events.Event;
@@ -70,9 +78,10 @@
             private var model:ModelLocator = ModelLocator.getInstance();
             [Bindable]
             public var TD:TableDetailsVO;
-
+            
             [Bindable]
-            public var field_types : Array = getTypes();
+            public var col_list : ArrayCollection = new ArrayCollection();
+            public var col_forms : ArrayCollection = new ArrayCollection();
 
             public function init() : void {
                 TD = new TableDetailsVO();
@@ -83,39 +92,48 @@
             
             public function handleShortcuts(e:KeyboardEvent) : void {
                 if(e.ctrlKey && e.keyCode == 70) { // ctrl + F
-                    addColumn();
+                    addNewColumn();
                 }
             }
             
-            public function addColumn(name:String="") : ColumnForm {
-                var wrapper_vbox : VBox = new VBox();
-                wrapper_vbox.label = "Column: ";
-                if (name == "")
-                    wrapper_vbox.label += (columns.getChildren().length + 1);
-                else
-                    wrapper_vbox.label += name;
-                wrapper_vbox.horizontalScrollPolicy = "off";
+            public function addNewColumn() : void {
                 var col_form : ColumnForm = new ColumnForm();
-                // Bind the 'name' field to the vbox label:
-                // (It has to be callLater'd because the textInput item is not immediately created.)
+                col_form.editable = true;
+                col_form.col_details = <details name="NEW COLUMN" isNullable="" datatype="INTEGER" decDigits="" precision="" />;
+                col_list.addItem(col_form.col_details);
+                col_forms.addItem(col_form);
+                var idx:int = col_list.length - 1;
+                col_grid.selectedIndex = idx;
+                selectColumn();
                 callLater(function():void {
                     col_form.col_name.addEventListener(Event.CHANGE, function(event:Event):void {
-                        wrapper_vbox.label = "Column: " + event.target.text;
+                        col_list.getItemAt(idx).@name = event.target.text;
+                        col_list.refresh();
                     });
                 });
-                wrapper_vbox.addChild(col_form);
-                columns.addChild(wrapper_vbox);
-                columns.selectedChild = wrapper_vbox;
-                return col_form;
+                callLater(function():void {
+                    col_form.col_type.addEventListener(Event.CHANGE, function(event:Event):void {
+                        col_list.getItemAt(idx).@datatype = event.target.selectedItem;
+                        col_list.refresh();
+                    });
+                });
+
             }
             
             public function addColumnsFromDetails() : void {
-                trace(TD.details);
                 for each (var col:XML in TD.details.descendants("column")) {
-                    var added_col:ColumnForm = addColumn(col.@name);
-                    added_col.col_details = col;
+                    col_list.addItem(col);
+                    var col_form : ColumnForm = new ColumnForm();
+                    col_form.editable = false;
+                    col_form.col_details = col;
+                    
+                    col_forms.addItem(col_form);
+                    //callLater(col_form.findIndex);
+
+                    //selected_form = col_form;
+                    //col_info.addChild(col_form);
                 }
-                columns.selectedIndex = 0;
+
                 // Also load the schema:
                 for (var i:Number = 0; i < table_schema.dataProvider.length; i++) {
                     if (table_schema.dataProvider[i].@label == TD.details.@schema) {
@@ -125,12 +143,26 @@
                 }
             }
             
-            public function submitCreateTable() : void {
-                for each (var vbox : VBox in columns.getChildren()) {
-                    for each (var col_form : ColumnForm in vbox.getChildren()) {
-                        trace(col_form.col_name.text);
-                    }
+            public function selectColumn(event:Event=null) : void {
+                selected_form.removeAllChildren();
+                var col_form : ColumnForm = col_forms[col_grid.selectedIndex];
+                if (!col_form.loaded) {
+                    selected_form.visible = true;
+                    callLater(col_form.findIndex);
                 }
+                selected_form.addChild(col_form);
+            }
+            
+            public function submitCreateTable() : void {
+                //  NOTE: you cannot rename a column.
+                // Renaming a tablename means making a new table.
+                // Changing the schema means copying the table to a different schema.
+                // They shouldn't be allowed to change the create time.
+                // Can't alter column structures.
+                TD.details.setName("details");
+                var td_event:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname,
+                    table_schema.text, table_name.text, ActionEnum.POST, TD.details);
+                CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
             }
             
             public function newSchema() : void {
@@ -139,11 +171,7 @@
                 opentablewindow.showCloseButton = true;
                 */
             }
-                        
-            private function getTypes() : Array {
-                return [{label: "INT", data: "INT"}, {label: "varchar", data: "varchar"}];
-            }
-            
+   
             private function getDefaults() : ArrayCollection {
                 return new ArrayCollection([{label: "now", data: "now"}, {label: "CUSTOM", data: "CUSTOM"}]);
             }

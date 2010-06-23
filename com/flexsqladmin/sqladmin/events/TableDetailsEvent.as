@@ -11,8 +11,9 @@ package com.flexsqladmin.sqladmin.events
         public var schema:String;
         public var table:String;
         public var action:ActionEnum;
+        public var details:XML;
 
-        public function TableDetailsEvent(cat:String, sch:String, tab:String, act:ActionEnum) {
+        public function TableDetailsEvent(cat:String, sch:String, tab:String, act:ActionEnum, det:XML=null) {
             DebugWindow.log("TableDetailsEvent.as");
             super(TABLEDETAILS);
             
@@ -20,6 +21,7 @@ package com.flexsqladmin.sqladmin.events
             schema = sch;
             table = tab;
             action = act;
+            details = det;
         }
     }
 }
