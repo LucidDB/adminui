@@ -28,7 +28,12 @@ package com.flexsqladmin.sqladmin.commands
 			sqlquerytype = ExecuteSQLEvent(event).sqlquerytype;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
 			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
-			model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+            try {
+                model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+            } catch(error:Error) {
+                model.main_tabnav.selectedIndex = 0; // make it default query window if it failed above
+                model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+            }
 		}
 		
 		public function onResult(event:*=null):void

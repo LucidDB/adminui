@@ -14,19 +14,21 @@
 	<mx:Script>
 		<![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-
-			import com.flexsqladmin.sqladmin.components.DebugWindow;
-			import com.flexsqladmin.sqladmin.model.ModelLocator;
-			import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-            import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-			
-			import mx.controls.Alert;
-			import mx.controls.Menu;
-			import mx.core.Application;
-			import mx.events.ListEvent;
-			import mx.events.MenuEvent;
-			import mx.managers.PopUpManager;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+            
+            import mx.controls.Alert;
+            import mx.controls.Menu;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.events.ListEvent;
+            import mx.events.MenuEvent;
+            import mx.managers.PopUpManager;
             
             [Embed(source="/icons/script_select.png")]
             private var selecticon:Class;
@@ -40,6 +42,11 @@
             private var opentableicon:Class;
             [Embed(source="/icons/script_exec.png")]
             private var scriptexec:Class;
+            [Embed("/icons/close_tab.png")]
+            public var closeicon : Class;
+            [Embed("/icons/confirm.png")]
+            public var confirmicon : Class;
+
             private var clickx:int = 0;
             private var clicky:int = 0;
             private var model:ModelLocator = ModelLocator.getInstance();
@@ -65,10 +72,14 @@
                             {label: "Script as Update", icon:updateicon},
                             {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
                             {label: "Open Table", icon: opentableicon},
-                            {label: "Edit Table", icon: updateicon}
+                            {label: "Edit Table", icon: updateicon},
+                            {label: "Drop Table", icon: closeicon}
                         ];
 	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
-	            		objMenu = [{label: "Script as Select", icon:selecticon}];
+	            		objMenu = [{label: "Script as Select", icon:selecticon}
+                            , {type: "separator"}
+                            , {label: "Drop View", icon: closeicon}
+                        ];
 	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){	
 	            		var myMenu:Menu = Menu.createMenu(null, objMenu);
 						myMenu.show(clickx + 25, clicky);
@@ -119,14 +130,32 @@
 	            		scriptquery += "\r)";
 	            	}
             	}
-            	else if(e.index == 2){
-            		scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
-            		for (x = 0; x < this.selectedItem.children().length(); x++){
-            			scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
-            			if (x + 1 < this.selectedItem.children().length())
-            				scriptquery += ", \r";
-            		}
-            		scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
+            	else if(e.index == 2) {
+                    // update for tables, drop for views
+                    if (getParentItem(this.selectedItem).@label == "Views") {
+                            var conf:Alert = Alert.show("Are you sure you want to\ndrop this view?",
+                                "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
+                                function(event:CloseEvent):void { // confirm handler
+                                    if (event.detail == Alert.YES) {
+                                        var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
+                                            'DROP VIEW "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
+                                            "normal");
+
+                                        CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                                        var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                                        CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                                    }
+                                }, confirmicon, Alert.NO);
+                       
+                    } else {
+                        scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", \r";
+                        }
+                        scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
+                    }
             	}
             	else if(e.index == 3){
             		scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
@@ -150,6 +179,20 @@
                         this.selectedItem.@label, ActionEnum.GET
                     );
                     CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
+                } else if (e.index == 7) {
+                    // Drop table
+                    var drop_conf:Alert = Alert.show("Are you sure you want to\ndrop this table?",
+                        "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
+                        function(event:CloseEvent):void { // confirm handler
+                            if (event.detail == Alert.YES) {
+                                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
+                                    'DROP TABLE "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
+                                    "normal");
+                                CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                                var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                                CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                            }
+                        }, confirmicon, Alert.NO);
                 }
             	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
                 
