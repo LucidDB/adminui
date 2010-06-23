@@ -158,6 +158,7 @@
                     return null;
                 }
                 
+                child.name = child.id;
                 child.addChild(added_obj);
 				navigator.addChild(child);
 
@@ -307,6 +308,7 @@
 										   stopScrollingEvent="{MouseEvent.MOUSE_OUT}" startScrollingEvent="{MouseEvent.MOUSE_OVER}"
 										   horizontalGap="0" tabClose="destroyTab(event);"
 										   closePolicy="{SuperTab.CLOSE_ALWAYS}"
+                                           editableTabLabels="true"
 										   />
 				
 			</mx:Box>

@@ -31,7 +31,8 @@ package com.flexsqladmin.sqladmin.commands
             try {
                 model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
-                model.main_tabnav.selectedIndex = 0; // make it default query window if it failed above
+                // make it default query window if it failed above
+                model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName("qw-1"));
                 model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             }
 		}
