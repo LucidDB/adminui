@@ -193,7 +193,7 @@
                     addTab("", tabnavigator, 'createTable');
 			}
 			
-			private function closeHandler(event:Event):void {
+			private function changeHandler(event:Event):void {
 				
 				var my:ComboBox = ComboBox(event.target);
 				var metadata:MetaDataEvent = new MetaDataEvent(ComboBox(event.target).selectedItem.CATALOG_NAME);
@@ -281,7 +281,7 @@
 		<mx:VBox height="100%" width="30%" >
 			<mx:HBox width="100%">
 				<mx:Button click="loadMetaData();" icon="@Embed(source='icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>
-				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="closeHandler(event)"/>
+				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" change="changeHandler(event)"/>
 				
 			</mx:HBox>
 			<components:ObjectBrowser dataProvider="{model.metadata}"/>

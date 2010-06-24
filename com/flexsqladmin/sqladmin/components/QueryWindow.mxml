@@ -213,7 +213,7 @@
             
             public function makeView():void {
                 var text:String = getQueryText();
-                if (text.substr(0, 6) == "SELECT") {
+                if (text.substr(0, 6).toUpperCase() == "SELECT") {
                     var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", model.main_tabnav, "viewWindow"));
                     vw.setText(getQueryText());
                     callLater(vw.guess_schema, [guessed_schema]);
