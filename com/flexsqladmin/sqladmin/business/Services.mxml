@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cairngorm:ServiceLocator
 	xmlns:cairngorm="com.adobe.cairngorm.business.*"
-	xmlns:mx="http://www.adobe.com/2006/mxml">
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+    >
 	
 	<mx:Script>
 		<![CDATA[
@@ -54,13 +55,7 @@
                 <table></table>
             </mx:request>
         </mx:operation>
-        <mx:operation name="postTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
-            <mx:request>
-                <catalog></catalog>
-                <schema></schema>
-                <table></table>
-                <details><column /></details>
-            </mx:request>
+        <mx:operation id="postTableDetails" name="postTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
         </mx:operation>
     </mx:WebService>
 	

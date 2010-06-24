@@ -67,7 +67,11 @@ package com.flexsqladmin.sqladmin.commands
     		if(insertresult.datamap == "Error"){
     			mx.controls.Alert.show(insertresult.NewDataSet.Table.Error, "Insert Error");
     		} else{
-    			model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(insertsql, "");
+                try {
+                    model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(insertsql, "");
+                } catch(error:Error) {
+                    model.query_results["qw-1"].queryHistoryVO.writeHistory(insertsql, "");
+                }
     			insertrowwindow.closeWin(new Event("CLOSED"));
     			insertrowwindow.getParentWindow().refreshData();
         	}

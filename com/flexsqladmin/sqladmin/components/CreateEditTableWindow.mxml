@@ -14,27 +14,29 @@
         <mx:Button click="addNewColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
     </mx:HBox>
 
+    <mx:Binding source="table_name.text" destination="TD.details.@name" />
+    <mx:Binding source="table_create_time.text" destination="TD.details.@createTime" />
     <mx:HBox width="100%" backgroundColor="#A9C0E7" left="10" right="10" top="30">
         <mx:Form width="100%" top="30">
             <mx:FormItem label="Catalog">
                 <mx:Label text="{model.currentcatalogname}" />
             </mx:FormItem>
             <mx:FormItem label="Schema">
-                <mx:ComboBox id="table_schema" dataProvider="{model.metadata.children()}"
+                <mx:ComboBox id="table_schema" dataProvider="{new XMLList(model.metadata.children())}"
                              labelField="@label" />
-                <mx:Button click="newSchema();" label="New Schema" />
+                <mx:Button id="new_schema_btn" click="newSchema();" label="New Schema" />
             </mx:FormItem>
         </mx:Form>
-        
+
         <mx:Form width="100%" top="30">
             <mx:FormItem label="Table Name">
-                <mx:TextInput id="table_name" text="{TD.details.@name}" />                
+                <mx:TextInput id="table_name" text="{TD.details.@name}" />
             </mx:FormItem>
             <mx:FormItem label="Create Time">
                 <mx:DateField id="table_create_time" formatString="YYYY-MM-DD"
                               showToday="true"
                               selectedDate="{new Date()}"
-                              text="{TD.details.@createTime}" />
+                              text="{new Date()}" />
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>
@@ -85,9 +87,9 @@
 
             public function init() : void {
                 TD = new TableDetailsVO();
+                TD.details.@createTime = table_create_time.text;
                 model.table_details[id] = TD;
                 model.table_details._len += 1;
-                //addColumn();
             }
             
             public function handleShortcuts(e:KeyboardEvent) : void {
@@ -99,7 +101,7 @@
             public function addNewColumn() : void {
                 var col_form : ColumnForm = new ColumnForm();
                 col_form.editable = true;
-                col_form.col_details = <details name="NEW COLUMN" isNullable="" datatype="INTEGER" decDigits="" precision="" />;
+                col_form.col_details = <details name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" />;
                 col_list.addItem(col_form.col_details);
                 col_forms.addItem(col_form);
                 var idx:int = col_list.length - 1;
@@ -125,13 +127,9 @@
                     col_list.addItem(col);
                     var col_form : ColumnForm = new ColumnForm();
                     col_form.editable = false;
-                    col_form.col_details = col;
+                    col_form.col_details = new XML(col);
                     
                     col_forms.addItem(col_form);
-                    //callLater(col_form.findIndex);
-
-                    //selected_form = col_form;
-                    //col_info.addChild(col_form);
                 }
 
                 // Also load the schema:
@@ -141,9 +139,18 @@
                         break;
                     }
                 }
+                
+                // And disable some fields.
+                table_name.editable = false;
+                table_create_time.enabled = false;
+                table_schema.enabled = false;
+                new_schema_btn.visible = false;
             }
             
             public function selectColumn(event:Event=null) : void {
+                if (col_grid.selectedIndex == -1)
+                    return;
+                
                 selected_form.removeAllChildren();
                 var col_form : ColumnForm = col_forms[col_grid.selectedIndex];
                 if (!col_form.loaded) {
@@ -154,14 +161,14 @@
             }
             
             public function submitCreateTable() : void {
-                //  NOTE: you cannot rename a column.
-                // Renaming a tablename means making a new table.
-                // Changing the schema means copying the table to a different schema.
-                // They shouldn't be allowed to change the create time.
-                // Can't alter column structures.
-                TD.details.setName("details");
+                TD.details.setChildren('');
+                for each (var col_form:ColumnForm in col_forms) {
+                    TD.details.appendChild(col_form.col_details);
+                }
+                var detail_data:XML = new XML(TD.details);
+                detail_data.setName("details");
                 var td_event:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname,
-                    table_schema.text, table_name.text, ActionEnum.POST, TD.details);
+                    table_schema.text, table_name.text, ActionEnum.POST, detail_data);
                 CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
             }
             
@@ -170,22 +177,6 @@
                 opentablewindow.setStyle("borderAlpha", 0.8);
                 opentablewindow.showCloseButton = true;
                 */
-            }
-   
-            private function getDefaults() : ArrayCollection {
-                return new ArrayCollection([{label: "now", data: "now"}, {label: "CUSTOM", data: "CUSTOM"}]);
-            }
-            
-            private function getCollations() : ArrayCollection {
-                return new ArrayCollection([{label: "utf", data: "utf8"}]);
-            }
-            
-            private function getAttributes() : ArrayCollection {
-                return new ArrayCollection([{label: "unsigned", data: "unsigned"}, {label: "on update", data: "on update"}]);
-            }
-            
-            private function getIndicies() : ArrayCollection {
-                return new ArrayCollection([{label: "primary", data: "primary"}]);
             }
             
             

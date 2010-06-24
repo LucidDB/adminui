@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml">
+
+<mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();">
+    <!--<mx:Binding source="col_name.text" destination="col_details.@name" />-->
+    <mx:Binding source="col_type.selectedItem" destination="col_details.@datatype" />
+    <mx:Binding source="col_digits.text" destination="col_details.@decDigits" />
+    <mx:Binding source="col_prec.text" destination="col_details.@precision" />
+    <mx:Binding source="col_default.text" destination="col_details.@defaultValue" />
+    <!--<mx:Binding source="col_remarks.text" destination="col_details.@remarks" />-->
+
     <mx:FormItem label="Name">
         <mx:TextInput editable="{editable}" id="col_name" text="{col_details.@name}" />
     </mx:FormItem>
     <mx:FormItem label="Nullable">
-        <mx:CheckBox enabled="{editable}" id="col_nullable" selected="{col_details.@isNullable}" />
+        <mx:CheckBox enabled="{editable}" id="col_nullable" change="nullboxclick(event);" />
     </mx:FormItem>
     <mx:FormItem label="Data Type">
         <mx:ComboBox id="col_type" enabled="{editable}" dataProvider="{types}" />
@@ -16,10 +24,19 @@
     <mx:FormItem label="Precision">
         <mx:TextInput editable="{editable}" id="col_prec" text="{col_details.@precision}" />
     </mx:FormItem>
+    <mx:FormItem label="Default Value">
+        <mx:TextInput editable="{editable}" id="col_default" text="{col_details.@defaultValue}" />
+    </mx:FormItem>
+    <mx:FormItem label="Remarks">
+        <mx:TextInput enabled="false" id="col_remarks" text="Not Implemented" />
+    </mx:FormItem>
     <mx:Script>
         <![CDATA[
             import mx.collections.ArrayCollection;
             // todo: make data type list
+            //       hide precision/digits depending on type selected
+            //       force input before allowing user to hit submit. (e.g. if a new column is not nullable,
+            //       they need to supply a default value.)
             [Bindable]
             public var col_details:XML;
             [Bindable]
@@ -30,7 +47,15 @@
             [Bindable]
             public var types:Array = ["INTEGER", "VARCHAR", "BOOLEAN", "TIMESTAMP"];
             
+            public function init() : void {
+                if (col_details.@isNullable != "true" && col_details.@isNullable != "false") {
+                    col_details.@isNullable = false;
+                } else {
+                    col_nullable.selected = (col_details.@isNullable == "true") ? true : false;
+                }
+            }
             public function findIndex() : void {
+                col_details.setName("column");
                 loaded = true;
                 for (var i:Number = 0; i < types.length; i++) {
                     if (types[i] == col_details.@datatype) {
@@ -38,6 +63,10 @@
                         break;
                     }
                 }
+            }
+            
+            public function nullboxclick(event:Event) : void {
+                col_details.@isNullable = event.target.selected;
             }
         ]]>
     </mx:Script>

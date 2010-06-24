@@ -40,13 +40,17 @@ package com.flexsqladmin.sqladmin.business
        }
        
        public function postTableDetails(cat:String, schema:String, table:String, details:XML) : void {
+           // TODO: get rid of the hardcoded url in here.
            DebugWindow.log("tableDetailsDelegate.as:postTableDetails()");
+           service.postTableDetails.request = XMLList(
+               "<ns0:postTableDetails xmlns:ns0=\"http://api.ws.dynamobi.com/\">" +
+               "<catalog>" + cat + "</catalog>" +
+               "<schema>" + schema + "</schema>" +
+               "<table>" + table + "</table>" +
+               details +
+               "</ns0:postTableDetails>"
+               );
            var o:AbstractOperation = service.getOperation("postTableDetails");
-           o.arguments.catalog = cat;
-           o.arguments.schema = schema;
-           o.arguments.table = table;
-           //o.arguments.details = "BAHFLSJFS";
-           XML(o.arguments.details).appendChild(details.children());// = new XML(details);
            var token:AsyncToken = service.postTableDetails();
            token.resultHandler = responder.onResult;
            token.faultHandler = responder.onFault;

@@ -65,8 +65,14 @@ package com.flexsqladmin.sqladmin.commands
                 var errormsg:String = r.NewDataSet.Table.Error;
                 DebugWindow.log("Error - " + errormsg);
             } else {
-                var response:XML = new XML(XML(event.result['return']));
-                trace(response);
+                var response:String = event.result['return'];
+                if (response == "true") {
+                    Alert.show("Execution Succeeded");
+                } else {
+                    Alert.show("Execution Failed");
+                }
+                /*var response:XML = new XML(XML(event.result['return']));
+                trace(response);*/
             }
         }
         
