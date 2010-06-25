@@ -78,6 +78,7 @@
 	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
 	            		objMenu = [{label: "Script as Select", icon:selecticon}
                             , {type: "separator"}
+                            , {label: "Edit View", icon: updateicon}
                             , {label: "Drop View", icon: closeicon}
                         ];
 	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){	
@@ -92,6 +93,7 @@
             	var catalogname : String = model.currentcatalogname;
             	var scriptquery:String = "";
             	var x:int = 0;
+                // todo: refactor this (in fact probably this whole class)
             	if (e.index == 0){
             		if(this.getParentItem(this.selectedItem).@label == "Procedures"){
             			scriptquery = "EXECUTE " + "\"" + catalogname + "\".\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " ";
@@ -131,22 +133,32 @@
 	            	}
             	}
             	else if(e.index == 2) {
-                    // update for tables, drop for views
+                    // script-update for tables, edit for views
                     if (getParentItem(this.selectedItem).@label == "Views") {
-                            var conf:Alert = Alert.show("Are you sure you want to\ndrop this view?",
-                                "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
-                                function(event:CloseEvent):void { // confirm handler
-                                    if (event.detail == Alert.YES) {
-                                        var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
-                                            'DROP VIEW "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
-                                            "normal");
+                        var loadCrap:Function = function(querydata:XML):void {
+                            //trace(querydata.NewDataSet.Table.@SCHEMA_NAME);
+                            var schema:String = querydata.NewDataSet.Table.SCHEMA_NAME;
+                            var view:String = querydata.NewDataSet.Table.VIEW_NAME;
+                            var desc:String = querydata.NewDataSet.Table.REMARKS;
+                            var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
+                            var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
 
-                                        CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-                                        var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                                        CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-                                    }
-                                }, confirmicon, Alert.NO);
-                       
+                            var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " + view, model.main_tabnav, "viewWindow"));
+                            vw.setText(text);
+                            vw.editing = true;
+                            vw.view_name.text = view;
+                            vw.view_desc.text = desc;
+                            callLater(vw.guess_schema, [schema]);
+                            
+                        };
+                        var query : String = 'SELECT SCHEMA_NAME, VIEW_NAME,' +
+                            ' REMARKS, ' +
+                            ' CREATION_TIMESTAMP, ORIGINAL_TEXT' +
+                            ' FROM "LOCALDB"."SYS_ROOT"."DBA_VIEWS" WHERE ' +
+                            "SCHEMA_NAME = '" + getParentItem(getParentItem(selectedItem)).@label + "' AND " +
+                            "VIEW_NAME = '" + selectedItem.@label + "'";
+                        var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "special", loadCrap);
+                        CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);                       
                     } else {
                         scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
                         for (x = 0; x < this.selectedItem.children().length(); x++){
@@ -157,12 +169,30 @@
                         scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
                     }
             	}
-            	else if(e.index == 3){
-            		scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
-            	}
-            	else if(e.index == 5){
-            		// Open the table window
-					//Application.application.openTableWindow(this.selectedItem.@label);
+            	else if(e.index == 3) {
+                    // script-delete for tabs, drop for views
+                    if (getParentItem(this.selectedItem).@label == "Views") {
+                        var conf:Alert = Alert.show("Are you sure you want to\ndrop this view?",
+                            "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
+                            function(event:CloseEvent):void { // confirm handler
+                                if (event.detail == Alert.YES) {
+                                    var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
+                                        'DROP VIEW "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
+                                        "normal");
+                                    
+                                    CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                                    var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                                    CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                                }
+                            }, confirmicon, Alert.NO);
+                        
+                    } else {
+                        scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
+                    }
+                }
+                else if(e.index == 5){
+                    // Open the table window
+                    //Application.application.openTableWindow(this.selectedItem.@label);
 					var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this.parentDocument.parentDocument, OpenTableWindow, true));
 		            opentablewindow.setStyle("borderAlpha", 0.8);
 		           	opentablewindow.showCloseButton = true; 

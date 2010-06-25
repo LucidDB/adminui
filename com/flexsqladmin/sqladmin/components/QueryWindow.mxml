@@ -37,6 +37,7 @@
             </mx:FormItem>
             <mx:FormItem>
                 <mx:Button click="makeView();" label="Create View" icon="@Embed(source='icons/exec.gif')" />
+                <mx:Button click="submitQuery();" toolTip="(F5) Preview Results" label="Preview Results" icon="@Embed(source='icons/exec.gif')" />
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>

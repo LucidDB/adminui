@@ -15,6 +15,8 @@
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
+            public var editing:Boolean = false;
+            
             
             public function init2() : void {    
                 this.window_actions.removeAllChildren();
@@ -41,7 +43,10 @@
             
             override public function makeView() : void {
                 var sql:String = getQueryText();
-                var view_sql:String = 'CREATE VIEW "' + model.currentcatalogname + '"."'
+                var view_sql:String = "CREATE ";
+                if (editing)
+                    view_sql += "OR REPLACE ";
+                view_sql += 'VIEW "' + model.currentcatalogname + '"."'
                 + view_schema.text + '"."'
                 + view_name.text + '" DESCRIPTION \'' + view_desc.text + '\' AS ' + sql;
                 var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(view_sql, "normal");

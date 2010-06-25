@@ -18,16 +18,37 @@ package com.flexsqladmin.sqladmin.commands
 	public class ExecuteSQLCommand implements Command, Responder
 	{
 		private var model:ModelLocator = ModelLocator.getInstance();
+        private var sql:String = "";
 		private var sqlquerytype:String = "";
+        private var func:Function;
 		
 		public function execute(event:CairngormEvent):void
 		{
 			DebugWindow.log("ExecuteSQLCommand:execute()");
 			model.exectimer.startTimer();
-			var sql:String = ExecuteSQLEvent(event).sql;
+			sql = ExecuteSQLEvent(event).sql;
 			sqlquerytype = ExecuteSQLEvent(event).sqlquerytype;
+            func = ExecuteSQLEvent(event).func;
 			var delegate:execSQLDelegate = new execSQLDelegate(this);
 			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
+		}
+		
+		public function onResult(event:*=null):void
+		{
+			DebugWindow.log("ExecuteSQLCommand.as:onResult()");
+			//DebugWindow.log("Web Service Result\n" + event.result.toString());
+			model.exectimer.stopTimer();
+			
+			var querycols:Array = new Array();
+           	var datagridcols:Array = new Array();
+			
+            //trace(event.result);
+			var queryxml:XML = new XML(event.result);
+            if (sqlquerytype == "special") {
+                func(queryxml);
+                return;
+            }
+                
             try {
                 model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
@@ -35,20 +56,8 @@ package com.flexsqladmin.sqladmin.commands
                 model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName("qw-1"));
                 model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             }
-		}
-		
-		public function onResult(event:*=null):void
-		{
-			DebugWindow.log("ExecuteSQLCommand.as:onResult()");
-			//DebugWindow.log("Web Service Result\n" + event.result.toString());
-			var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedChild.id];
-			model.exectimer.stopTimer();
-			result_info.showplanwindow.clearWindow();
-			
-			var querycols:Array = new Array();
-           	var datagridcols:Array = new Array();
-			
-			var queryxml:XML = new XML(event.result);
+            var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedChild.id];
+            result_info.showplanwindow.clearWindow();
 			result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
 			 
 			if(sqlquerytype != "showplan")
