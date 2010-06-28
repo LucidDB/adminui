@@ -1,14 +1,15 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
+	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.events.MetaDataEvent
 	import com.flexsqladmin.sqladmin.business.getDBMetaDataDelegate;
-	import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.MetaDataEvent;
+	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+	
+	import mx.core.Application;
 	
 	public class MetaDataCommand implements Command, Responder
 	{
@@ -28,9 +29,8 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("MetaDataCommand:onResult()");
-			//DebugWindow.log("Web Service Result\n" + event.result.toString());
-			model.metadata = new XML(event.result);
-		}
+            model.metadata = new XML(event.result);    
+        }
 		
 		public function onFault(event:*=null):void
 		{

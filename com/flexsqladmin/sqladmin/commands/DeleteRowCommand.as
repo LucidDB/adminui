@@ -1,16 +1,18 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
+	import com.adobe.cairngorm.commands.Command;
+	import com.adobe.cairngorm.control.CairngormEvent;
+	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
-	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
 	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+	
+	import mx.containers.VBox;
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
-	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
 
 	public class DeleteRowCommand implements Command, Responder
 	{
@@ -67,7 +69,7 @@ package com.flexsqladmin.sqladmin.commands
     			mx.controls.Alert.show(deleteresult.NewDataSet.Table.Error, "Delete Error");
     		} else{
                 try {
-                    model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(deletesql, "");
+                    model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(deletesql, "");
                 } catch(error:Error) {
                     model.query_results["qw-1"].queryHistoryVO.writeHistory(deletesql, "");
                 }

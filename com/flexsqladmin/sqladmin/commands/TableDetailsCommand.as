@@ -14,6 +14,7 @@ package com.flexsqladmin.sqladmin.commands
     
     import flash.events.Event;
     
+    import mx.containers.VBox;
     import mx.controls.Alert;
     import mx.core.Application;
 
@@ -52,8 +53,8 @@ package com.flexsqladmin.sqladmin.commands
                 var errormsg:String = r.NewDataSet.Table.Error;
                 DebugWindow.log("Error - " + errormsg);
             } else {
-                model.table_details[model.main_tabnav.selectedChild.id].details = new XML(XML(event.result['return']));
-                CreateEditTableWindow(model.main_tabnav.selectedChild.getChildAt(0)).addColumnsFromDetails();
+                model.table_details[VBox(model.main_tabnav.selectedChild).id].details = new XML(XML(event.result['return']));
+                CreateEditTableWindow(VBox(model.main_tabnav.selectedChild).getChildAt(0)).addColumnsFromDetails();
             }            
         }
         

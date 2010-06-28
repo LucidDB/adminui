@@ -11,6 +11,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
 	
 	import mx.collections.XMLListCollection;
+	import mx.containers.VBox;
 	import mx.controls.DataGrid;
 	import mx.controls.dataGridClasses.DataGridColumn;
 	import mx.core.Application;
@@ -50,13 +51,13 @@ package com.flexsqladmin.sqladmin.commands
             }
                 
             try {
-                model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+                model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
                 // make it default query window if it failed above
                 model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName("qw-1"));
-                model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+                model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             }
-            var result_info : QueryResultInfo = model.query_results[model.main_tabnav.selectedChild.id];
+            var result_info : QueryResultInfo = model.query_results[VBox(model.main_tabnav.selectedChild).id];
             result_info.showplanwindow.clearWindow();
 			result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
 			 

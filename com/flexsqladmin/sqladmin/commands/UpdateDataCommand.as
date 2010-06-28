@@ -1,18 +1,20 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
+	import com.adobe.cairngorm.commands.Command;
+	import com.adobe.cairngorm.control.CairngormEvent;
+	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
+	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
+	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
 	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+	
+	import mx.containers.VBox;
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
-	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-	import mx.events.DataGridEvent;
-	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
-	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import mx.controls.TextInput;
-	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
+	import mx.events.DataGridEvent;
 
 	public class UpdateDataCommand implements Command, Responder
 	{
@@ -87,7 +89,7 @@ package com.flexsqladmin.sqladmin.commands
 	        	tablewindow.refreshData();
 	     	} else{
                 try {
-                    model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(updatesql, "");
+                    model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(updatesql, "");
                 } catch(error:Error) {
                     model.query_results["qw-1"].queryHistoryVO.writeHistory(updatesql, "");
                 }

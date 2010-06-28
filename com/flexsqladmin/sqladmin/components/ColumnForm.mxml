@@ -8,6 +8,11 @@
     <mx:Binding source="col_default.text" destination="col_details.@defaultValue" />
     <!--<mx:Binding source="col_remarks.text" destination="col_details.@remarks" />-->
 
+    <mx:Validator id="defval_validator" source="{col_default}" property="text" 
+                  required="{default_required}"
+                  requiredFieldError="This table has existing values, you must provide a default value if this column cannot be null."
+                  />
+    
     <mx:FormItem label="Name">
         <mx:TextInput editable="{editable}" id="col_name" text="{col_details.@name}" />
     </mx:FormItem>
@@ -35,12 +40,14 @@
             import mx.collections.ArrayCollection;
             // todo: make data type list
             //       hide precision/digits depending on type selected
-            //       force input before allowing user to hit submit. (e.g. if a new column is not nullable,
-            //       they need to supply a default value.)
             [Bindable]
             public var col_details:XML;
             [Bindable]
             public var editable:Boolean;
+            [Bindable]
+            public var default_required:Boolean = false;
+            
+            public var num_existing_rows:Number = 0;
             
             public var loaded:Boolean = false;
             
@@ -52,6 +59,12 @@
                     col_details.@isNullable = false;
                 } else {
                     col_nullable.selected = (col_details.@isNullable == "true") ? true : false;
+                }
+                default_required = (!col_nullable.selected && num_existing_rows > 0);
+                defval_validator.validate();
+                if (default_required) {
+                    col_default.setFocus();
+                    col_default.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 }
             }
             public function findIndex() : void {
@@ -67,6 +80,8 @@
             
             public function nullboxclick(event:Event) : void {
                 col_details.@isNullable = event.target.selected;
+                default_required = (!col_nullable.selected && num_existing_rows > 0);
+                defval_validator.validate();
             }
         ]]>
     </mx:Script>

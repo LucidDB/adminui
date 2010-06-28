@@ -1,16 +1,19 @@
 package com.flexsqladmin.sqladmin.commands
 {
-	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.business.Responder;
-	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+	import com.adobe.cairngorm.commands.Command;
+	import com.adobe.cairngorm.control.CairngormEvent;
+	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.InsertRowEvent;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
-	import mx.controls.Alert;
 	import com.flexsqladmin.sqladmin.view.InsertRowWindow;
+	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+	
 	import flash.events.Event;
+	
+	import mx.containers.VBox;
+	import mx.controls.Alert;
 
 	public class InsertRowCommand implements Command, Responder
 	{
@@ -68,7 +71,7 @@ package com.flexsqladmin.sqladmin.commands
     			mx.controls.Alert.show(insertresult.NewDataSet.Table.Error, "Insert Error");
     		} else{
                 try {
-                    model.query_results[model.main_tabnav.selectedChild.id].queryHistoryVO.writeHistory(insertsql, "");
+                    model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(insertsql, "");
                 } catch(error:Error) {
                     model.query_results["qw-1"].queryHistoryVO.writeHistory(insertsql, "");
                 }

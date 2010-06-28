@@ -8,7 +8,7 @@
 	dragEnabled="true" 
 	labelField="@label" 
 	showRoot="false" 
-	rowHeight="25" 
+	rowHeight="25"
 	creationComplete="init();">
 	
 	<mx:Script>
@@ -22,6 +22,7 @@
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
             import com.flexsqladmin.sqladmin.view.OpenTableWindow;
             
+            import mx.containers.VBox;
             import mx.controls.Alert;
             import mx.controls.Menu;
             import mx.core.Application;
@@ -72,7 +73,7 @@
                             {label: "Script as Update", icon:updateicon},
                             {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
                             {label: "Open Table", icon: opentableicon},
-                            {label: "Edit Table", icon: updateicon},
+                            {label: "View and Edit Table", icon: updateicon},
                             {label: "Drop Table", icon: closeicon}
                         ];
 	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
@@ -228,7 +229,7 @@
                 
                 if (scriptquery != "") {
                     var makenewqw : Boolean = false;
-                    var qw : QueryWindow = model.aryQueryWindows[model.main_tabnav.selectedChild.id];
+                    var qw : QueryWindow = model.aryQueryWindows[VBox(model.main_tabnav.selectedChild).id];
                     if (qw && qw.isEmpty()) {
                         qw.setText(scriptquery);
                     } else {

@@ -10,7 +10,7 @@
     
     <mx:HBox width="100%" left="10" right="10">
         <mx:Button click="submitCreateTable();" toolTip="Create Your Table" label="Create Your Table"
-                   icon="@Embed(source='icons/exec.gif')" />
+                   icon="@Embed(source='/icons/exec.gif')" />
         <mx:Button click="addNewColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
     </mx:HBox>
 
@@ -68,13 +68,15 @@
             import mx.collections.ArrayCollection;
             import mx.containers.Accordion;
             import mx.containers.VBox;
+            import mx.controls.Alert;
             import mx.controls.CheckBox;
             import mx.managers.PopUpManager;
             /* We have to embed a font for the Accordion. Without doing this the
             * labels that are rotated will be invisible.
             */
-            [Embed(systemFont='Arial', fontWeight="bold", fontName='accordionHeader', mimeType='application/x-font', advancedAntiAliasing='true')] 
+            /*[Embed(systemFont='Arial', fontWeight="bold", fontName='accordionHeader', mimeType='application/x-font', advancedAntiAliasing='true')] 
             private var font1:Class;
+            */
 
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
@@ -101,6 +103,7 @@
             public function addNewColumn() : void {
                 var col_form : ColumnForm = new ColumnForm();
                 col_form.editable = true;
+                col_form.num_existing_rows = TD.details.@currentRowCount;
                 col_form.col_details = <details name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" />;
                 col_list.addItem(col_form.col_details);
                 col_forms.addItem(col_form);
@@ -127,6 +130,7 @@
                     col_list.addItem(col);
                     var col_form : ColumnForm = new ColumnForm();
                     col_form.editable = false;
+                    col_form.num_existing_rows = TD.details.@currentRowCount;
                     col_form.col_details = new XML(col);
                     
                     col_forms.addItem(col_form);
@@ -163,6 +167,10 @@
             public function submitCreateTable() : void {
                 TD.details.setChildren('');
                 for each (var col_form:ColumnForm in col_forms) {
+                    if (col_form.default_required && col_form.col_default.text == '') {
+                        Alert.show("Please fill in the default value on your non-nullable column.");
+                        return;
+                    }
                     TD.details.appendChild(col_form.col_details);
                 }
                 var detail_data:XML = new XML(TD.details);

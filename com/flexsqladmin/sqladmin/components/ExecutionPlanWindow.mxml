@@ -94,7 +94,7 @@
 					
                     // Add Image
                     var i:Image = new Image();
-                    //i.load("icons/" + imageicon + ".png");
+                    //i.load("/icons/" + imageicon + ".png");
                     var spicon:showPlanIcon = new showPlanIcon(imageicon);
                     i.load(spicon.getIcon());
                     i.x = nodes[prop.NodeId].x;

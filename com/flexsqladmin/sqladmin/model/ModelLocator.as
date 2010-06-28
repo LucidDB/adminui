@@ -5,12 +5,13 @@ package com.flexsqladmin.sqladmin.model
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
     
+    import flash.utils.Dictionary;
+    
     import flexlib.containers.SuperTabNavigator;
     
+    import mx.collections.ArrayCollection;
     import mx.collections.XMLListCollection;
     import mx.controls.DataGrid;
-    
-    import flash.utils.Dictionary;
     
     [Bindable]
     public class ModelLocator implements com.adobe.cairngorm.model.ModelLocator
@@ -21,11 +22,16 @@ package com.flexsqladmin.sqladmin.model
     	public var aryQueryWindows:Dictionary = new Dictionary();
 		public var query_results : Dictionary = new Dictionary(); // contains QueryResultInfo's.
         public var table_details : Dictionary = new Dictionary(); // contains TableDetailVO's
+        public var users_windows : Dictionary = new Dictionary(); // contains UsersWindow's
+        public var roles_windows : Dictionary = new Dictionary(); // contains RolesWindow's
 		public var main_tabnav : SuperTabNavigator;
     	public var connectionVO:ConnectionVO;
     	public var tempConnectionVO:ConnectionVO;
     	public var connectionText:String = "";
     	public var metadata:XML;
+        public var session_info:XML;
+        public var users_list:Array;
+        public var roles_info:XML;
     	public var exectimer:ExecutionTimer;
     	public var catalogdata:XMLListCollection;
     	public var currentcatalogname:String = 'LOCALDB';
@@ -47,6 +53,8 @@ package com.flexsqladmin.sqladmin.model
             aryQueryWindows._len = 0;
             query_results._len = 0;
             table_details._len = 0;
+            users_windows._len = 0;
+            roles_windows._len = 0;
 
 	 	  	if ( com.flexsqladmin.sqladmin.model.ModelLocator.modelLocator != null )
 	        	throw new Error( "Only one ModelLocator instance should be instantiated" );
