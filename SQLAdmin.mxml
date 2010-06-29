@@ -32,6 +32,7 @@
             import flexlib.containers.SuperTabNavigator;
             import flexlib.controls.SuperTabBar;
             import flexlib.controls.tabBarClasses.SuperTab;
+            import flexlib.events.SuperTabEvent;
             
             import mx.controls.Alert;
             import mx.controls.ComboBox;
@@ -70,20 +71,23 @@
 				var urlpattern:RegExp = /SQLAdmin.swf/i; 
 				var wsdl:String = "";
 				try {
-					// If there is a flash variables from the html page, lets use, otherwise default it to the current directory
-					//            		if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
-					//            			wsdl = this.url.replace(urlpattern, "flexsqladmin.asmx?WSDL");
-					//            		} else {
-					//            			wsdl = Application.application.parameters.webservice;
-					//            		}
-					wsdl = "http://localhost:8080/adminws/ns0.wsdl";
-					//DebugWindow.log("Using WSDL location - " + wsdl);
-					var s:WebService = ServiceLocator.getInstance().getService("sqlWebService") as WebService;
-					s.wsdl = wsdl;
-					s.loadWSDL();
-                    var s2:WebService = ServiceLocator.getInstance().getService("TableDetailsService") as WebService;
-                    s2.wsdl = wsdl;
-                    s2.loadWSDL();
+                    /*if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
+                        wsdl = "http://localhost:8080/adminws/ns0.wsdl";
+                    } else {
+                        wsdl = Application.application.parameters.webservice;
+                    }*/
+                    wsdl = "http://localhost:8080/adminws/ns0.wsdl";
+
+					DebugWindow.log("Using WSDL location - " + wsdl);
+                    var services:Array = ['sqlWebService'
+                        , 'TableDetailsService'
+                        , 'UsersAndRolesService'
+                        ];
+                    for each (var name:String in services) {
+                        var s:WebService = ServiceLocator.getInstance().getService(name) as WebService;
+                        s.wsdl = wsdl;
+                        s.loadWSDL();
+                    }
 				} catch (e:Error) {
 					mx.controls.Alert.show("Error Loading WSDL", "WSDL Error");
 				}				
@@ -178,14 +182,21 @@
                 return added_obj;
 			}
 			
-			private function destroyTab(e : Event) : void {
-				DebugWindow.log("main.mxml:destroyTabButton()");
-                if (model.aryQueryWindows[e.target.id] != null)
-                    model.aryQueryWindows[e.target.id] = null;
-                if (model.query_results[e.target.id] != null)
-                    model.query_results[e.target.id] = null;
-                if (model.table_details[e.target.id] != null)
-                    model.query_results[e.target.id] = null;
+			private function destroyTab(e : SuperTabEvent) : void {
+                var id:String = VBox(tabnavigator.getChildAt(e.tabIndex)).id;
+				DebugWindow.log("main.mxml:destroyTabButton() - " + id);
+                if (model.aryQueryWindows[id] != null)
+                    model.aryQueryWindows[id] = null;
+                if (model.query_results[id] != null)
+                    model.query_results[id] = null;
+                if (model.table_details[id] != null)
+                    model.query_results[id] = null;
+                if (model.roles_windows[id] != null)
+                    model.roles_windows[id] = null;
+                if (model.users_windows[id] != null) {
+                    UsersWindow(model.users_windows[id]).sessionTimer.stop();
+                    model.users_windows[id] = null;
+                }
 			}
 			
 			private function showAboutWindow():void{

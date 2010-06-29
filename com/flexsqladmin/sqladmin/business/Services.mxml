@@ -58,5 +58,22 @@
         <mx:operation id="postTableDetails" name="postTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
         </mx:operation>
     </mx:WebService>
+    
+    <mx:WebService
+        id="UsersAndRolesService"
+        service="UsersAndRolesService"
+        useProxy="false"
+        makeObjectsBindable="false"
+        showBusyCursor="false"
+        fault="mx.controls.Alert.show('Error loading WSDL', 'UsersAndRolesService Error');" >
+        <mx:operation name="getCurrentSessions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="getUsersDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+            </mx:request>
+        </mx:operation>
+    </mx:WebService>
 	
 </cairngorm:ServiceLocator>

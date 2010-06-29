@@ -29,8 +29,9 @@ package com.flexsqladmin.sqladmin.model
     	public var tempConnectionVO:ConnectionVO;
     	public var connectionText:String = "";
     	public var metadata:XML;
-        public var session_info:XML;
+        public var session_info:XMLList;
         public var users_list:Array;
+        public var users_details:XMLList;
         public var roles_info:XML;
     	public var exectimer:ExecutionTimer;
     	public var catalogdata:XMLListCollection;

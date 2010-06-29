@@ -36,18 +36,23 @@
                 </mx:FormItem>
             </mx:Form>
         </mx:Panel>
-        <mx:Spacer width="50%" />
+        <mx:Spacer width="15%" />
         <mx:VBox>
-            <mx:ComboBox id="users_list" dataProvider="{model.users_list}" />
+            <mx:ComboBox id="users_list" prompt="Select User" selectedIndex="-1" creationComplete="checkUsersList();" dataProvider="{model.users_list}" />
             <mx:Button label="Modify User" click="modifyUser();" icon="@Embed(source='/icons/exec.gif')" />
         </mx:VBox>
-        <mx:Spacer width="50%" />
-        <mx:Panel title="Active User Sessions">
-            <mx:AdvancedDataGrid id="session_info" dataProvider="{model.session_info}">
+        <mx:Spacer width="15%" />
+        <mx:Panel title="Active User Sessions" width="100%">
+            <mx:HBox>
+            <mx:Label text="Update every: " />
+            <mx:NumericStepper id="update_interval" value="10" maximum="300" minimum="0" />
+            <mx:Label text="seconds. (0 means off.)" />
+            </mx:HBox>
+            <mx:AdvancedDataGrid width="100%" id="session_info" dataProvider="{model.session_info}">
                 <mx:columns>
                     <mx:AdvancedDataGridColumn id="s_id" headerText="ID" dataField="@id" />
                     <mx:AdvancedDataGridColumn id="s_user" headerText="User" dataField="@user" />
-                    <mx:AdvancedDataGridColumn id="s_query" headerText="SQL Query" dataField="@query" />
+                    <mx:AdvancedDataGridColumn  editable="false" rendererIsEditor="true" itemRenderer="mx.controls.TextInput" id="s_query" headerText="SQL Query" dataField="@query" />
                 </mx:columns>
             </mx:AdvancedDataGrid>
         </mx:Panel>
@@ -72,6 +77,7 @@
 
     <mx:Script>
         <![CDATA[
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -80,11 +86,16 @@
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
+            public var sessionTimer:Timer;
+            
             public function init() : void {
                 model.users_windows[id] = this;
                 model.users_windows._len += 1;
                 
-                
+                sessionTimer = new Timer(update_interval.value * 1000);
+                sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
+                sessionTimer.start();
+                sessionUpdate(null);
             }
             
             public function passValidate() : Boolean {
@@ -112,6 +123,26 @@
             
             public function modifyRole() : void {
                 Application.application.addTab('Roles', model.main_tabnav, 'rolesWindow');
+            }
+            
+            public function sessionUpdate(event:TimerEvent) : void {
+                if (update_interval.value == 0)
+                    return;
+                if (update_interval.value * 1000 != sessionTimer.delay) {
+                    sessionTimer.stop();
+                    sessionTimer = new Timer(update_interval.value * 1000);
+                    sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
+                    sessionTimer.start();
+                }
+                var upEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getCurrentSessions');
+                CairngormEventDispatcher.getInstance().dispatchEvent(upEvent);
+            }
+            
+            public function checkUsersList() : void {
+                if (!model.users_list) {
+                    var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
+                    CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
+                }
             }
         ]]>
     </mx:Script>
