@@ -8,12 +8,16 @@ package com.flexsqladmin.sqladmin.events
         public static var USERSANDROLES:String = "usersandroles";
         
         public var call:String;
+        public var user:String;
+        public var pass:String;
 
-        public function UsersAndRolesEvent(call:String) {
+        public function UsersAndRolesEvent(call:String, un:String="", pw:String="") {
             DebugWindow.log("UsersAndRolesEvent.as");
             super(USERSANDROLES);
             
             this.call = call;
+            user = un;
+            pass = pw;
         }
     }
 }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="300"
+                creationComplete="init();"
+                title="Modifying User {user}"
+                close="closeWin();"
+                >
+    
+    <mx:Validator source="{new_name}" property="text" />
+    <mx:Validator source="{new_pass}" property="text" />
+    <mx:Validator source="{new_pass2}" property="text" />
+
+    <mx:Form>
+        <mx:FormItem label="Change Name">
+            <mx:TextInput id="new_name" text="{user}" change="{user = new_name.text;}" />
+        </mx:FormItem>
+        <mx:FormItem label="Change Password">
+            <mx:TextInput id="new_pass" displayAsPassword="true" />
+        </mx:FormItem>
+        <mx:FormItem label="Confirm Password: ">
+            <mx:VBox>
+                <mx:TextInput displayAsPassword="true" id="new_pass2" change="passValidate();" />
+                <mx:Label x="0" text="Passwords do not match" color="red" id="p_matches" visible="false" />
+            </mx:VBox>
+        </mx:FormItem>
+        <mx:FormItem>
+            <mx:Button label="Save Changes" icon="@Embed(source='/icons/exec.gif')" click="modUser();" />
+        </mx:FormItem>
+        <mx:FormItem>
+            <mx:Button label="Delete User" icon="@Embed(source='/icons/close_tab.png')" click="deleteUser();" />
+        </mx:FormItem>
+        
+    </mx:Form>
+
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.LoginEvent;
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+            
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            import mx.managers.PopUpManager;
+            
+            [Embed("/icons/confirm.png")]
+            public var confirmicon : Class;
+            
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            [Bindable]
+            public var user:String;
+
+            public function init() : void {
+                PopUpManager.centerPopUp(this);
+                new_name.setFocus();
+                
+            }
+            
+            public function modUser() : void {
+                if (new_name.text != '' && new_pass.text != '' && passValidate()) {
+                    var addUserEvent:UsersAndRolesEvent = new UsersAndRolesEvent('modifyUser', new_name.text, new_pass.text);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(addUserEvent);
+                } else {
+                    new_pass.setFocus();
+                }
+            }
+            
+            public function deleteUser() : void {
+                var conf:Alert = Alert.show("Are you sure you want to\ndrop this user?",
+                    "Confirmation", Alert.YES|Alert.NO, this,
+                    function(event:CloseEvent):void { // confirm handler
+                        if (event.detail == Alert.YES) {
+                            var dropEvent:UsersAndRolesEvent = new UsersAndRolesEvent('deleteUser', user);
+                            CairngormEventDispatcher.getInstance().dispatchEvent(dropEvent);
+                        }
+                    }, confirmicon, Alert.NO);
+            }
+            
+            public function passValidate() : Boolean {
+                p_matches.visible = true;
+                if (new_pass2.text == new_pass.text) {
+                    p_matches.text = "Passwords match";
+                    p_matches.setStyle("color", "green");
+                    return true;
+                } else {
+                    p_matches.text = "Passwords do not match";
+                    p_matches.setStyle("color", "red");
+                    return false;
+                }
+            }
+            
+            public function closeWin() : void {
+                PopUpManager.removePopUp(this);
+            }
+            
+        ]]>
+    </mx:Script>
+    
+</mx:TitleWindow>

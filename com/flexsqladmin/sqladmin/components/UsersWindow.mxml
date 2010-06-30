@@ -52,7 +52,7 @@
                 <mx:columns>
                     <mx:AdvancedDataGridColumn id="s_id" headerText="ID" dataField="@id" />
                     <mx:AdvancedDataGridColumn id="s_user" headerText="User" dataField="@user" />
-                    <mx:AdvancedDataGridColumn  editable="false" rendererIsEditor="true" itemRenderer="mx.controls.TextInput" id="s_query" headerText="SQL Query" dataField="@query" />
+                    <mx:AdvancedDataGridColumn id="s_query"  editable="false" rendererIsEditor="true" itemRenderer="mx.controls.TextInput" headerText="SQL Query" dataField="@query" />
                 </mx:columns>
             </mx:AdvancedDataGrid>
         </mx:Panel>
@@ -77,11 +77,18 @@
 
     <mx:Script>
         <![CDATA[
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            import com.flexsqladmin.sqladmin.view.ModifyUserWindow;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import flash.text.TextLineMetrics;    
+            
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
             
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
@@ -96,6 +103,11 @@
                 sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
                 sessionTimer.start();
                 sessionUpdate(null);
+                
+                s_id.width = measureText(CustomFuncs.wordMult("W", 4)).width;
+                s_user.width = measureText(CustomFuncs.wordMult("W", 6)).width;
+                s_query.width = measureText(CustomFuncs.wordMult("W", 100)).width;
+                 
             }
             
             public function passValidate() : Boolean {
@@ -113,12 +125,20 @@
             
             public function createUser() : void {
                 if (user_name.text != '' && user_pass.text != '' && passValidate()) {
-                    
+                    var addUserEvent:UsersAndRolesEvent = new UsersAndRolesEvent('addNewUser', user_name.text, user_pass.text);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(addUserEvent);
+                } else {
+                    user_pass.setFocus();
                 }
             }
             
             public function modifyUser() : void {
-                
+                if (users_list.selectedIndex != -1) {
+                    var mod_win:ModifyUserWindow = ModifyUserWindow(PopUpManager.createPopUp(this, ModifyUserWindow, true));
+                    mod_win.setStyle("borderAlpha", 0.8);
+                    mod_win.showCloseButton = true;
+                    mod_win.user = users_list.selectedLabel;
+                }
             }
             
             public function modifyRole() : void {

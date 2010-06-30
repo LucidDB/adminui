@@ -74,6 +74,23 @@
             <mx:request>
             </mx:request>
         </mx:operation>
+        <mx:operation name="addNewUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <user></user>
+                <password></password>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="modifyUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <user></user>
+                <password></password>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="deleteUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <user></user>
+            </mx:request>
+        </mx:operation>
     </mx:WebService>
 	
 </cairngorm:ServiceLocator>

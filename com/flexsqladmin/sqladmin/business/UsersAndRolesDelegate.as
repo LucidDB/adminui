@@ -21,7 +21,6 @@ package com.flexsqladmin.sqladmin.business
         public function UsersAndRolesDelegate(r:Responder) {
             DebugWindow.log("UsersAndRolesDelegate.as:UsersAndRolesDelegate()");
             service = ServiceLocator.getInstance().getService("UsersAndRolesService") as WebService;
-            //service.showBusyCursor = false;
             model.tempConnectionVO.setHttpHeaders(service);
             responder = r;
         }
@@ -34,9 +33,34 @@ package com.flexsqladmin.sqladmin.business
         }
         
         public function getUsersDetails() : void {
-            service.showBusyCursor = true;
             var o:AbstractOperation = service.getOperation("getUsersDetails");
             var token:AsyncToken = service.getUsersDetails();
+            token.resultHandler = responder.onResult;
+            token.faultHandler = responder.onFault;
+        }
+        
+        public function addNewUser(user:String, pass:String) : void {
+            var o:AbstractOperation = service.getOperation("addNewUser");
+            o.arguments.user = user;
+            o.arguments.password = pass;
+            var token:AsyncToken = service.addNewUser();
+            token.resultHandler = responder.onResult;
+            token.faultHandler = responder.onFault;
+        }
+        
+        public function deleteUser(user:String) : void {
+            var o:AbstractOperation = service.getOperation("deleteUser");
+            o.arguments.user = user;
+            var token:AsyncToken = service.deleteUser();
+            token.resultHandler = responder.onResult;
+            token.faultHandler = responder.onFault;
+        }
+        
+        public function modifyUser(user:String, pass:String) : void {
+            var o:AbstractOperation = service.getOperation("modifyUser");
+            o.arguments.user = user;
+            o.arguments.password = pass;
+            var token:AsyncToken = service.modifyUser();
             token.resultHandler = responder.onResult;
             token.faultHandler = responder.onFault;
         }
