@@ -5,7 +5,8 @@
 	folderOpenIcon="@Embed(source='/icons/database.png')" 
 	folderClosedIcon="@Embed(source='/icons/database.png')" 
 	height="95%" width="100%" 
-	dragEnabled="true" 
+	dragEnabled="true"
+    doubleClickEnabled="true"
 	labelField="@label" 
 	showRoot="false" 
 	rowHeight="25"
@@ -50,11 +51,19 @@
 
             private var clickx:int = 0;
             private var clicky:int = 0;
+            private var menu_closed:Boolean = true;
             private var model:ModelLocator = ModelLocator.getInstance();
             
             public function init():void{
+                var expandTree:Function = function():void {
+                    expandItem(selectedItem, !isItemOpen(selectedItem), true);
+                };
+                
             	this.addEventListener(MouseEvent.CLICK, clickHandler, false, 1);
-            	this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
+                this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
+                this.addEventListener(MouseEvent.DOUBLE_CLICK, expandTree, false, 3);
+                this.addEventListener(ListEvent.ITEM_DOUBLE_CLICK, expandTree, false, 5);
+
             }
             
             private function clickHandler(e:MouseEvent):void{
@@ -82,10 +91,16 @@
                             , {label: "Edit View", icon: updateicon}
                             , {label: "Drop View", icon: closeicon}
                         ];
-	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){	
-	            		var myMenu:Menu = Menu.createMenu(null, objMenu);
-						myMenu.show(clickx + 25, clicky);
-						myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
+	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){
+                        if (menu_closed) {
+                            menu_closed = false;
+                            var myMenu:Menu = Menu.createMenu(null, objMenu);
+                            myMenu.show(clickx + 25, clicky);
+                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
+                            myMenu.addEventListener(Event.CLOSE, function():void { menu_closed=true; });
+                        } else {
+                            menu_closed = true;
+                        }
 	            	}
             	}
             }
