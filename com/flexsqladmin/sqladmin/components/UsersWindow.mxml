@@ -37,9 +37,12 @@
             </mx:Form>
         </mx:Panel>
         <mx:Spacer width="15%" />
-        <mx:VBox>
+        <mx:VBox height="100%">
             <mx:ComboBox id="users_list" prompt="Select User" selectedIndex="-1" creationComplete="checkUsersList();" dataProvider="{model.users_list}" />
             <mx:Button label="Modify User" click="modifyUser();" icon="@Embed(source='/icons/exec.gif')" />
+            <mx:Spacer height="25%" />
+            <mx:ComboBox id="roles_list" prompt="Select Role" selectedIndex="-1" creationComplete="checkRolesList();" dataProvider="{model.roles_list}" />
+            <mx:Button label="Modify Role" click="modifyRole();" icon="@Embed(source='/icons/exec.gif')" />
         </mx:VBox>
         <mx:Spacer width="15%" />
         <mx:Panel title="Active User Sessions" width="100%">
@@ -58,21 +61,6 @@
         </mx:Panel>
     </mx:HBox>
     
-    <mx:HBox left="10" right="10" width="100%">
-        <mx:VBox>
-        <mx:Panel title="Roles">
-            <mx:Button id="mod_roles" label="Modify Selected Role"
-                       icon="@Embed(source='/icons/exec.gif')"
-                       click="modifyRole();" />
-            <mx:AdvancedDataGrid id="roles_info" dataProvider="{model.roles_info}">
-                <mx:columns>
-                    <mx:AdvancedDataGridColumn id="r_name" headerText="Name" dataField="@name" />
-                    <mx:AdvancedDataGridColumn id="r_permissions" headerText="Permissions" dataField="@permissions" />
-                </mx:columns>
-            </mx:AdvancedDataGrid>
-        </mx:Panel>
-        </mx:VBox>
-    </mx:HBox>
     </mx:VBox>
 
     <mx:Script>
@@ -106,7 +94,7 @@
                 
                 s_id.width = measureText(CustomFuncs.wordMult("W", 4)).width;
                 s_user.width = measureText(CustomFuncs.wordMult("W", 6)).width;
-                s_query.width = measureText(CustomFuncs.wordMult("W", 100)).width;
+                //s_query.width = measureText(CustomFuncs.wordMult("W", 100)).width;
                  
             }
             
@@ -142,7 +130,8 @@
             }
             
             public function modifyRole() : void {
-                Application.application.addTab('Roles', model.main_tabnav, 'rolesWindow');
+                var mod_role:RolesWindow = Application.application.addTab('Modify Role', model.main_tabnav, 'rolesWindow');
+                mod_role.modding = true;
             }
             
             public function sessionUpdate(event:TimerEvent) : void {
@@ -162,6 +151,13 @@
                 if (!model.users_list) {
                     var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
                     CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
+                }
+            }
+            
+            public function checkRolesList() : void {
+                if (!model.roles_list) {
+                    var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                    //CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                 }
             }
         ]]>

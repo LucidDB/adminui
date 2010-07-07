@@ -11,7 +11,7 @@
 
     <mx:Form>
         <mx:FormItem label="Change Name">
-            <mx:TextInput id="new_name" text="{user}" change="{user = new_name.text;}" />
+            <mx:TextInput editable="{user == ''}" id="new_name" text="{user}" change="{user = new_name.text;}" />
         </mx:FormItem>
         <mx:FormItem label="Change Password">
             <mx:TextInput id="new_pass" displayAsPassword="true" />

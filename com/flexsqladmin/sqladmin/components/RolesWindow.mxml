@@ -7,13 +7,16 @@
            >
 
     <mx:VBox left="10" right="10" top="10" bottom="10" width="100%">
-        <mx:Panel title="Modify Role">
+        <mx:Panel id="r_pan" creationComplete="{if (modding) r_pan.title='Modify Role'; else r_pan.title='New Role';}">
             <mx:Form>
                 <mx:FormItem label="Name: ">
-                    <mx:TextInput id="role_name" />
+                    <mx:TextInput creationComplete="{role_name.enabled=!modding;}" id="role_name" />
                 </mx:FormItem>
                 <mx:FormItem>
-                    <mx:Button label="Create or Replace" click="createRole();" icon="@Embed(source='/icons/exec.gif')" />                    
+                    <mx:Button creationComplete="{save_btn.enabled=!modding;}" id="save_btn" label="Save Name" click="saveName();" icon="@Embed(source='/icons/exec.gif')" />                    
+                </mx:FormItem>
+                <mx:FormItem>
+                    <mx:Button label="Grant Permissions On Schemas And Tables" click="grantPerms();" icon="@Embed(source='/icons/exec.gif')" />
                 </mx:FormItem>
             </mx:Form>
             <mx:AdvancedDataGrid id="role_users" dataProvider="{role_users_data}" width="100%">
@@ -57,13 +60,19 @@
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
+            public var modding:Boolean = false;
+            
             public function init() : void {
                 // todo: generate data provider for roles from already queried information if possible.
                 model.roles_windows[id] = this;
                 model.roles_windows._len += 1;
             }
             
-            public function createRole() : void {
+            public function saveName() : void {
+                
+            }
+            
+            public function grantPerms() : void {
                 
             }
             

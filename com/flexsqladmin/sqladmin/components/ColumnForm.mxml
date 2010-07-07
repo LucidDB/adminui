@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:Form xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();">
-    <!--<mx:Binding source="col_name.text" destination="col_details.@name" />-->
-    <mx:Binding source="col_type.selectedItem" destination="col_details.@datatype" />
-    <mx:Binding source="col_digits.text" destination="col_details.@decDigits" />
-    <mx:Binding source="col_prec.text" destination="col_details.@precision" />
-    <mx:Binding source="col_default.text" destination="col_details.@defaultValue" />
-    <!--<mx:Binding source="col_remarks.text" destination="col_details.@remarks" />-->
 
     <mx:Validator id="defval_validator" source="{col_default}" property="text" 
                   required="{default_required}"
@@ -66,6 +60,12 @@
                     col_default.setFocus();
                     col_default.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
                 }
+                 
+                col_digits.addEventListener(Event.CHANGE, function():void { col_details.@decDigits = col_digits.text; });
+                col_prec.addEventListener(Event.CHANGE, function():void { col_details.@precision = col_prec.text; });
+                col_default.addEventListener(Event.CHANGE, function():void { col_details.@defaultValue = col_default.text; });
+                col_type.addEventListener(Event.CHANGE, function():void { col_details.@datatype = col_type.selectedItem; });
+                
             }
             public function findIndex() : void {
                 col_details.setName("column");

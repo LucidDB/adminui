@@ -74,6 +74,10 @@
             <mx:request>
             </mx:request>
         </mx:operation>
+        <mx:operation name="getRolesDetails" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+            </mx:request>
+        </mx:operation>
         <mx:operation name="addNewUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
                 <user></user>

@@ -104,7 +104,7 @@
                 var col_form : ColumnForm = new ColumnForm();
                 col_form.editable = true;
                 col_form.num_existing_rows = TD.details.@currentRowCount;
-                col_form.col_details = <details name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" />;
+                col_form.col_details = <details name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" defaultValue="" />;
                 col_list.addItem(col_form.col_details);
                 col_forms.addItem(col_form);
                 var idx:int = col_list.length - 1;

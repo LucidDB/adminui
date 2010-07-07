@@ -6,6 +6,10 @@ package com.flexsqladmin.sqladmin.business
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
     
+    import flash.utils.Proxy;
+    import flash.utils.flash_proxy;
+
+    
     import mx.rpc.AbstractOperation;
     import mx.rpc.AsyncToken;
     import mx.rpc.events.FaultEvent;
@@ -25,42 +29,19 @@ package com.flexsqladmin.sqladmin.business
             responder = r;
         }
         
-        public function getCurrentSessions() : void {
-            var o:AbstractOperation = service.getOperation("getCurrentSessions");
-            var token:AsyncToken = service.getCurrentSessions();
-            token.resultHandler = responder.onResult;
-            token.faultHandler = responder.onFault;
-        }
-        
-        public function getUsersDetails() : void {
-            var o:AbstractOperation = service.getOperation("getUsersDetails");
-            var token:AsyncToken = service.getUsersDetails();
-            token.resultHandler = responder.onResult;
-            token.faultHandler = responder.onFault;
-        }
-        
-        public function addNewUser(user:String, pass:String) : void {
-            var o:AbstractOperation = service.getOperation("addNewUser");
-            o.arguments.user = user;
-            o.arguments.password = pass;
-            var token:AsyncToken = service.addNewUser();
-            token.resultHandler = responder.onResult;
-            token.faultHandler = responder.onFault;
-        }
-        
-        public function deleteUser(user:String) : void {
-            var o:AbstractOperation = service.getOperation("deleteUser");
-            o.arguments.user = user;
-            var token:AsyncToken = service.deleteUser();
-            token.resultHandler = responder.onResult;
-            token.faultHandler = responder.onFault;
-        }
-        
-        public function modifyUser(user:String, pass:String) : void {
-            var o:AbstractOperation = service.getOperation("modifyUser");
-            o.arguments.user = user;
-            o.arguments.password = pass;
-            var token:AsyncToken = service.modifyUser();
+        public function serviceDelegate(operation:String, arguments:Object=null) : void {
+            var o:AbstractOperation = service.getOperation(operation);
+            if (arguments) {
+                for (var arg:String in arguments) {
+                    if (arguments[arg])
+                        o.arguments[arg] = arguments[arg];
+                }
+            }
+            // We should be able to do this:
+            //var token:AsyncToken = service[operation]();
+            // But unfortunately the WebService interface overrides this functionality,
+            // so we have to do this verbose thing to dynamically call.
+            var token:AsyncToken = flash.utils.Proxy(service).flash_proxy::callProperty.apply(service, [operation]);
             token.resultHandler = responder.onResult;
             token.faultHandler = responder.onFault;
         }

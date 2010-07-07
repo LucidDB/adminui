@@ -33,17 +33,13 @@ package com.flexsqladmin.sqladmin.commands
             pass = UsersAndRolesEvent(event).pass;
             CursorManager.setBusyCursor();
             var delegate:UsersAndRolesDelegate = new UsersAndRolesDelegate(this);
-            if (call == 'getCurrentSessions') {
+            
+            if (call == 'getCurrentSessions')
                 CursorManager.removeBusyCursor();
-                delegate.getCurrentSessions();
-            } else if (call == 'getUsersDetails')
-                delegate.getUsersDetails();
-            else if (call == 'addNewUser')
-                delegate.addNewUser(user, pass);
-            else if (call == 'deleteUser')
-                delegate.deleteUser(user);
-            else if (call == 'modifyUser')
-                delegate.modifyUser(user, pass);
+            
+            var args:Object = {user: user, password: pass};
+            delegate.serviceDelegate(call, args);
+
         }
         
         public function onResult(event:*=null) : void {
@@ -56,6 +52,9 @@ package com.flexsqladmin.sqladmin.commands
                 var response:String;
                 if (call == 'getCurrentSessions') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getCurrentSessions");
+                    /*if (model.session_info)
+                        model.session_info += new XMLList(XML(event.result).children());
+                    else*/
                     model.session_info = new XMLList(XML(event.result).children());
                 } else if (call == 'getUsersDetails') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getUsersDetails");
@@ -63,6 +62,13 @@ package com.flexsqladmin.sqladmin.commands
                     model.users_list = new Array();
                     for each (var el:XML in model.users_details) {
                         model.users_list.push(el.@name);
+                    }
+                } else if (call == 'getRolesDetails') {
+                    DebugWindow.log("UsersAndRolesCommand.as:onResult()-getRolesDetails");
+                    model.roles_info = new XML(event.result);
+                    model.roles_list = new Array();
+                    for each (el in model.roles_info.children()) {
+                        model.roles_list.push(el.@name);
                     }
                 } else if (call == 'addNewUser') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewUser");
