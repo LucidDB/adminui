@@ -1,6 +1,8 @@
 package com.flexsqladmin.sqladmin.vo
 {
 	import com.adobe.cairngorm.vo.ValueObject;
+	import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+	
 	import mx.formatters.DateFormatter;
 	
 	[Bindable]
@@ -17,7 +19,7 @@ package com.flexsqladmin.sqladmin.vo
 				sqt = "";
 			else
 				sqt = sqt.toUpperCase() + " - ";
-			history = "<font color='#009900'><b>[" + dateformatter.format(timeStamp) + "]</b></font> : " + sqt + s.replace(pattern, " ") + "\n" + history;
+			history = "<font color='#009900'><b>[" + dateformatter.format(timeStamp) + "]</b></font> : " + sqt + CustomFuncs.htmlEntities(s.replace(pattern, " ")) + "\n" + history;
 		}
 	}
 }

@@ -11,6 +11,26 @@ package com.flexsqladmin.sqladmin.utils
             return new_word;
         }
         
+        public static function htmlEntities(str:String) : String {
+            var escaped:String = "";
+            for (var i:Number = 0; i < str.length; ++i) {
+                var c:String = str.charAt(i);
+                if (c == '<')
+                    escaped += '&lt;';
+                else if (c == '>')
+                    escaped += '&gt;';
+                else if (c == '"')
+                    escaped += '&quot;';
+                else if (c == "'")
+                    escaped += '&apos;';
+                else if (c == '&')
+                    escaped += '&amp;';
+                else
+                    escaped += c;
+            }
+            return escaped;
+        }
+        
         // The following XML set functions are not implemented with efficiency in mind;
         // probably best not to use them for large sets.
         
