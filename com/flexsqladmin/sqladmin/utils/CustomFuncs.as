@@ -3,32 +3,34 @@ package com.flexsqladmin.sqladmin.utils
     public final class CustomFuncs {
         public static function wordMult(word:String, times:Number) : String {
             // 'hello' * 2 = 'hellohello'
-            var new_word:Array = [word];
+            // Note: the make array, push, push, array.join('') idiom is much slower in flex,
+            // use simple string concatenation
+            var new_word:String = word;
             while (times > 0) {
-                new_word.push(word);
+                new_word += word;
                 times -= 1;
             }
-            return new_word.join('');
+            return new_word;
         }
         
         public static function htmlEntities(str:String) : String {
-            var escaped:Array = [];
+            var escaped:String = '';
             for (var i:Number = 0; i < str.length; ++i) {
                 var c:String = str.charAt(i);
                 if (c == '<')
-                    escaped.push('&lt;');
+                    escaped += '&lt;';
                 else if (c == '>')
-                    escaped.push('&gt;');
+                    escaped += '&gt;';
                 else if (c == '"')
-                    escaped.push('&quot;');
+                    escaped += '&quot;';
                 else if (c == "'")
-                    escaped.push('&apos;');
+                    escaped += '&apos;';
                 else if (c == '&')
-                    escaped.push('&amp;');
+                    escaped += '&amp;';
                 else
-                    escaped.push(c);
+                    escaped += c;
             }
-            return escaped.join('');
+            return escaped;
         }
         
         public static function colorInterpolate(col1:Array, col2:Array, factor:Number=0.5) : Array {
