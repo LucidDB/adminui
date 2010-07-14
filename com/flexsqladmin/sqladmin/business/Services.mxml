@@ -113,14 +113,40 @@
                 <role></role>
             </mx:request>
         </mx:operation>
-        <mx:operation name="grantPermissions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+        <mx:operation name="grantPermissionsOnSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
-                <elements></elements>
+                <catalog></catalog>
+                <schema></schema>
+                <permissions></permissions>
+                <grantee></grantee>
             </mx:request>
         </mx:operation>
-        <mx:operation name="revokePermissions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+        <mx:operation name="grantPermissions" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
-                <elements></elements>
+                <catalog></catalog>
+                <schema></schema>
+                <type></type>
+                <element></element>
+                <permissions></permissions>
+                <grantee></grantee>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="revokePermissionsOnSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+                <permissions></permissions>
+                <grantee></grantee>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="revokePermissions" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+                <type></type>
+                <element></element>
+                <permissions></permissions>
+                <grantee></grantee>
             </mx:request>
         </mx:operation>
     </mx:WebService>

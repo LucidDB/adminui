@@ -310,11 +310,6 @@
                                 }
                             }
                         }
-                        
-                        // should we just let java parse this..? no...
-                        // oh, duh
-                        // we send a revoke call for any diff in oldActions and actions,
-                        // then send an add call for all actions,
                        
                     }
                 }
@@ -329,9 +324,9 @@
                 
                 // will not have any revokes until functionality is added in LucidDB
                 
-                var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', '', '', '', grant_perms);
+                var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', role_name, '', '', grant_perms);
                 CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
-                var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', '', '', '', revoke_perms);
+                var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', role_name, '', '', revoke_perms);
                 //CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
             }
             

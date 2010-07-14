@@ -30,6 +30,10 @@ package com.flexsqladmin.sqladmin.commands
         private var with_grant:String;
         private var perms_list:Array;
         
+        private var total_calls:Number;
+        private var call_successes:Array;
+        private var call_fails:Array;
+        
         public function execute(event:CairngormEvent) : void {
             DebugWindow.log("UsersAndRolesCommand:execute()");
             call = UsersAndRolesEvent(event).call;
@@ -46,16 +50,37 @@ package com.flexsqladmin.sqladmin.commands
             if (call == 'getCurrentSessions')
                 CursorManager.removeBusyCursor();
             
+            total_calls = 0;
+            call_successes = [];
+            call_fails = [];
+            
             var args:Object;
             if (role_name == '') {
                 args = {user: user, password: pass};
             } else if (added != '') {
                 args = {user: user, role: role_name, added: added, with_grant: with_grant};
             } else if (perms_list != null) {
-                args = {elements: perms_list};
+                //call = call.slice(0, -1);
+                for each (var perm:XML in perms_list) {
+                    var real_call:String = call;
+                    var perms:String = String(perm.@perms).replace(' ', ',').replace('ALL', 'ALL PRIVILEGES');
+                    if (perm.@level == 'schema') {
+                        real_call += 'OnSchema';
+                        args = {catalog: model.currentcatalogname, schema: perm.@name,
+                            permissions: perms, grantee: role_name};
+                    } else if (perm.@level == 'item') {
+                        args = {catalog: model.currentcatalogname, schema: perm.@schemaName,
+                            type: perm.@type, element: perm.@name, permissions: perms,
+                            grantee: role_name};
+                    }
+                    total_calls += 1;
+                    delegate.serviceDelegate(real_call, args);
+                }
+                return;
             } else {
                 args = {role: role_name};
             }
+            total_calls += 1;
             delegate.serviceDelegate(call, args);
 
         }
@@ -139,6 +164,24 @@ package com.flexsqladmin.sqladmin.commands
                         Alert.show("User Changed", "Success");
                     } else {
                         Alert.show("Could not change user: " + response, "Error");
+                    }
+                } else if (call == 'grantPermissions' || call == 'revokePermissions') {
+                    DebugWindow.log("UsersAndRolesCommand.as:onResult()-grant or revoke");
+                    response = event.result;
+                    if (response == "") {
+                        call_successes.push('');
+                    } else {
+                        call_fails.push(response);
+                    }
+                    if (call_successes.length + call_fails.length == total_calls) {
+                        usersEvent = new UsersAndRolesEvent('getRolesDetails');
+                        CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
+                        if (call_fails.length == 0) {
+                            Alert.show("All permission changes successful", "Success");
+                        } else {
+                            var responses:String = call_fails.join("\n");
+                            Alert.show("Some permission changes failed, here are the details:\n" + responses, "Warning");
+                        }
                     }
                 }
             }
