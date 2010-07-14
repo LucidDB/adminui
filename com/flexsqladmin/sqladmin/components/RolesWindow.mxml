@@ -16,23 +16,33 @@
                     <mx:Button creationComplete="{save_btn.enabled=!modding;}" id="save_btn" label="Save Name" click="saveName();" icon="@Embed(source='/icons/exec.gif')" />                    
                 </mx:FormItem>
                 <mx:FormItem>
-                    <mx:Button label="Grant Permissions On Schemas And Tables" click="grantPerms();" icon="@Embed(source='/icons/exec.gif')" />
+                    <mx:Button enabled="{modding}" label="Grant Permissions On Schemas And Tables" click="grantPerms();" icon="@Embed(source='/icons/exec.gif')" />
+                </mx:FormItem>
+                <mx:FormItem>
+                    <mx:Button enabled="{modding}" label="Delete Role" click="deleteRole();" icon="@Embed(source='/icons/close_tab.png')" />
                 </mx:FormItem>
             </mx:Form>
-            <mx:AdvancedDataGrid id="role_users" dataProvider="{role_users_data}" width="100%">
+            <mx:AdvancedDataGrid enabled="{modding}" id="role_users" dataProvider="{role_users_data_collection()}" width="100%">
                 <mx:columns>
                     <mx:AdvancedDataGridColumn id="r_user" headerText="User" dataField="@user" />
-                    <mx:AdvancedDataGridColumn textAlign="center" id="r_add" headerText="blah" dataField="@added">
+                    <mx:AdvancedDataGridColumn editable="{modding}" rendererIsEditor="true" textAlign="center" id="r_add" headerText="Added To This Role">
                         <mx:itemRenderer>
                             <mx:Component>
-                                <mx:CheckBox selected="{data.@added == 'true'}" />
+                                <!-- Currently can't revoke -->
+                                <mx:CheckBox click="if (!selected) { event.preventDefault(); selected=true; return; }
+                                             data.@added = selected; data.@with_grant = (!selected) ? 'false' : data.@with_grant;
+                                             outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
+                                             enabled="{outerDocument.modding}" updateComplete="{selected = (data.@added == 'true');}"
+                                             />
                             </mx:Component>
                         </mx:itemRenderer>
                     </mx:AdvancedDataGridColumn>
-                    <mx:AdvancedDataGridColumn textAlign="center" id="r_grant" headerText="With Grant" dataField="@with_grant">
+                    <mx:AdvancedDataGridColumn textAlign="center" id="r_grant" headerText="With Grant Option">
                         <mx:itemRenderer>
                             <mx:Component>
-                                <mx:CheckBox selected="{data.@with_grant == 'true'}" />
+                                <mx:CheckBox click="data.@with_grant = selected; data.@added = 'true';
+                                             outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
+                                             enabled="{outerDocument.modding}" updateComplete="{selected = (data.@with_grant == 'true');}" />
                             </mx:Component>
                         </mx:itemRenderer>
                     </mx:AdvancedDataGridColumn>
@@ -40,40 +50,108 @@
             </mx:AdvancedDataGrid>
         </mx:Panel>
     </mx:VBox>
-    
+    <mx:ComboBox valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />
+
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.view.PermissionsWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             
             import mx.collections.ArrayCollection;
             import mx.controls.CheckBox;
+            import mx.effects.Pause;
+            import mx.managers.PopUpManager;
             
             [Bindable]
-            public var role_users_data:ArrayCollection = new ArrayCollection([
-                <node user="Bob" added="true" with_grant="true" />,
-                <node user="Jenny" added="false" with_grant="false" />,
-                <node user="Shain" added="true" with_grant="false" />]);
+            public var role_users_data:Dictionary = new Dictionary();
             
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
+            [Bindable]
             public var modding:Boolean = false;
             
             public function init() : void {
-                // todo: generate data provider for roles from already queried information if possible.
                 model.roles_windows[id] = this;
                 model.roles_windows._len += 1;
+                
+                if (!model.users_list) {
+                    var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
+                    CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
+                }
+                if (!model.roles_list) {
+                    var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                    CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
+                }
+                
+                reloadUsers();
+            }
+            
+            public function reloadUsers() : void {
+                role_users_data = new Dictionary();
+                //var blah:Array = ['no', 'yes', 'blah', 'sha', 'crap', 'fill', 'me', 'up', 'big', 'boy'];
+                //for each (var b:String in model.users_list) {blah.push(b);}
+                for each (var user:String in model.users_list) {
+                    role_users_data[user] = new XML('<node user="' + user + '" added="false" with_grant="false" />');
+                }
+                
+                if (modding) {
+                    for each (var el:XML in model.roles_info.children()) {
+                        if (el.@name == role_name.text) {
+                            var users:Array = String(el.users).split(' ');
+                            var grant_users:Array = String(el.users_with_grant_option).split(' ');
+                            for each (user in users)
+                                if (user in role_users_data)
+                                    role_users_data[user].@added = true;
+                            for each(var grant:String in grant_users)
+                                if (grant in role_users_data)
+                                    role_users_data[user].@with_grant = true;
+                        }
+                    }
+                }
+                
+                dispatchEvent(new Event("usersChange"));
+            }
+            
+            [Bindable(Event="usersChange")]
+            public function role_users_data_collection() : ArrayCollection {
+                var coll:ArrayCollection = new ArrayCollection();
+                for each (var el:XML in role_users_data) {
+                    coll.addItem(el);
+                }
+                if (coll.length == 0) {
+                    coll.addItem(new XML('<node user="Loading..." added="false" with_grant="false" />'));
+                }
+                return coll;
             }
             
             public function saveName() : void {
-                
+                if (role_name.text != '') {
+                    var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('addNewRole', '','', role_name.text);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
+                    modding = true;
+                }
+            }
+            
+            public function deleteRole() : void {
+                var dr:UsersAndRolesEvent = new UsersAndRolesEvent('deleteRole', '', '', role_name.text);
+                CairngormEventDispatcher.getInstance().dispatchEvent(dr);
             }
             
             public function grantPerms() : void {
-                
+                var grant_win:PermissionsWindow = PermissionsWindow(PopUpManager.createPopUp(this, PermissionsWindow, true));
+                grant_win.setStyle("borderAlpha", 0.8);
+                grant_win.showCloseButton = true;
+                grant_win.role_name = role_name.text;
+            }
+            
+            public function user_click(name:String, added:String, with_grant:String) : void {
+                var user_to_role:UsersAndRolesEvent = new UsersAndRolesEvent('userToRole', name, '', role_name.text, added, with_grant);
+                CairngormEventDispatcher.getInstance().dispatchEvent(user_to_role);
             }
             
         ]]>

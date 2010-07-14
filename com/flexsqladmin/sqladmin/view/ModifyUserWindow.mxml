@@ -35,10 +35,8 @@
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.LoginEvent;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
             
             import mx.controls.Alert;
             import mx.events.CloseEvent;

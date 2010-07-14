@@ -74,7 +74,7 @@
             <mx:request>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getRolesDetails" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+        <mx:operation name="getRolesDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
             </mx:request>
         </mx:operation>
@@ -82,6 +82,11 @@
             <mx:request>
                 <user></user>
                 <password></password>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="addNewRole" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <role></role>
             </mx:request>
         </mx:operation>
         <mx:operation name="modifyUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
@@ -93,6 +98,29 @@
         <mx:operation name="deleteUser" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request>
                 <user></user>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="userToRole" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <user></user>
+                <role></role>
+                <added></added>
+                <with_grant></with_grant>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="deleteRole" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <role></role>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="grantPermissions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <elements></elements>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="revokePermissions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <elements></elements>
             </mx:request>
         </mx:operation>
     </mx:WebService>

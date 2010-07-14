@@ -3,35 +3,53 @@ package com.flexsqladmin.sqladmin.utils
     public final class CustomFuncs {
         public static function wordMult(word:String, times:Number) : String {
             // 'hello' * 2 = 'hellohello'
-            var new_word : String = new String(word);
+            var new_word:Array = [word];
             while (times > 0) {
-                new_word += word;
+                new_word.push(word);
                 times -= 1;
             }
-            return new_word;
+            return new_word.join('');
         }
         
         public static function htmlEntities(str:String) : String {
-            var escaped:String = "";
+            var escaped:Array = [];
             for (var i:Number = 0; i < str.length; ++i) {
                 var c:String = str.charAt(i);
                 if (c == '<')
-                    escaped += '&lt;';
+                    escaped.push('&lt;');
                 else if (c == '>')
-                    escaped += '&gt;';
+                    escaped.push('&gt;');
                 else if (c == '"')
-                    escaped += '&quot;';
+                    escaped.push('&quot;');
                 else if (c == "'")
-                    escaped += '&apos;';
+                    escaped.push('&apos;');
                 else if (c == '&')
-                    escaped += '&amp;';
+                    escaped.push('&amp;');
                 else
-                    escaped += c;
+                    escaped.push(c);
             }
-            return escaped;
+            return escaped.join('');
         }
         
-        // The following XML set functions are not implemented with efficiency in mind;
+        public static function colorInterpolate(col1:Array, col2:Array, factor:Number=0.5) : Array {
+            var col_inter:Array = [
+                (col2[0] - col1[0])*factor + col2[0],
+                (col2[1] - col1[1])*factor + col2[1],
+                (col2[2] - col1[2])*factor + col2[2]
+                ];
+            return col_inter;
+        }
+        
+        public static function hexColorInterpolate(col1:Number, col2:Number, factor:Number=0.5) : Number {
+            var c1:Array = [col1 & 0xff0000, col1 & 0x00ff00, col1 & 0x0000ff];
+            var c2:Array = [col2 & 0xff0000, col2 & 0x00ff00, col2 & 0x0000ff];
+            var inter:Array = colorInterpolate(c1, c2, factor);
+            var col_inter:Number = (inter[0] << 16) | (inter[1] << 8) | inter[2];
+            return col_inter;
+        }
+        
+        
+        // The following (XML) set functions are not implemented with efficiency in mind;
         // probably best not to use them for large sets.
         
         /**
@@ -65,12 +83,32 @@ package com.flexsqladmin.sqladmin.utils
             return diff;
         }
         
+        public static function ArrDiff(arr1:Array, arr2:Array) : Array {
+            var diff:Array = [];
+            for each (var node:* in arr1) {
+                if (arr2.indexOf(node) == -1) {
+                    diff.push(node);
+                }
+            }
+            return diff;
+        }
+        
         public static function XMLunion(list1:XMLList, list2:XMLList) : XMLList {
-            // set of nodes in l1 and l2
+            // unique set of nodes in l1 or l2
             var union:XMLList = new XMLList(list1);
             for each (var node:XML in list2) {
                 if (!list1.contains(node)) {
                     union += node;
+                }
+            }
+            return union;
+        }
+        
+        public static function ArrUnion(arr1:Array, arr2:Array) : Array {
+            var union:Array = arr1.slice();
+            for each (var node:* in arr2) {
+                if (arr1.indexOf(node) == -1) {
+                    union.push(node);
                 }
             }
             return union;

@@ -5,11 +5,6 @@
            height="100%"
            creationComplete="init();"
            >
-    <mx:Script>
-        <![CDATA[
-            import mx.core.Application;
-        ]]>
-    </mx:Script>
     
     <mx:Validator source="{user_name}" property="text" />
     <mx:Validator source="{user_pass}" property="text" />
@@ -67,6 +62,8 @@
         <![CDATA[
             import mx.controls.Alert;
             import mx.managers.PopUpManager;
+            import mx.core.Application;
+
             import com.flexsqladmin.sqladmin.view.ModifyUserWindow;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
@@ -74,7 +71,7 @@
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             
-            import flash.text.TextLineMetrics;    
+            import flash.text.TextLineMetrics;
             
             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
             
@@ -130,8 +127,11 @@
             }
             
             public function modifyRole() : void {
+                // todo: Should this make a PopUp like Modify User does, or should it really be another tab?
+                // I think it should make a popup. Make a note to ask Nick. (I'm on the fence.)
                 var mod_role:RolesWindow = Application.application.addTab('Modify Role', model.main_tabnav, 'rolesWindow');
                 mod_role.modding = true;
+                mod_role.role_name.text = roles_list.selectedLabel;
             }
             
             public function sessionUpdate(event:TimerEvent) : void {
@@ -157,7 +157,7 @@
             public function checkRolesList() : void {
                 if (!model.roles_list) {
                     var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
-                    //CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                 }
             }
         ]]>

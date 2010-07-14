@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="500" height="500"
+                creationComplete="init();"
+                title="Grant Permissions"
+                close="closeWin();" xmlns:treeClasses="mx.controls.treeClasses.*"
+                >
+    <mx:Style>
+        .win {backgroundColor: #869ca7; backgroundGradientColors: #9bafb9, #68808c; }
+    </mx:Style>
+    <mx:VBox top="10" left="10" right="10" bottom="10" width="100%" textAlign="center" styleName="win">        
+        <!--<mx:Text selectable="true" link="selectClick(event);">
+            <mx:htmlText>
+                <![CDATA[
+<font color="#0000ff"><b><a href="event:all">Select All</a>    <a href="event:none">Select None</a></b></font>]]>
+            </mx:htmlText>
+        </mx:Text>-->
+        <!--<mx:HBox>
+            <mx:CheckBox id="apply_all" click="selectClick(event);" />
+            <mx:Label text="Apply To All" />
+        </mx:HBox>-->
+        <mx:Tree id="items_tree"
+                 dataProvider="{datacopy}"
+                 labelField="@label" 
+                 dragMoveEnabled="false" 
+                 defaultLeafIcon="@Embed(source='/icons/database_table.png')" 
+                 folderOpenIcon="@Embed(source='/icons/database.png')" 
+                 folderClosedIcon="@Embed(source='/icons/database.png')" 
+                 showRoot="false"
+                 rowHeight="25"
+                 left="5" right="5" width="100%"
+                 textAlign="left"
+                 itemClick="tree_itemClick(event);"
+                 dataTipFunction="tree_dataTip"
+                 showDataTips="true"
+                 >
+            <mx:itemRenderer>
+                <mx:Component>                        
+                    <treeClasses:TreeItemRenderer creationComplete="tree_init();">
+                    <mx:Script>
+                        <![CDATA[
+                            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+                            
+                            import mx.containers.HBox;
+                            import mx.controls.Label;
+                            import mx.controls.treeClasses.TreeListData;
+                            import mx.events.ToolTipEvent;
+                            
+                            public var disBox:HBox;
+                            public var disLabel:Label;
+                            public var treeListData:TreeListData;
+                            public var firstgo:Boolean = true;
+                            
+                             public function tree_init() : void {
+                                 addEventListener(ToolTipEvent.TOOL_TIP_SHOWN, toolTipShown);
+                            }
+                            
+                            override protected function createChildren() : void {
+                                super.createChildren();
+                                if (firstgo) {
+                                    for (var i:Number = 0; i < numChildren; i++) {
+                                        super.removeChildAt(i);
+                                    }
+                                    if (disBox == null) {
+                                        disBox = new HBox();
+                                        disLabel = new Label();
+                                        disBox.addChild(disLabel);
+                                        this.addChild(disBox);
+                                    }
+                                    firstgo = false;
+                                }
+                            }
+                            
+                            override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void {
+                                super.updateDisplayList(unscaledWidth, unscaledHeight);
+                                treeListData = TreeListData(listData);
+                                if (treeListData != null) {
+                                    if (super.data) {
+                                        var node:XML = treeListData.item as XML;
+                                        if (node.hasOwnProperty('@actions')) {
+                                            var acts:Array = String(node.@actions).split(' ');
+                                            var color:Number = outerDocument.color_key[acts[0]];
+                                            for (var i:Number = 1; i < acts.length; i++) {
+                                                if (acts[0] == 'ALL' || acts[i] == 'ALL') {
+                                                    color = outerDocument.color_key['ALL'];
+                                                    break;
+                                                } else {
+                                                    color = CustomFuncs.hexColorInterpolate(color, outerDocument.color_key[acts[i]]);
+                                                }
+                                            }
+                                            disBox.setStyle("fontWeight", "bold");
+                                            disBox.setStyle("backgroundColor", color);
+                                            disBox.setStyle("backgroundAlpha", 1);
+                                        } else {
+                                            disBox.setStyle("fontWeight", "normal");
+                                            disBox.setStyle("backgroundColor", 0xffffff);
+                                            disBox.setStyle("backgroundAlpha", 0);
+                                        }
+                                        
+                                        disLabel.text = node.@label;
+                                        
+                                        disBox.height = height;
+                                        //disBox.width = (node.hasOwnProperty('@actions')) ? disLabel.width : width - (icon.width + icon.x);
+                                        disBox.width = width - (icon.width + icon.x) - icon.width;
+                                        disBox.x = icon.width + icon.x + 2;
+                                        disBox.visible = true;
+                                    }
+                                }
+                            }
+                            
+                            public function toolTipShown(event:ToolTipEvent) : void {
+                                var pt:Point = disBox.localToGlobal(new Point());
+                                event.toolTip.move(pt.x + disLabel.width, pt.y);
+                            }
+                            
+                        ]]>
+                    </mx:Script>
+                    </treeClasses:TreeItemRenderer>
+                </mx:Component>
+            </mx:itemRenderer>
+        </mx:Tree>
+        <mx:Box />
+        <mx:HBox textAlign="center" width="100%">
+            <mx:Spacer width="50%" />
+            <mx:Label fontWeight="bold" text="All Applicable" />
+            <mx:CheckBox id="p_all" />
+            <mx:Spacer width="50%" />
+        </mx:HBox>
+        <mx:HBox fontWeight="bold" width="100%">
+            <mx:Spacer width="50%" />
+            <mx:Form>
+                <mx:FormItem label="Select">
+                    <mx:CheckBox id="p_select" />
+                </mx:FormItem>
+                <mx:FormItem label="Insert">
+                    <mx:CheckBox id="p_insert" />
+                </mx:FormItem>
+                <mx:FormItem label="Update">
+                    <mx:CheckBox id="p_update" />
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Spacer width="50%" />
+            <mx:Form>
+                <mx:FormItem label="Delete">
+                    <mx:CheckBox id="p_delete" />
+                </mx:FormItem>
+                <mx:FormItem label="Execute">
+                    <mx:CheckBox id="p_execute" />
+                </mx:FormItem>
+                <mx:FormItem label="Usage">
+                    <mx:CheckBox id="p_usage" />
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Spacer width="50%" />
+        </mx:HBox>
+        <mx:HBox width="100%" horizontalAlign="center">
+            <mx:Button label="Save Changes" click="savePerms();" icon="@Embed(source='/icons/exec.gif')" />
+        </mx:HBox>
+
+    </mx:VBox>
+
+    <mx:Script>
+        <![CDATA[
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import mx.core.Container;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import mx.events.CloseEvent;
+            import mx.events.ListEvent;
+            import mx.managers.PopUpManager;
+            
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            [Bindable]
+            public var datacopy:XML;
+            
+            public var original_data:XML;
+            
+            public var role_name:String;
+            
+            public var color_key:Object = {
+                'ALL' : 0xffecaa,
+                'SELECT' : 0xa89074,
+                'INSERT' : 0x7a895e,
+                'UPDATE' : 0x69403c,
+                'DELETE' : 0x3d74c4,
+                'EXECUTE' : 0x7f6856,
+                'USAGE' : 0x54765e
+                // 18237f, 777451, 0e1b3b
+            }
+
+            public function init() : void {
+                PopUpManager.centerPopUp(this);
+
+                datacopy = new XML(model.metadata);
+                // remove cols from consideration
+                var cols:XMLList = datacopy.node.node.node.node.(@column);
+                for (var i:Number = cols.length()-1; i >= 0; i--) {
+                    delete cols[i];
+                }
+                for each (var role:XML in model.roles_info.children()) {
+                    if (role.@name == role_name) {
+                        for each (var perm:XML in role.permission) {
+                            var type:String = (perm.@itemType == 'LOCAL VIEW') ? 'Views' : 'Tables';
+                            var node:XML = datacopy.node.(@label == perm.@schemaName).node.(@label == type).node.(@label == perm.@itemName)[0];
+                            node.@actions = perm.@actions;
+                            node.@oldActions = perm.@actions;
+                            node.@schemaName = perm.@schemaName;
+                            node.@itemType = perm.@itemType;
+                        }
+                    }
+                }
+                original_data = new XML(datacopy);
+                // Add colors to form items
+                for (var p:String in color_key) {
+                    Container(this['p_' + p.toLowerCase()].parent).setStyle("backgroundColor", color_key[p]);
+                    CheckBox(this['p_' + p.toLowerCase()]).addEventListener(MouseEvent.CLICK, permClick);
+                }
+            }
+            
+            public function closeWin() : void {
+                PopUpManager.removePopUp(this);
+            }
+            
+            //public function selectClick(event:TextEvent) : void {
+            public function selectClick(event:Event) : void {
+
+            }
+            
+            public function permClick(event:Event, other_item:XML=null) : void {
+                if (items_tree.selectedItem || other_item) {
+                    var perms:Array = [];
+                    var revoke:String = '';
+                    for (var p:String in color_key) {
+                        if (CheckBox(this['p_' + p.toLowerCase()]).selected) {
+                            perms.push(p);
+                        }
+                        if (!event.target.selected && event.target.id == 'p_' + p.toLowerCase()) {
+                            revoke = p;
+                        }
+                    }
+                    var item:XML = (other_item) ? other_item : XML(items_tree.selectedItem);
+
+                    item.@actions = (other_item && item.hasOwnProperty('@actions'))
+                                        ? ( (revoke != '')
+                                            ? CustomFuncs.ArrUnion(String(item.@oldActions).split(' '), CustomFuncs.ArrDiff(String(item.@actions).split(' '), [revoke])).join(' ')
+                                            : CustomFuncs.ArrUnion(perms, String(item.@actions).split(' ')).join(' ')
+                                           )
+                                        :  perms.join(' ');
+                    // Delete the nodes if they're empty so we don't get a diff
+                    if (item.@actions == '' && !item.hasOwnProperty('@oldActions'))
+                        delete item.@actions;
+                    
+                    for each (var child:XML in item.children()) {
+                        permClick(event, child);
+                    }
+                }
+            }
+            
+            public function savePerms() : void {
+                var revoke_perms:Array = [];
+                var grant_perms:Array = [];
+                var diff_schemas:XMLList = CustomFuncs.XMLdifference(datacopy.children(), original_data.children());
+                for each (var schema:XML in diff_schemas) {
+                    if (schema.hasOwnProperty('@actions')) {
+                        // done, simply apply perms to whole schema
+                        if (schema.hasOwnProperty('@oldActions')) {
+                            var to_grant:String = CustomFuncs.ArrDiff(String(schema.@actions).split(' '), String(schema.@oldActions).split(' ')).join(' ');
+                            var to_revoke:String = CustomFuncs.ArrDiff(String(schema.@oldActions).split(' '), String(schema.@actions).split(' ')).join(' ');
+                            grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + to_grant + '" />'));
+                            if (to_revoke != '') revoke_perms.push(new XML('<revoke level="schema" name="' + schema.@label + '" perms="' + to_revoke + '" />'));
+                        } else {
+                            grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + schema.@actions + '" />'));
+                        }
+                    } else {
+                        // gotta find individual tables and views with actions
+                        var tabs_and_views:XMLList = schema.children();
+                        for each (var tab_or_view:XML in tabs_and_views) {
+                            var type:String;
+                            if (tab_or_view.@label == 'Tables')
+                                type = 'table';
+                            else
+                                type = 'view';
+                            for each (var element:XML in tab_or_view.children()) {
+                                if (tab_or_view.hasOwnProperty('@actions') && tab_or_view.@actions != element.@actions) {
+                                    grant_perms.push(new XML('<grant level="item" type="' + type +
+                                        '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                        '" perms="' + tab_or_view.@actions + '" />'));
+                                } else {
+                                    if (element.hasOwnProperty('@oldActions')) {
+                                        to_grant = CustomFuncs.ArrDiff(String(element.@actions).split(' '), String(element.@oldActions).split(' ')).join(' ');
+                                        to_revoke = CustomFuncs.ArrDiff(String(element.@oldActions).split(' '), String(element.@actions).split(' ')).join(' ');
+                                        if (to_grant != '') {
+                                            grant_perms.push(new XML('<grant level="item" type="' + type +
+                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                            '" perms="' + to_grant + '" />'));
+                                        }
+                                        if (to_revoke != '') {
+                                            revoke_perms.push(new XML('<revoke level="item" type="' + type +
+                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                            '" perms="' + to_revoke + '" />'));
+                                        }
+                                    } else if (element.@oldActions != element.@actions) {
+                                        grant_perms.push(new XML('<grant level="item" type="' + type +
+                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                            '" perms="' + element.@actions + '" />'));
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // should we just let java parse this..? no...
+                        // oh, duh
+                        // we send a revoke call for any diff in oldActions and actions,
+                        // then send an add call for all actions,
+                       
+                    }
+                }
+               /* trace(diff_schemas.toXMLString());
+                trace('grants...');
+                for each (var g:XML in grant_perms)
+                    trace(g.toXMLString() + ',');
+                trace('now revs...');
+                for each (var r:XML in revoke_perms)
+                    trace(r.toXMLString());
+                */
+                
+                // will not have any revokes until functionality is added in LucidDB
+                
+                var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', '', '', '', grant_perms);
+                CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
+                var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', '', '', '', revoke_perms);
+                //CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
+            }
+            
+            // tree functions
+            public function tree_itemClick(event:ListEvent) : void {
+                var item:XML = XML(event.currentTarget.selectedItem);
+                for (var p:String in color_key) {
+                    CheckBox(this['p_' + p.toLowerCase()]).selected = false;
+                    CheckBox(this['p_' + p.toLowerCase()]).enabled = true;
+                }
+                if (item.hasOwnProperty('@actions')) {
+                    for each (var perm:String in String(item.@actions).toLowerCase().split(' ')) {
+                        if (perm == '') continue;
+                        CheckBox(this['p_' + perm]).selected = true;
+                        // TODO: allow permission revoking
+                        CheckBox(this['p_' + perm]).enabled = false;
+                    }
+                }
+            }
+            
+            public function tree_dataTip(item:Object) : String {
+                if (XML(item).hasOwnProperty('@actions') && items_tree.activeEffects.length == 0) {
+                    return XML(item).@actions;
+                } else {
+                    return '';
+                }
+            }
+            
+        ]]>
+    </mx:Script>
+    
+</mx:TitleWindow>
