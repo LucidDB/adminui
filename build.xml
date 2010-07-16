@@ -1,6 +1,6 @@
 <project name="FlexSQLAdmin" default="deploy">
 
-  <property name="webapp.dir" value="/var/lib/jetty/webapps"/>
+  <property name="webapp.dir" value="/home/kevin/Desktop/jetty-hightide-7.1.5.v20100705/webapps"/>
   <!-- Change this to your SDK location. -->
   <property name="FLEX_HOME" value="/home/kevin/Desktop/flex_sdk_4" />
 
@@ -53,6 +53,7 @@
     <generateHtmlWrapper file="SQLAdmin.html"
       height="100%" width="100%" swf="SQLAdmin" output="${DEPLOY_DIR}"
       title="SQLAdmin" template="express-installation"
+      version-major="6" version-minor="0" version-revision="65"
       />
   </target>
 
@@ -64,9 +65,9 @@
     <attribute name="width"/>
     <attribute name="height"/>
     <!--<attribute name="bgcolor"/>-->
-    <!--<attribute name="version-major"/>-->
-    <!--<attribute name="version-minor"/>-->
-    <!--<attribute name="version-revision"/>-->
+    <attribute name="version-major"/>
+    <attribute name="version-minor"/>
+    <attribute name="version-revision"/>
     <attribute name="template"/>
     <attribute name="output"/>
 
