@@ -1,6 +1,6 @@
 <project name="FlexSQLAdmin" default="deploy">
 
-  <property name="webapp.dir" value="/home/kevin/Desktop/jetty-hightide-7.1.5.v20100705/webapps"/>
+  <property name="webapp.dir" value="/var/lib/jetty/webapps"/>
   <!-- Change this to your SDK location. -->
   <property name="FLEX_HOME" value="/home/kevin/Desktop/flex_sdk_4" />
 
@@ -35,6 +35,7 @@
 
   <target name="deploy" depends="generate_war">
     <copy file="adminui.war" toFile="${webapp.dir}/adminui.war" />
+    <copy file="adminui.war" tofile="../dynamodb-services/wars/adminui.war"/>
     <delete file="adminui.war" />
   </target>
 
