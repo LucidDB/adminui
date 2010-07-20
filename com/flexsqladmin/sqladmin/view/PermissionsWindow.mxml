@@ -213,10 +213,11 @@
                     }
                 }
                 original_data = new XML(datacopy);
-                // Add colors to form items
+                // Add colors to form items and disable entry until they click something
                 for (var p:String in color_key) {
                     Container(this['p_' + p.toLowerCase()].parent).setStyle("backgroundColor", color_key[p]);
                     CheckBox(this['p_' + p.toLowerCase()]).addEventListener(MouseEvent.CLICK, permClick);
+                    CheckBox(this['p_' + p.toLowerCase()]).enabled = false;
                 }
             }
             

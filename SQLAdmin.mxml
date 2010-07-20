@@ -222,6 +222,19 @@
 				var metadata:MetaDataEvent = new MetaDataEvent(ComboBox(event.target).selectedItem.CATALOG_NAME);
 				CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
 			}   
+
+      private function add_item_click() : void {
+        var selected:Object = add_item_list.selectedItem;
+        if (selected.action == 'query') {
+          addTab('', tabnavigator);
+        } else if (selected.action == 'table') {
+          addTab('New Table', tabnavigator, 'createTable');
+        } else if (selected.action == 'users') {
+          addTab('Users', tabnavigator, 'usersWindow');
+        } else if (selected.action == 'roles') {
+          addTab('New Role', tabnavigator, 'rolesWindow');
+        }
+      }
 			
 		]]>
 	</mx:Script>
@@ -314,22 +327,13 @@
 			
 			<mx:Box width="100%" height="50%">
 				<mx:HBox width="100%">
-					<mx:Button click="addTab('', tabnavigator);" icon="@Embed(source='/icons/add_tab.png')"
-                               toolTip="(CTRL-T) Add Query Tab" id="addtab" label="Add Query Tab" />
-                    <mx:Button click="addTab('New Table', tabnavigator, 'createTable');"
-                               icon="@Embed(source='/icons/add_tab.png')" toolTip="(CTRL-N) Add New Table"
-                               id="addtabletab" label="Add New Table" />
-                    <mx:Button click="addTab('Users', tabnavigator, 'usersWindow');"
-                               icon="@Embed(source='/icons/add_tab.png')"
-                               id="userstab" label="View and Create Users" />
-                    <mx:Button click="addTab('New Role', tabnavigator, 'rolesWindow');"
-                               icon="@Embed(source='/icons/add_tab.png')"
-                               id="rolestab" label="Add New Role" />
-					<!--
-					This might come out in a future release. The functionality is there, just no paste ability yet. 
-					<mx:Button icon="@Embed(source='/icons/cut.png')" toolTip="(CTRL-X) Cut" label="Cut" click="cut();"/>
-					<mx:Button icon="@Embed(source='/icons/copy.png')" toolTip="(CTRL-C) Copy" label="Copy" click="copy();"/>
-					-->
+          <mx:Button click="add_item_click();" label="Add " icon="@Embed(source='/icons/add_tab.png')"/>
+          <mx:ComboBox id="add_item_list">
+            <mx:Object label="Query Tab" action="query" />
+            <mx:Object label="New Table" action="table" />
+            <mx:Object label="and View Users Window" action="users" />
+            <mx:Object label="New Role" action="roles" />
+          </mx:ComboBox>
 					<mx:Spacer width="100%"/>
 					<mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>
 				</mx:HBox>
