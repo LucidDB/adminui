@@ -4,7 +4,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
 	import com.flexsqladmin.sqladmin.events.LoginEvent;
@@ -28,8 +28,14 @@ package com.flexsqladmin.sqladmin.commands
 			loginWindow = LoginEvent(event).loginWindow;
 			var sql:String = LoginEvent(event).sql;
 			var sqlquerytype:String = LoginEvent(event).sqlquerytype;
-			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
+            
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                sqlquerytype: sqlquerytype,
+                sql: sql,
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("execSQL", args);
 		}
 		public function login():void{
 			DebugWindow.log("LoginCommand:login()");

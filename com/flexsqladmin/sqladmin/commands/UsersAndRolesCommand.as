@@ -4,8 +4,7 @@ package com.flexsqladmin.sqladmin.commands
     import com.adobe.cairngorm.commands.Command;
     import com.adobe.cairngorm.control.CairngormEvent;
     import com.adobe.cairngorm.control.CairngormEventDispatcher;
-    import com.flexsqladmin.sqladmin.business.UsersAndRolesDelegate;
-    import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+    import com.flexsqladmin.sqladmin.business.GeneralDelegate;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -45,7 +44,7 @@ package com.flexsqladmin.sqladmin.commands
             perms_list = UsersAndRolesEvent(event).perms_list;
             
             CursorManager.setBusyCursor();
-            var delegate:UsersAndRolesDelegate = new UsersAndRolesDelegate(this);
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "UsersAndRolesService");
             
             if (call == 'getCurrentSessions')
                 CursorManager.removeBusyCursor();

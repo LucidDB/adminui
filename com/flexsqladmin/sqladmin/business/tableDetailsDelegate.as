@@ -41,7 +41,7 @@ package com.flexsqladmin.sqladmin.business
        
        public function postTableDetails(cat:String, schema:String, table:String, details:XML) : void {
            // TODO: get rid of the hardcoded url in here.
-           DebugWindow.log("tableDetailsDelegate.as:postTableDetails()");
+           DebugWindow.log("shiiiitableDetailsDelegate.as:postTableDetails()");
            service.postTableDetails.request = XMLList(
                "<ns0:postTableDetails xmlns:ns0=\"http://api.ws.dynamobi.com/\">" +
                "<catalog>" + cat + "</catalog>" +

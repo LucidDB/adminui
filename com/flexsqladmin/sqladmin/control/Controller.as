@@ -1,7 +1,6 @@
 package com.flexsqladmin.sqladmin.control
 {
 	import com.adobe.cairngorm.control.FrontController;
-	import com.flexsqladmin.sqladmin.commands.InitCommand;
     import com.flexsqladmin.sqladmin.commands.LoginCommand;
     import com.flexsqladmin.sqladmin.commands.MetaDataCommand;
     import com.flexsqladmin.sqladmin.commands.ExecuteSQLCommand;
@@ -14,7 +13,6 @@ package com.flexsqladmin.sqladmin.control
     import com.flexsqladmin.sqladmin.commands.TableDetailsCommand;
     import com.flexsqladmin.sqladmin.commands.UsersAndRolesCommand;
     
-    import com.flexsqladmin.sqladmin.events.InitEvent;
     import com.flexsqladmin.sqladmin.events.LoginEvent;
     import com.flexsqladmin.sqladmin.events.MetaDataEvent;
     import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -33,7 +31,6 @@ package com.flexsqladmin.sqladmin.control
 		{
 			addCommand(LoginEvent.LOGIN, LoginCommand);
 			addCommand(MetaDataEvent.METADATA, MetaDataCommand);
-			addCommand(InitEvent.INITEVENT, InitCommand);
 			addCommand(ExecuteSQLEvent.EXECUTESQL, ExecuteSQLCommand);
 			addCommand(OpenTableEvent.OPENTABLE, OpenTableCommand);
 			addCommand(TableMetaDataEvent.TABLEMETADATA, TableMetaDataCommand);

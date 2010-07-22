@@ -4,7 +4,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -30,8 +30,13 @@ package com.flexsqladmin.sqladmin.commands
 			sql = ExecuteSQLEvent(event).sql;
 			sqlquerytype = ExecuteSQLEvent(event).sqlquerytype;
             func = ExecuteSQLEvent(event).func;
-			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL(sql, sqlquerytype, model.tempConnectionVO);
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                sqlquerytype: sqlquerytype,
+                sql: sql,
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("execSQL", args);
 		}
 		
 		public function onResult(event:*=null):void

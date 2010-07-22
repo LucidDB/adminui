@@ -5,7 +5,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.business.Responder;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.TableMetaDataEvent;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.vo.OpenTableData;
 
@@ -18,8 +18,17 @@ package com.flexsqladmin.sqladmin.commands
 		{
 			DebugWindow.log("TableMetaDataCommand.as:execute()");
 			tablemetadata = TableMetaDataEvent(event).tablemetadata;
-			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL("SELECT column_name, datatype, is_nullable AS IS_NULLABLE, \"PRECISION\" AS character_maximum_length FROM SYS_ROOT.DBA_COLUMNS WHERE table_name = '" + tablemetadata.getTable().split(".")[1] + "'", "meta", model.connectionVO);
+            
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                sqlquerytype: "meta",
+                sql: "SELECT column_name, datatype, is_nullable AS IS_NULLABLE, " +
+                    "\"PRECISION\" AS character_maximum_length " +
+                    "FROM SYS_ROOT.DBA_COLUMNS " +
+                    "WHERE table_name = '" + tablemetadata.getTable().split(".")[1] + "'",
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("execSQL", args);
 		}
 		
 		public function onResult(event:*=null):void

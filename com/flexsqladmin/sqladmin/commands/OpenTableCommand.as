@@ -3,7 +3,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.business.Responder;
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.OpenTableEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -24,8 +24,14 @@ package com.flexsqladmin.sqladmin.commands
 			var tableParts:Array = table.split(".");
 			table = tableParts.join('"."');
 			tabledatagrid = OpenTableEvent(event).tabledatagrid;
-			var delegate:execSQLDelegate = new execSQLDelegate(this);
-			delegate.execSQL("SELECT * FROM \"" + table + "\"", "normal", model.connectionVO);
+            
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                sqlquerytype: "normal",
+                sql: "SELECT * FROM \"" + table + "\"",
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("execSQL", args);
 		}
 		
 		public function onResult(event:*=null):void

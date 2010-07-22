@@ -3,7 +3,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.business.Responder;
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.business.execSQLDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	
@@ -16,10 +16,16 @@ package com.flexsqladmin.sqladmin.commands
 		public function execute(event:CairngormEvent):void
 		{
 			DebugWindow.log("ListCatalogsCommand:execute()");
-			var delegate:execSQLDelegate = new execSQLDelegate(this);
 			var sql:String = "SELECT distinct CATALOG_NAME  FROM SYS_ROOT.DBA_SCHEMAS order by CATALOG_NAME";
 			var querytype:String = "normal";
-			delegate.execSQL(sql,querytype,model.connectionVO)
+
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                sqlquerytype: querytype,
+                sql: sql,
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("execSQL", args);
 		}
 
 		public function onResult(event:*=null):void

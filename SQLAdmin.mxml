@@ -20,7 +20,6 @@
             import com.flexsqladmin.sqladmin.components.UsersWindow;
             import com.flexsqladmin.sqladmin.components.ViewWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.events.InitEvent;
             import com.flexsqladmin.sqladmin.events.MetaDataEvent;
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;

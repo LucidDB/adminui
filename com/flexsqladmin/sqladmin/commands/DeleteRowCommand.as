@@ -3,7 +3,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.business.Responder;
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -33,7 +33,7 @@ package com.flexsqladmin.sqladmin.commands
 			
 			for (var x:int = 0; x < datagrid.selectedItem.children().length(); x++){
             	deletestring += "\"" + datagrid.columns[x].dataField + "\"";
-            	if (datagrid.selectedItem.children()[x] == "<NULL>"){
+            	if (datagrid.selectedItem.children()[x] == "<NULL>" || datagrid.selectedItem.children()[x].toString().toLowerCase() == 'null') {
             		deletestring += " IS NULL";
             	} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "MONEY" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "SMALLMONEY"){
             		deletestring += " = " + datagrid.selectedItem.children()[x];
@@ -56,8 +56,13 @@ package com.flexsqladmin.sqladmin.commands
 			
 			DebugWindow.log("Delete String = " + deletesql);
 			DebugWindow.log("Check String = " + checksqlstring);
-			var delegate:handleUpdateDelegate = new handleUpdateDelegate(this);
-			delegate.handleUpdate(deletesql, checksqlstring, model.connectionVO);
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                               testsql: checksqlstring,
+                               sql: deletesql,
+                               toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("handleUpdate", args);
 		}
 		
 		public function onResult(event:*=null):void

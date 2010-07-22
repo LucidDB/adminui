@@ -3,7 +3,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.business.Responder;
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.business.handleUpdateDelegate;
+	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
@@ -52,7 +52,7 @@ package com.flexsqladmin.sqladmin.commands
             var whereclause:String = "";
 			for(var x:int = 0; x < datagrid.columnCount ; x++){
 				whereclause += "\"" + datagrid.columns[x].dataField + "\"";
-				if (itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField] == "<NULL>"){
+				if (itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField] == "<NULL>"  || datagrid.columns[x].dataField.toString().toLowerCase() == 'null') {
 					whereclause += " IS NULL";
 				} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "MONEY" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "SMALLMONEY"){
 					whereclause += " = " + itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField];
@@ -72,8 +72,13 @@ package com.flexsqladmin.sqladmin.commands
 			DebugWindow.log("Update String = " + updatesql);
 			DebugWindow.log("Check String = " + checksql);
 			
-			var delegate:handleUpdateDelegate = new handleUpdateDelegate(this);
-			delegate.handleUpdate(updatesql, checksql, model.connectionVO);
+            var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
+            var args:Object = {connection: model.connectionVO.getConnectionString(),
+                testsql: checksql,
+                sql: updatesql,
+                toomany: model.connectionVO.toomany
+            };
+            delegate.serviceDelegate("handleUpdate", args);
 		}
 		
 		public function onResult(event:*=null):void
