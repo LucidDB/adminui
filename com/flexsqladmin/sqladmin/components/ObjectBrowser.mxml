@@ -134,7 +134,11 @@
             }
             
             private function schema_click_handler(e:MenuEvent) : void {
-                
+                if (e.index == 0) {
+                    query_dispatcher('DROP SCHEMA "' + model.currentcatalogname + '"."' +
+                        selectedItem.@label + '" CASCADE',
+                        "Are you sure you want to\ndrop this schema?");
+                }
             }
             
             private function menuHandler(e:MenuEvent):void{
@@ -220,20 +224,10 @@
             	else if(e.index == 3) {
                     // script-delete for tabs, drop for views
                     if (getParentItem(this.selectedItem).@label == "Views") {
-                        var conf:Alert = Alert.show("Are you sure you want to\ndrop this view?",
-                            "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
-                            function(event:CloseEvent):void { // confirm handler
-                                if (event.detail == Alert.YES) {
-                                    var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
-                                        'DROP VIEW "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
-                                        "normal");
-                                    
-                                    CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-                                    var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                                    CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-                                }
-                            }, confirmicon, Alert.NO);
-                        
+                        query_dispatcher('DROP VIEW "' + catalogname + '"."' + 
+                            getParentItem(getParentItem(selectedItem)).@label + 
+                            '"."' + selectedItem.@label + '" CASCADE',
+                            "Are you sure you want to\ndrop this view?");                        
                     } else {
                         scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
                     }
@@ -259,18 +253,10 @@
                     CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
                 } else if (e.index == 7) {
                     // Drop table
-                    var drop_conf:Alert = Alert.show("Are you sure you want to\ndrop this table?",
-                        "Confirmation", Alert.YES|Alert.NO, Application.application as Application,
-                        function(event:CloseEvent):void { // confirm handler
-                            if (event.detail == Alert.YES) {
-                                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(
-                                    'DROP TABLE "' + catalogname + '"."' + getParentItem(getParentItem(selectedItem)).@label + '"."' + selectedItem.@label + '" CASCADE',
-                                    "normal");
-                                CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-                                var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                                CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-                            }
-                        }, confirmicon, Alert.NO);
+                    query_dispatcher('DROP TABLE "' + catalogname + '"."' +
+                        getParentItem(getParentItem(selectedItem)).@label + '"."' +
+                        selectedItem.@label + '" CASCADE',
+                        "Are you sure you want to\ndrop this table?");
                 }
             	DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
                 
@@ -286,6 +272,20 @@
                     qw.guessed_schema = String(getParentItem(getParentItem(this.selectedItem)).@label);
                 }
             }
+            
+            private function query_dispatcher(query:String, warn_msg:String) : void {
+                Alert.show(warn_msg, "Confirmation", Alert.YES|Alert.NO,
+                    Application.application as Application,
+                    function(event:CloseEvent):void { // confirm handler
+                        if (event.detail == Alert.YES) {
+                            var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "normal");
+                            CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                            var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                            CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                        }
+                    }, confirmicon, Alert.NO);
+            }
+
 		]]>
 	</mx:Script>
 	

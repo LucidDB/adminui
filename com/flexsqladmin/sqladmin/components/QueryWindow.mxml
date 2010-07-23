@@ -163,7 +163,7 @@
 			
 			public function parseQuery(e:KeyboardEvent):void{
 				if (e.keyCode != 116 && querytext.text != null){
-	                var pattern:RegExp = /\b(add|column|modify|truncate|create|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
+	                var pattern:RegExp = /\b(add|column|modify|truncate|create|schema|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
 	                var aggpattern:RegExp = /\b(count|avg|sum|max|min)\b/gi;
 	                var regexNewLine:RegExp = /\r/g;
 	                var lt:RegExp = /</g;
