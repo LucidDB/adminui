@@ -4,7 +4,7 @@ package com.flexsqladmin.sqladmin.commands
     import com.adobe.cairngorm.commands.Command;
     import com.adobe.cairngorm.control.CairngormEvent;
     import com.adobe.cairngorm.control.CairngormEventDispatcher;
-    import com.flexsqladmin.sqladmin.business.GeneralDelegate;
+    import com.flexsqladmin.sqladmin.business.tableDetailsDelegate;
     import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
@@ -23,33 +23,19 @@ package com.flexsqladmin.sqladmin.commands
         private var request_type:ActionEnum;
         
         public function execute(event:CairngormEvent) : void {
-            DebugWindow.log("TableDetails:execute()or");
+            DebugWindow.log("TableDetails:execute()");
             var cat:String = TableDetailsEvent(event).catalog;
             var schema:String = TableDetailsEvent(event).schema;
             var table:String = TableDetailsEvent(event).table;
             var action:ActionEnum = TableDetailsEvent(event).action;
             var details:XML = TableDetailsEvent(event).details;
             request_type = action;
-
-            var delegate:GeneralDelegate = new GeneralDelegate(this, "TableDetailsService");
-
-            var op:String;
-            var args:Object;
-            if (action == ActionEnum.GET) {
-                op = "getTableDetails";
-                args = {table: table,
-                    schema: schema,
-                    catalog: cat
-                };
-            } else if (action == ActionEnum.POST) {
-                op = "postTableDetails";
-                args = {table: table,
-                    schema: schema,
-                    catalog: cat,
-                    detailsHolder: details//.toXMLString()
-                };
-            }
-            delegate.serviceDelegate(op, args);
+            
+            var delegate:tableDetailsDelegate = new tableDetailsDelegate(this);
+            if (action == ActionEnum.GET)
+                delegate.getTableDetails(cat, schema, table);
+            else if (action == ActionEnum.POST)
+                delegate.postTableDetails(cat, schema, table, details);
         }
         
         public function onResult(event:*=null) : void {
@@ -86,6 +72,8 @@ package com.flexsqladmin.sqladmin.commands
                 } else {
                     Alert.show("Execution Failed");
                 }
+                /*var response:XML = new XML(XML(event.result['return']));
+                trace(response);*/
             }
         }
         
