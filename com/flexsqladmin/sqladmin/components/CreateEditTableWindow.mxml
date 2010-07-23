@@ -11,7 +11,8 @@
     <mx:HBox width="100%" left="10" right="10">
         <mx:Button click="submitCreateTable();" toolTip="Create Your Table" label="Create Your Table"
                    icon="@Embed(source='/icons/exec.gif')" />
-        <mx:Button click="addNewColumn();" toolTip="(CTRL+F?) Add Column" label="Add Column" />
+        <mx:Button click="addNewColumn();" toolTip="(CTRL+F) Add Column" label="Add Column"
+                   icon="@Embed(source='/icons/textfield_add.png')" />
     </mx:HBox>
 
     <mx:Binding source="table_name.text" destination="TD.details.@name" />
@@ -22,9 +23,11 @@
                 <mx:Label text="{model.currentcatalogname}" />
             </mx:FormItem>
             <mx:FormItem label="Schema">
-                <mx:ComboBox id="table_schema" dataProvider="{new XMLList(model.metadata.children())}"
+                <mx:ComboBox id="table_schema" prompt="Select Schema" selectedIndex="-1"
+                             dataProvider="{new XMLList(model.metadata.children())}"
                              labelField="@label" />
-                <mx:Button id="new_schema_btn" click="newSchema();" label="New Schema" />
+                <mx:Button id="new_schema_btn" click="newSchema();" label="New Schema" 
+                           icon="@Embed(source='/icons/database_add.png')" />
             </mx:FormItem>
         </mx:Form>
 
@@ -61,6 +64,7 @@
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
             
             import flash.events.Event;
@@ -169,9 +173,13 @@
             
             public function submitCreateTable() : void {
                 TD.details.setChildren('');
+                if (table_schema.selectedIndex == -1) {
+                    Alert.show("Please select a schema.", "Error");
+                    return;
+                }
                 for each (var col_form:ColumnForm in col_forms) {
                     if (col_form.default_required && col_form.col_default.text == '') {
-                        Alert.show("Please fill in the default value on your non-nullable column.");
+                        Alert.show("Please fill in the default value on your non-nullable column.", "Error");
                         return;
                     }
                     TD.details.appendChild(col_form.col_details);
@@ -184,10 +192,9 @@
             }
             
             public function newSchema() : void {
-                /*var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this, OpenTableWindow, true));
-                opentablewindow.setStyle("borderAlpha", 0.8);
-                opentablewindow.showCloseButton = true;
-                */
+                var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
+                sch_win.setStyle("borderAlpha", 0.8);
+                sch_win.showCloseButton = true;
             }
             
             

@@ -46,6 +46,10 @@
 			public var closeTabImg : Class;
 			[Embed("/icons/script_select.png")]
 			public var QWimg : Class;
+            [Embed("/icons/table_add.png")]
+            public var NTimg:Class;
+            [Embed("/icons/group.png")]
+            public var UsersImg:Class;
 			
 			[Bindable]
 			private var model:ModelLocator = ModelLocator.getInstance();
@@ -134,7 +138,7 @@
 			}
 						
 			public function addTab(lbl:String, navigator:SuperTabNavigator,
-								   child_obj:String = "") : Object {
+								   child_obj:String = "", icon:Class=null) : Object {
 				
 				if(lbl=="")
 					lbl = "Query Window";// + (navigator.numChildren + 1);
@@ -154,6 +158,7 @@
                     ctw.id = "ctw-" + (model.table_details._len + 1).toString();
                     added_obj = ctw;
                     child.id = ctw.id;
+                    child.icon = NTimg;
                 } else if (child_obj == "viewWindow") {
                     var vw:ViewWindow = new ViewWindow();
                     vw.id = "vw-" + (model.table_details._len + 1).toString();
@@ -164,6 +169,7 @@
                     uw.id = "uw-" + (model.users_windows._len + 1).toString();
                     added_obj = uw;
                     child.id = uw.id;
+                    child.icon = UsersImg;
                 } else if (child_obj == "rolesWindow") {
                     var rw:RolesWindow = new RolesWindow();
                     rw.id = "rw-" + (model.roles_windows._len + 1).toString();
@@ -172,7 +178,8 @@
                 } else {
                     return null;
                 }
-                
+                if (icon != null) // override default
+                    child.icon = icon;
                 child.name = child.id;
                 child.addChild(added_obj);
 				navigator.addChild(child);

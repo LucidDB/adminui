@@ -41,7 +41,7 @@ package com.flexsqladmin.sqladmin.business
        
        public function postTableDetails(cat:String, schema:String, table:String, details:XML) : void {
            // TODO: get rid of the hardcoded url in here.
-           DebugWindow.log("shiiiitableDetailsDelegate.as:postTableDetails()");
+           DebugWindow.log("tableDetailsDelegate.as:postTableDetails()");
            service.postTableDetails.request = XMLList(
                "<ns0:postTableDetails xmlns:ns0=\"http://api.ws.dynamobi.com/\">" +
                "<catalog>" + cat + "</catalog>" +
@@ -52,6 +52,16 @@ package com.flexsqladmin.sqladmin.business
                );
            var o:AbstractOperation = service.getOperation("postTableDetails");
            var token:AsyncToken = service.postTableDetails();
+           token.resultHandler = responder.onResult;
+           token.faultHandler = responder.onFault;
+       }
+       
+       public function createSchema(cat:String, schema:String) : void {
+           DebugWindow.log("tableDetailsDelegate.as:createSchema()");
+           var o:AbstractOperation = service.getOperation("createSchema");
+           o.arguments.schema = schema;
+           o.arguments.catalog = cat;
+           var token:AsyncToken = service.createSchema();
            token.resultHandler = responder.onResult;
            token.faultHandler = responder.onFault;
        }

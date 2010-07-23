@@ -48,6 +48,8 @@
             public var closeicon : Class;
             [Embed("/icons/confirm.png")]
             public var confirmicon : Class;
+            [Embed("/icons/table_edit.png")]
+            public var ETimg:Class;
 
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -217,7 +219,7 @@
                     // Add New Table For Editing
                     var tab_win : CreateEditTableWindow = CreateEditTableWindow(
                         Application.application.addTab("Edit Table " + this.selectedItem.@label,
-                                                       model.main_tabnav, 'createTable')
+                                                       model.main_tabnav, 'createTable', ETimg)
                     );
                     // Grab the table data.
                     var td_event:TableDetailsEvent = new TableDetailsEvent(catalogname,

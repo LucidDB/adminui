@@ -36,6 +36,8 @@ package com.flexsqladmin.sqladmin.commands
                 delegate.getTableDetails(cat, schema, table);
             else if (action == ActionEnum.POST)
                 delegate.postTableDetails(cat, schema, table, details);
+            else if (action == ActionEnum.PUT)
+                delegate.createSchema(cat, schema);
         }
         
         public function onResult(event:*=null) : void {
@@ -43,6 +45,8 @@ package com.flexsqladmin.sqladmin.commands
                 onGetResult(event);
             else if (request_type == ActionEnum.POST)
                 onPostResult(event);
+            else if (request_type == ActionEnum.PUT)
+                onPutResult(event);
         }
         
         // for gets:
@@ -72,8 +76,22 @@ package com.flexsqladmin.sqladmin.commands
                 } else {
                     Alert.show("Execution Failed");
                 }
-                /*var response:XML = new XML(XML(event.result['return']));
-                trace(response);*/
+            }
+        }
+        
+        public function onPutResult(event:*=null) : void {
+            DebugWindow.log("TableDetailsCommand:onPutResult()");
+            var r:XML = new XML(event.result);
+            if (r.datamap == "Error") {
+                var errormsg:String = r.NewDataSet.Table.Error;
+                DebugWindow.log("Error - " + errormsg);                
+            } else {
+                var response:String = event.result;
+                if (response.length == 0) {
+                    Alert.show("Schema created.", "Success");
+                } else {
+                    Alert.show("Schema could not be created.", "Error");
+                }
             }
         }
         

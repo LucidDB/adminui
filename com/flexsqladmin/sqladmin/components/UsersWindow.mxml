@@ -123,12 +123,16 @@
                     mod_win.setStyle("borderAlpha", 0.8);
                     mod_win.showCloseButton = true;
                     mod_win.user = users_list.selectedLabel;
+                } else {
+                    Alert.show("Please select a user.", "Error");
                 }
             }
             
             public function modifyRole() : void {
-                // todo: Should this make a PopUp like Modify User does, or should it really be another tab?
-                // I think it should make a popup. Make a note to ask Nick. (I'm on the fence.)
+                if (roles_list.selectedIndex == -1) {
+                    Alert.show("Please select a role.", "Error");
+                    return;
+                }
                 var mod_role:RolesWindow = Application.application.addTab('Modify Role', model.main_tabnav, 'rolesWindow');
                 mod_role.modding = true;
                 mod_role.role_name.text = roles_list.selectedLabel;

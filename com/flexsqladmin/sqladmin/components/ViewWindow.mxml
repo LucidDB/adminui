@@ -7,10 +7,12 @@
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
             import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
             
             import mx.core.Application;
+            import mx.managers.PopUpManager;
             
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
@@ -38,7 +40,9 @@
             }
             
             override public function newSchema() : void {
-                
+                var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
+                sch_win.setStyle("borderAlpha", 0.8);
+                sch_win.showCloseButton = true;
             }
             
             override public function makeView() : void {
