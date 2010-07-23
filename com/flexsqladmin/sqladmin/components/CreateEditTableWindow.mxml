@@ -191,6 +191,7 @@
                 CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
             }
             
+            // Todo: in objectbrowser allow deletion?
             public function newSchema() : void {
                 var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
                 sch_win.setStyle("borderAlpha", 0.8);

@@ -53,17 +53,20 @@
 
             private var clickx:int = 0;
             private var clicky:int = 0;
+            private var click_interval:Number = 0;
+
             private var menu_closed:Boolean = true;
             private var model:ModelLocator = ModelLocator.getInstance();
             
-            public function init():void{
+            public function init() : void {  
                 var expandTree:Function = function():void {
-                    expandItem(selectedItem, !isItemOpen(selectedItem), true);
+                    clearInterval(click_interval);
+                    expandItem(selectedItem, !isItemOpen(selectedItem), true, true);
                 };
                 
             	this.addEventListener(MouseEvent.CLICK, clickHandler, false, 1);
                 this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
-                this.addEventListener(MouseEvent.DOUBLE_CLICK, expandTree, false, 3);
+                //this.addEventListener(MouseEvent.DOUBLE_CLICK, expandTree, false, 3);
                 this.addEventListener(ListEvent.ITEM_DOUBLE_CLICK, expandTree, false, 5);
 
             }
@@ -73,13 +76,30 @@
             	clicky = e.stageY;
             }
             
-			private function listItemClickHandler(event:Event):void {
-            	if(this.selectedItem.@sqlquery != null && this.selectedItem.@sqlquery.toString().length != 0){
-            		var objMenu:Array;
-            		if (this.getParentItem(this.selectedItem).@label == "Procedures")
-            			objMenu = [{label: "Script as Execute", icon:scriptexec}];
-            		else if (this.getParentItem(this.selectedItem).@label == "Tables")
-	            		objMenu = [{label: "Script as Select", icon:selecticon},
+            private function listItemClickHandler(event:ListEvent) : void {
+                clearInterval(click_interval);
+                click_interval = setInterval(deferredListItemClickHandler, 200);
+            }
+            
+			private function deferredListItemClickHandler() : void {
+                clearInterval(click_interval);
+                var objMenu:Array = [];
+                var action:String = '';
+                
+                // Schemas and tables/views menu roots:
+                if (XML(selectedItem).localName() == 'schema') {
+                    objMenu = [{label: "Drop Schema", icon: closeicon}
+                    ];
+                    action = 'schema_click';
+                }
+                
+                // Individual tables and views:
+                if(this.selectedItem.@sqlquery != null && this.selectedItem.@sqlquery.toString().length != 0) {
+                    action = 'element_click';
+                    if (this.getParentItem(this.selectedItem).@label == "Procedures")
+                        objMenu = [{label: "Script as Execute", icon:scriptexec}];
+                    else if (this.getParentItem(this.selectedItem).@label == "Tables")
+                        objMenu = [{label: "Script as Select", icon:selecticon},
                             {label: "Script as Insert", icon:inserticon},
                             {label: "Script as Update", icon:updateicon},
                             {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
@@ -87,24 +107,34 @@
                             {label: "View and Edit Table", icon: updateicon},
                             {label: "Drop Table", icon: closeicon}
                         ];
-	            	else if (this.getParentItem(this.selectedItem).@label == "Views")
-	            		objMenu = [{label: "Script as Select", icon:selecticon}
+                    else if (this.getParentItem(this.selectedItem).@label == "Views")
+                        objMenu = [{label: "Script as Select", icon:selecticon}
                             , {type: "separator"}
                             , {label: "Edit View", icon: updateicon}
                             , {label: "Drop View", icon: closeicon}
                         ];
-	            	if (this.getParentItem(this.selectedItem).@label == "Tables" || this.getParentItem(this.selectedItem).@label == "Views" || this.getParentItem(this.selectedItem).@label == "Procedures"){
-                        if (menu_closed) {
-                            menu_closed = false;
-                            var myMenu:Menu = Menu.createMenu(null, objMenu);
-                            myMenu.show(clickx + 25, clicky);
+                }
+
+                if (objMenu.length > 0) {
+                    if (menu_closed) {
+                        menu_closed = false;
+                        var myMenu:Menu = Menu.createMenu(null, objMenu);
+                        myMenu.show(clickx + 25, clicky);
+                        
+                        if (action == 'element_click')
                             myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
-                            myMenu.addEventListener(Event.CLOSE, function():void { menu_closed=true; });
-                        } else {
-                            menu_closed = true;
-                        }
-	            	}
-            	}
+                        else if (action == 'schema_click')
+                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, schema_click_handler);
+                        
+                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed=true; });
+                    } else {
+                        menu_closed = true;
+                    }
+                }
+            }
+            
+            private function schema_click_handler(e:MenuEvent) : void {
+                
             }
             
             private function menuHandler(e:MenuEvent):void{
