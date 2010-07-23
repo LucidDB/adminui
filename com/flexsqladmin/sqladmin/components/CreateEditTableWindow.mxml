@@ -90,6 +90,8 @@
             public function init() : void {
                 TD = new TableDetailsVO();
                 TD.details.@createTime = table_create_time.text;
+                table_create_time.enabled = false;
+
                 model.table_details[id] = TD;
                 model.table_details._len += 1;
             }
@@ -135,6 +137,8 @@
                     
                     col_forms.addItem(col_form);
                 }
+                
+                table_create_time.text = TD.details.@createTime;
 
                 // Also load the schema:
                 for (var i:Number = 0; i < table_schema.dataProvider.length; i++) {
@@ -146,7 +150,6 @@
                 
                 // And disable some fields.
                 table_name.editable = false;
-                table_create_time.enabled = false;
                 table_schema.enabled = false;
                 new_schema_btn.visible = false;
             }

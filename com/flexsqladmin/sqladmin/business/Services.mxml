@@ -56,12 +56,6 @@
             </mx:request>
         </mx:operation>
         <mx:operation id="postTableDetails" name="postTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
-            <mx:request>
-                <catalog></catalog>
-                <schema></schema>
-                <table></table>
-                <detailsHolder></detailsHolder>
-            </mx:request>
         </mx:operation>
     </mx:WebService>
     
