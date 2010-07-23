@@ -74,12 +74,11 @@
 				var urlpattern:RegExp = /SQLAdmin.swf/i; 
 				var wsdl:String = "";
 				try {
-                    /*if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
+                    if(Application.application.parameters.webservice == undefined || Application.application.parameters.webservice == '' ){
                         wsdl = "http://localhost:8080/adminws/ns0.wsdl";
                     } else {
                         wsdl = Application.application.parameters.webservice;
-                    }*/
-                    wsdl = "http://localhost:8080/adminws/ns0.wsdl";
+                    }
 
 					DebugWindow.log("Using WSDL location - " + wsdl);
                     var services:Array = ['sqlWebService'
