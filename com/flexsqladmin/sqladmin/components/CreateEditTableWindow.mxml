@@ -195,6 +195,9 @@
                 var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
                 sch_win.setStyle("borderAlpha", 0.8);
                 sch_win.showCloseButton = true;
+                sch_win.addEventListener(Event.CLOSE, function():void {
+                    table_schema.dataProvider = new XMLList(model.metadata.children());
+                });
             }
             
             

@@ -22,6 +22,7 @@
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
@@ -41,6 +42,8 @@
                 if (new_name.text != '') {
                     var addSchEvent:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname, new_name.text, '', ActionEnum.PUT);
                     CairngormEventDispatcher.getInstance().dispatchEvent(addSchEvent);
+                    var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
                 } else {
                     new_name.setFocus();
                 }

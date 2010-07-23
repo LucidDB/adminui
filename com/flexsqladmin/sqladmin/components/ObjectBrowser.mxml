@@ -50,6 +50,8 @@
             public var confirmicon : Class;
             [Embed("/icons/table_edit.png")]
             public var ETimg:Class;
+            [Embed("/icons/script_edit.png")]
+            public var VWedImg:Class;
 
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -195,7 +197,7 @@
                             var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
                             var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
 
-                            var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " + view, model.main_tabnav, "viewWindow"));
+                            var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " + view, model.main_tabnav, "viewWindow", VWedImg));
                             vw.setText(text);
                             vw.editing = true;
                             vw.view_name.text = view;

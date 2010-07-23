@@ -14,7 +14,7 @@
       <mx:Button click="clearQuery();" icon="@Embed(source='/icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query" />
       <mx:Button click="submitShowPlanQuery();" icon="@Embed(source='/icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
       <mx:CheckBox label="Include Execution Plan" id="spflag"/>
-      <mx:Button click="makeView();" label="Make View From Query" toolTip="Make View From Query" />
+      <mx:Button click="makeView();" label="Make View From Query" toolTip="Make View From Query" icon="{VWimg}" />
   </mx:HBox>
 
     <mx:HBox width="100%" left="10" right="10" id="view_info" visible="false">
@@ -25,7 +25,8 @@
             <mx:FormItem label="Schema">
                 <mx:ComboBox id="view_schema" dataProvider="{model.metadata.children()}"
                              labelField="@label" />
-                <mx:Button click="newSchema();" label="New Schema" />
+                <mx:Button click="newSchema();" label="New Schema"
+                           icon="@Embed(source='/icons/database_add.png')" />
             </mx:FormItem>
         </mx:Form>
         <mx:Form>
@@ -91,6 +92,10 @@
             public var guessed_schema : String; // this is populated when a 'script as' or similar
             // query is executed.
 			
+            [Bindable]
+            [Embed("/icons/script_add.png")]
+            public var VWimg:Class;
+            
 			public function init() : void {
 				querytext.percentWidth = 100;
 				querytext.setFocus();
@@ -215,7 +220,7 @@
             public function makeView():void {
                 var text:String = getQueryText();
                 if (text.substr(0, 6).toUpperCase() == "SELECT") {
-                    var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", model.main_tabnav, "viewWindow"));
+                    var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", model.main_tabnav, "viewWindow", VWimg));
                     vw.setText(getQueryText());
                     callLater(vw.guess_schema, [guessed_schema]);
                 } else {

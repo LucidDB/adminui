@@ -32,7 +32,8 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("MetaDataCommand:onResult()");
-            model.metadata = new XML(event.result);    
+            model.metadata = new XML(event.result);
+            //trace(model.metadata.toXMLString());
         }
 		
 		public function onFault(event:*=null):void
