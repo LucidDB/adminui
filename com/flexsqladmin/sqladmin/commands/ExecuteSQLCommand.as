@@ -48,13 +48,6 @@ package com.flexsqladmin.sqladmin.commands
 			var querycols:Array = new Array();
            	var datagridcols:Array = new Array();
 			
-            //trace(event.result);
-			var queryxml:XML = new XML(event.result);
-            if (sqlquerytype == "special") {
-                func(queryxml);
-                return;
-            }
-                
             try {
                 model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
@@ -62,33 +55,54 @@ package com.flexsqladmin.sqladmin.commands
                 model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName("qw-1"));
                 model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             }
+            
             var result_info : QueryResultInfo = model.query_results[VBox(model.main_tabnav.selectedChild).id];
             result_info.showplanwindow.clearWindow();
-			result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
-			 
-			if(sqlquerytype != "showplan")
-                querycols = queryxml.datamap.split(",");
-                
-            for(var x:int; x < querycols.length; x++){
-                var querycolumn:DataGridColumn = new DataGridColumn(querycols[x]);
-                querycolumn.dataTipField = querycols[x];
-                querycolumn.dataField = querycols[x];
-               	querycolumn.editable = false;
-                datagridcols.push(querycolumn);
-            }
             
-            result_info.querydatagrid.columns = datagridcols;
-			
-			if(queryxml.recordcount != ''){
-                result_info.querymessages = queryxml.recordcount + " row(s) returned.  Execution time: " + queryxml.executiontime + " ms";
+            var rows:Number = 0;
+            var executiontime:Number = 0;
+            result_info.querydata = new XMLListCollection();
+            
+            var queries:XMLList = new XMLList(event.result);
+            for each (var queryxml:XML in queries) {
+                if (sqlquerytype == "special") {
+                    func(queryxml);
+                    continue;
+                }
+                
+                result_info.querydata.addItem(queryxml.NewDataSet.Table);
+                //result_info.querydata.addItem(new XML('<Table>' + queryxml.NewDataSet.Table.children() + '</Table>'));
+                
+                if(sqlquerytype != "showplan")
+                    querycols = queryxml.datamap.split(",");
+                
+                for(var x:int = 0; x < querycols.length; x++){
+                    var querycolumn:DataGridColumn = new DataGridColumn(querycols[x]);
+                    querycolumn.dataTipField = querycols[x];
+                    querycolumn.dataField = querycols[x];
+                    querycolumn.editable = false;
+                    datagridcols.push(querycolumn);
+                }
+                
+                if(queryxml.recordcount != ''){
+                    rows += Number(queryxml.recordcount);
+                    executiontime += Number(queryxml.executiontime);
+                } 
+                
+                DebugWindow.log("messages: " + result_info.querymessages);
+                if((sqlquerytype == "showplan" || sqlquerytype == "spnormal") && queryxml.datamap.toString() != "Error"){
+                    result_info.showplanwindow.drawPlan(queryxml);
+                }
+            }
+            if (sqlquerytype == 'special')
+                return;
+            
+            if (rows > 0) {
+                result_info.querymessages = rows + " row(s) returned.  Execution time: " + executiontime + " ms";
             } else {
                 result_info.querymessages = "";
-            } 
-            
-			DebugWindow.log("messages: " + result_info.querymessages);
-            if((sqlquerytype == "showplan" || sqlquerytype == "spnormal") && queryxml.datamap.toString() != "Error"){
-            	result_info.showplanwindow.drawPlan(queryxml);
             }
+            result_info.querydatagrid.columns = datagridcols;
             //resetSelection();
 		}
 		public function onFault(event:*=null):void

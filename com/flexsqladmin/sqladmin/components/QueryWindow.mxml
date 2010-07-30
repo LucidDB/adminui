@@ -51,7 +51,10 @@
 	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10" id="tabresults_holder">
 		<mx:TabNavigator id="tabresults" width="100%" height="100%" alpha=".8">
 			<mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='/icons/result.png')">
-				<mx:DataGrid id="querydatagrid" dataProvider="{result_info.querydata}" width="100%" height="100%" horizontalScrollPolicy="auto" x="0" y="0"></mx:DataGrid>
+				<mx:DataGrid id="querydatagrid" dataProvider="{result_info.querydata}"
+                             width="100%" height="100%" horizontalScrollPolicy="auto" 
+                             x="0" y="0">
+                </mx:DataGrid>
 			</mx:Canvas>
 			<mx:Canvas id="messages" label="Messages" icon="@Embed(source='/icons/messages.png')">
 				<mx:TextArea text="{result_info.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
