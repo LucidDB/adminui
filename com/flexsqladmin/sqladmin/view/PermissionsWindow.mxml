@@ -203,7 +203,7 @@
                 for each (var role:XML in model.roles_info.children()) {
                     if (role.@name == role_name) {
                         for each (var perm:XML in role.permission) {
-                            var type:String = (perm.@itemType == 'LOCAL VIEW') ? 'Views' : 'Tables';
+                            var type:String = String(perm.@itemType).replace('Local', '') + 's';
                             var node:XML = datacopy.node.(@label == perm.@schemaName).node.(@label == type).node.(@label == perm.@itemName)[0];
                             node.@actions = perm.@actions;
                             node.@oldActions = perm.@actions;
