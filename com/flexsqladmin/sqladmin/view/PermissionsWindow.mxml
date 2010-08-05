@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="500" height="500"
+                xmlns:com="com.flexsqladmin.sqladmin.components.*"
                 creationComplete="init();"
                 title="Grant Permissions"
                 close="closeWin();" xmlns:treeClasses="mx.controls.treeClasses.*"
@@ -30,30 +31,25 @@
                  left="5" right="5" width="100%"
                  textAlign="left"
                  itemClick="tree_itemClick(event);"
-                 dataTipFunction="tree_dataTip"
-                 showDataTips="true"
                  >
             <mx:itemRenderer>
                 <mx:Component>                        
-                    <treeClasses:TreeItemRenderer creationComplete="tree_init();">
+                    <treeClasses:TreeItemRenderer>
                     <mx:Script>
                         <![CDATA[
                             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
                             
                             import mx.containers.HBox;
-                            import mx.containers.VBox;
+                            import mx.controls.Image;
                             import mx.controls.Label;
                             import mx.controls.treeClasses.TreeListData;
                             import mx.events.ToolTipEvent;
                             
                             public var disBox:HBox;
                             public var disLabel:Label;
+                            public var iconsBox:HBox;
                             public var treeListData:TreeListData;
                             public var firstgo:Boolean = true;
-                            
-                             public function tree_init() : void {
-                                 addEventListener(ToolTipEvent.TOOL_TIP_SHOWN, toolTipShown);
-                            }
                             
                             override protected function createChildren() : void {
                                 super.createChildren();
@@ -64,7 +60,12 @@
                                     if (disBox == null) {
                                         disBox = new HBox();
                                         disLabel = new Label();
+                                        iconsBox = new HBox();
+                                        iconsBox.percentWidth = 100;
+                                        iconsBox.setStyle("paddingRight", "10");
+                                        iconsBox.setStyle("horizontalAlign", "right");
                                         disBox.addChild(disLabel);
+                                        disBox.addChild(iconsBox);
                                         this.addChild(disBox);
                                     }
                                     firstgo = false;
@@ -72,60 +73,55 @@
                             }
                             
                             override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void {
-                                super.updateDisplayList(unscaledWidth, unscaledHeight);
                                 treeListData = TreeListData(listData);
                                 if (treeListData != null) {
                                     if (super.data) {
                                         var node:XML = treeListData.item as XML;
                                         if (node.hasOwnProperty('@actions')) {
                                             var acts:Array = String(node.@actions).split(' ');
-                                            //var color:Number = outerDocument.perms_key[acts[0]];
                                             var icons:Array = [];
                                             for (var i:Number = 0; i < acts.length; i++) {
                                                 if (acts[i] != 'ALL') {
                                                     icons.push(outerDocument.perms_key[acts[i]]);
-                                                }
-                                                if (acts[0] == 'ALL' || acts[i] == 'ALL') {
-                                                    //color = outerDocument.perms_key['ALL'];
-                                                    //break;
                                                 } else {
-                                                    //color = CustomFuncs.hexColorInterpolate(color, outerDocument.perms_key[acts[i]]);
+                                                    icons = [];
+                                                    for (var p:String in outerDocument.perms_key) {
+                                                        if (p != 'ALL')
+                                                            icons.push(outerDocument.perms_key[p]);
+                                                    }
+                                                    break;
                                                 }
                                             }
-                                            for (i = 1; i < disBox.numChildren; i++) {
-                                                disBox.removeChildAt(i);
+                                            iconsBox.removeAllChildren();
+                                            for each (var perm_icon:Image in icons) {
+                                                // We have to make a new Image container every time
+                                                // due to funky stuff happening with removeAllChildren().
+                                                var c:Image = new Image();
+                                                c.source = perm_icon.source;
+                                                c.toolTip = perm_icon.toolTip;
+                                                c.addEventListener(ToolTipEvent.TOOL_TIP_SHOWN, toolTipShown);
+                                                iconsBox.addChild(c);
                                             }
-                                            for each (var perm_icon:Class in icons) {
-                                                var holder:HBox = new HBox();
-                                                holder.label = "sigh";
-                                                holder.icon = perm_icon;
-                                                holder.visible = true;
-                                                holder.minHeight = 50;
-                                                disBox.addChild(holder);
-                                            }
-                                            //disBox.setStyle("backgroundColor", color);
                                             disBox.setStyle("fontWeight", "bold");
-                                            //disBox.setStyle("backgroundAlpha", 0);
                                         } else {
+                                            iconsBox.removeAllChildren();
                                             disBox.setStyle("fontWeight", "normal");
-                                            //disBox.setStyle("backgroundColor", 0xffffff);
-                                            //disBox.setStyle("backgroundAlpha", 0);
                                         }
                                         
                                         disLabel.text = node.@label;
                                         
                                         disBox.height = height;
-                                        //disBox.width = (node.hasOwnProperty('@actions')) ? disLabel.width : width - (icon.width + icon.x);
                                         disBox.width = width - (icon.width + icon.x) - icon.width + 16;
                                         disBox.x = icon.width + icon.x + 2;
                                         disBox.visible = true;
                                     }
                                 }
+                                super.updateDisplayList(unscaledWidth, unscaledHeight);
                             }
                             
                             public function toolTipShown(event:ToolTipEvent) : void {
-                                var pt:Point = disBox.localToGlobal(new Point());
-                                event.toolTip.move(pt.x + disLabel.width, pt.y);
+                                var pt:Point = event.target.localToGlobal(new Point());
+                                event.toolTip.move(pt.x, pt.y - event.target.height/2);
                             }
                             
                         ]]>
@@ -144,27 +140,27 @@
         <mx:HBox fontWeight="bold" width="100%">
             <mx:Spacer width="50%" />
             <mx:Form>
-                <mx:FormItem label="Select">
+                <com:FormItemWithImage label="Select">
                     <mx:CheckBox id="p_select" />
-                </mx:FormItem>
-                <mx:FormItem label="Insert">
+                </com:FormItemWithImage>
+                <com:FormItemWithImage label="Insert">
                     <mx:CheckBox id="p_insert" />
-                </mx:FormItem>
-                <mx:FormItem label="Update">
+                </com:FormItemWithImage>
+                <com:FormItemWithImage label="Update">
                     <mx:CheckBox id="p_update" />
-                </mx:FormItem>
+                </com:FormItemWithImage>
             </mx:Form>
             <mx:Spacer width="50%" />
             <mx:Form>
-                <mx:FormItem label="Delete">
+                <com:FormItemWithImage label="Delete">
                     <mx:CheckBox id="p_delete" />
-                </mx:FormItem>
-                <mx:FormItem label="Execute">
+                </com:FormItemWithImage>
+                <com:FormItemWithImage label="Execute">
                     <mx:CheckBox id="p_execute" />
-                </mx:FormItem>
-                <mx:FormItem label="Usage">
+                </com:FormItemWithImage>
+                <com:FormItemWithImage label="Usage">
                     <mx:CheckBox id="p_usage" />
-                </mx:FormItem>
+                </com:FormItemWithImage>
             </mx:Form>
             <mx:Spacer width="50%" />
         </mx:HBox>
@@ -176,12 +172,15 @@
 
     <mx:Script>
         <![CDATA[
+            import mx.controls.Image;
             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
             import mx.core.Container;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import com.flexsqladmin.sqladmin.components.FormItemWithImage;
             
             import mx.events.CloseEvent;
             import mx.events.ListEvent;
@@ -216,16 +215,22 @@
             
             public var role_name:String;
             
-            public var perms_key:Object = {
-                'ALL' : null, //0xffecaa,
-                'SELECT' : icon_select, //0xa89074, // magnifier.png
-                'INSERT' : icon_insert, //0x7a895e, // add.png
-                'UPDATE' : icon_update, //0x69403c, // pencil.png
-                'DELETE' : icon_delete, //0x3d74c4, // close_tab.png
-                'EXECUTE' : icon_execute, //0x7f6856, // arrow_right.png
-                'USAGE' : icon_usage //0x54765e // lock_open.png
-                // 18237f, 777451, 0e1b3b
+            private function iconToImage(icon:Class, tooltip:String = '') : Image {
+                var img:Image = new Image();
+                img.source = icon;
+                img.toolTip = tooltip;
+                return img;
             }
+            
+            public var perms_key:Object = {
+                'ALL' : null,
+                'SELECT' : iconToImage(icon_select, 'Select'),
+                'INSERT' : iconToImage(icon_insert, 'Insert'),
+                'UPDATE' : iconToImage(icon_update, 'Update'),
+                'DELETE' : iconToImage(icon_delete, 'Delete'),
+                'EXECUTE' : iconToImage(icon_execute, 'Execute'),
+                'USAGE' : iconToImage(icon_usage, 'Usage')
+            };
 
             public function init() : void {
                 PopUpManager.centerPopUp(this);
@@ -251,9 +256,11 @@
                 original_data = new XML(datacopy);
                 // Add colors to form items and disable entry until they click something
                 for (var p:String in perms_key) {
-                    Container(this['p_' + p.toLowerCase()].parent).icon = perms_key[p];
-                    CheckBox(this['p_' + p.toLowerCase()]).addEventListener(MouseEvent.CLICK, permClick);
-                    CheckBox(this['p_' + p.toLowerCase()]).enabled = false;
+                    var checkbox:CheckBox = CheckBox(this['p_' + p.toLowerCase()]);
+                    if (p != 'ALL')
+                        FormItemWithImage(checkbox.parent).imageSource = perms_key[p].source;
+                    checkbox.addEventListener(MouseEvent.CLICK, permClick);
+                    checkbox.enabled = false;
                 }
             }
             
@@ -381,14 +388,6 @@
                         // TODO: allow permission revoking
                         CheckBox(this['p_' + perm]).enabled = false;
                     }
-                }
-            }
-            
-            public function tree_dataTip(item:Object) : String {
-                if (XML(item).hasOwnProperty('@actions') && items_tree.activeEffects.length == 0) {
-                    return XML(item).@actions;
-                } else {
-                    return '';
                 }
             }
             
