@@ -41,6 +41,7 @@
                             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
                             
                             import mx.containers.HBox;
+                            import mx.containers.VBox;
                             import mx.controls.Label;
                             import mx.controls.treeClasses.TreeListData;
                             import mx.events.ToolTipEvent;
@@ -78,29 +79,44 @@
                                         var node:XML = treeListData.item as XML;
                                         if (node.hasOwnProperty('@actions')) {
                                             var acts:Array = String(node.@actions).split(' ');
-                                            var color:Number = outerDocument.color_key[acts[0]];
-                                            for (var i:Number = 1; i < acts.length; i++) {
+                                            //var color:Number = outerDocument.perms_key[acts[0]];
+                                            var icons:Array = [];
+                                            for (var i:Number = 0; i < acts.length; i++) {
+                                                if (acts[i] != 'ALL') {
+                                                    icons.push(outerDocument.perms_key[acts[i]]);
+                                                }
                                                 if (acts[0] == 'ALL' || acts[i] == 'ALL') {
-                                                    color = outerDocument.color_key['ALL'];
-                                                    break;
+                                                    //color = outerDocument.perms_key['ALL'];
+                                                    //break;
                                                 } else {
-                                                    color = CustomFuncs.hexColorInterpolate(color, outerDocument.color_key[acts[i]]);
+                                                    //color = CustomFuncs.hexColorInterpolate(color, outerDocument.perms_key[acts[i]]);
                                                 }
                                             }
+                                            for (i = 1; i < disBox.numChildren; i++) {
+                                                disBox.removeChildAt(i);
+                                            }
+                                            for each (var perm_icon:Class in icons) {
+                                                var holder:HBox = new HBox();
+                                                holder.label = "sigh";
+                                                holder.icon = perm_icon;
+                                                holder.visible = true;
+                                                holder.minHeight = 50;
+                                                disBox.addChild(holder);
+                                            }
+                                            //disBox.setStyle("backgroundColor", color);
                                             disBox.setStyle("fontWeight", "bold");
-                                            disBox.setStyle("backgroundColor", color);
-                                            disBox.setStyle("backgroundAlpha", 1);
+                                            //disBox.setStyle("backgroundAlpha", 0);
                                         } else {
                                             disBox.setStyle("fontWeight", "normal");
-                                            disBox.setStyle("backgroundColor", 0xffffff);
-                                            disBox.setStyle("backgroundAlpha", 0);
+                                            //disBox.setStyle("backgroundColor", 0xffffff);
+                                            //disBox.setStyle("backgroundAlpha", 0);
                                         }
                                         
                                         disLabel.text = node.@label;
                                         
                                         disBox.height = height;
                                         //disBox.width = (node.hasOwnProperty('@actions')) ? disLabel.width : width - (icon.width + icon.x);
-                                        disBox.width = width - (icon.width + icon.x) - icon.width;
+                                        disBox.width = width - (icon.width + icon.x) - icon.width + 16;
                                         disBox.x = icon.width + icon.x + 2;
                                         disBox.visible = true;
                                     }
@@ -176,18 +192,38 @@
             [Bindable]
             public var datacopy:XML;
             
+            
+            [Bindable]
+            [Embed("/icons/magnifier.png")]
+            public var icon_select:Class;
+            [Bindable]
+            [Embed("/icons/add.png")]
+            public var icon_insert:Class;
+            [Bindable]
+            [Embed("/icons/pencil.png")]
+            public var icon_update:Class;
+            [Bindable]
+            [Embed("/icons/close_tab.png")]
+            public var icon_delete:Class;
+            [Bindable]
+            [Embed("/icons/arrow_right.png")]
+            public var icon_execute:Class;
+            [Bindable]
+            [Embed("/icons/lock_open.png")]
+            public var icon_usage:Class;
+            
             public var original_data:XML;
             
             public var role_name:String;
             
-            public var color_key:Object = {
-                'ALL' : 0xffecaa,
-                'SELECT' : 0xa89074,
-                'INSERT' : 0x7a895e,
-                'UPDATE' : 0x69403c,
-                'DELETE' : 0x3d74c4,
-                'EXECUTE' : 0x7f6856,
-                'USAGE' : 0x54765e
+            public var perms_key:Object = {
+                'ALL' : null, //0xffecaa,
+                'SELECT' : icon_select, //0xa89074, // magnifier.png
+                'INSERT' : icon_insert, //0x7a895e, // add.png
+                'UPDATE' : icon_update, //0x69403c, // pencil.png
+                'DELETE' : icon_delete, //0x3d74c4, // close_tab.png
+                'EXECUTE' : icon_execute, //0x7f6856, // arrow_right.png
+                'USAGE' : icon_usage //0x54765e // lock_open.png
                 // 18237f, 777451, 0e1b3b
             }
 
@@ -204,7 +240,7 @@
                     if (role.@name == role_name) {
                         for each (var perm:XML in role.permission) {
                             var type:String = String(perm.@itemType).replace('Local', '') + 's';
-                            var node:XML = datacopy.node.(@label == perm.@schemaName).node.(@label == type).node.(@label == perm.@itemName)[0];
+                            var node:XML = datacopy.schema.(@label == perm.@schemaName).node.(@label == type).node.(@label == perm.@itemName)[0];
                             node.@actions = perm.@actions;
                             node.@oldActions = perm.@actions;
                             node.@schemaName = perm.@schemaName;
@@ -214,8 +250,8 @@
                 }
                 original_data = new XML(datacopy);
                 // Add colors to form items and disable entry until they click something
-                for (var p:String in color_key) {
-                    Container(this['p_' + p.toLowerCase()].parent).setStyle("backgroundColor", color_key[p]);
+                for (var p:String in perms_key) {
+                    Container(this['p_' + p.toLowerCase()].parent).icon = perms_key[p];
                     CheckBox(this['p_' + p.toLowerCase()]).addEventListener(MouseEvent.CLICK, permClick);
                     CheckBox(this['p_' + p.toLowerCase()]).enabled = false;
                 }
@@ -234,7 +270,7 @@
                 if (items_tree.selectedItem || other_item) {
                     var perms:Array = [];
                     var revoke:String = '';
-                    for (var p:String in color_key) {
+                    for (var p:String in perms_key) {
                         if (CheckBox(this['p_' + p.toLowerCase()]).selected) {
                             perms.push(p);
                         }
@@ -334,7 +370,7 @@
             // tree functions
             public function tree_itemClick(event:ListEvent) : void {
                 var item:XML = XML(event.currentTarget.selectedItem);
-                for (var p:String in color_key) {
+                for (var p:String in perms_key) {
                     CheckBox(this['p_' + p.toLowerCase()]).selected = false;
                     CheckBox(this['p_' + p.toLowerCase()]).enabled = true;
                 }
