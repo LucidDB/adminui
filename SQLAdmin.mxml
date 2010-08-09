@@ -46,6 +46,7 @@ Redistribution and use in source and binary forms, with or without modification,
             
             import mx.controls.Alert;
             import mx.controls.ComboBox;
+            import mx.events.DropdownEvent;
             import mx.managers.PopUpManager;
             import mx.rpc.soap.mxml.WebService;
 			
@@ -239,7 +240,10 @@ Redistribution and use in source and binary forms, with or without modification,
 				CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
 			}   
 
-      private function add_item_click() : void {
+      private function add_item_click(event:DropdownEvent) : void {
+        if (event.triggerEvent != null)
+          return;
+        
         var selected:Object = add_item_list.selectedItem;
         if (selected.action == 'query') {
           addTab('', tabnavigator);
@@ -343,12 +347,13 @@ Redistribution and use in source and binary forms, with or without modification,
 			
 			<mx:Box width="100%" height="50%">
 				<mx:HBox width="100%">
-          <mx:Button click="add_item_click();" label="Add " icon="@Embed(source='/icons/tab_add.png')"/>
-          <mx:ComboBox id="add_item_list" change="add_item_click();">
-            <mx:Object label="Query Tab" action="query" />
-            <mx:Object label="New Table Tab" action="table" />
-            <mx:Object label="Users Info Tab" action="users" />
+          <mx:ComboBox id="add_item_list" close="add_item_click(event);">
+            <mx:Object label="Launch Query Tab" action="query" />
+            <mx:Object label="New Table" action="table" />
+            <mx:Object label="New User" action="users" />
+            <!--<mx:Object label="New Schema" action="" />-->
             <mx:Object label="New Role and Permissions Tab" action="roles" />
+            <!--<mx:Object label="New View" action="" />-->
           </mx:ComboBox>
 					<mx:Spacer width="100%"/>
 					<mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>

@@ -17,12 +17,20 @@ Redistribution and use in source and binary forms, with or without modification,
            creationComplete="init();"
            >
     
+    <mx:states>
+        <mx:State name="edit">
+            <mx:SetProperty target="{submit_btn}" name="toolTip" value="Update your Table" />
+            <mx:SetProperty target="{submit_btn}" name="label" value="Update your Table" />
+            <mx:SetProperty target="{table_name}" name="editable" value="false" />
+            <mx:SetProperty target="{table_schema}" name="editable" value="false" />
+            <mx:SetProperty target="{new_schema_btn}" name="visible" value="false" />
+        </mx:State>
+    </mx:states>
     
     <mx:HBox width="100%" left="10" right="10">
-        <mx:Button click="submitCreateTable();" toolTip="Create Your Table" label="Create Your Table"
+        <mx:Button id="submit_btn" click="submitCreateTable();" 
+                   toolTip="Create your Table" label="Create your Table"
                    icon="@Embed(source='/icons/exec.gif')" />
-        <mx:Button click="addNewColumn();" toolTip="(CTRL+F) Add Column" label="Add Column"
-                   icon="@Embed(source='/icons/textfield_add.png')" />
     </mx:HBox>
 
     <mx:Binding source="table_name.text" destination="TD.details.@name" />
@@ -33,11 +41,13 @@ Redistribution and use in source and binary forms, with or without modification,
                 <mx:Label text="{model.currentcatalogname}" />
             </mx:FormItem>
             <mx:FormItem label="Schema">
+                <mx:HBox>
                 <mx:ComboBox id="table_schema" prompt="Select Schema" selectedIndex="-1"
                              dataProvider="{new XMLList(model.metadata.children())}"
                              labelField="@label" />
                 <mx:Button id="new_schema_btn" click="newSchema();" label="New Schema" 
                            icon="@Embed(source='/icons/database_add.png')" />
+                </mx:HBox>
             </mx:FormItem>
         </mx:Form>
 
@@ -53,7 +63,9 @@ Redistribution and use in source and binary forms, with or without modification,
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>
-    
+    <mx:Button left="{10 + col_grid.x + col_grid.width - newcol_btn.width}" top="120" id="newcol_btn" click="addNewColumn();"
+               toolTip="(CTRL+F) Add Column" label="Add Column"
+               icon="@Embed(source='/icons/textfield_add.png')" />    
     <mx:HBox id="col_info" left="10" right="10" top="145" bottom="10" width="50%" height="100%">
         <mx:AdvancedDataGrid id="col_grid" dataProvider="{col_list}" click="selectColumn(event);" height="100%" width="50%">
             <mx:columns>
@@ -162,10 +174,8 @@ Redistribution and use in source and binary forms, with or without modification,
                     }
                 }
                 
-                // And disable some fields.
-                table_name.editable = false;
-                table_schema.enabled = false;
-                new_schema_btn.visible = false;
+                // And disable/rename some fields.
+                this.currentState = "edit";
             }
             
             public function selectColumn(event:Event=null) : void {

@@ -14,10 +14,14 @@ Redistribution and use in source and binary forms, with or without modification,
 	title="About Flex SQLAdmin" 
 	close="closeWin(event);" 
 	creationComplete="init();" 
-	layout="absolute" width="384" height="214">
+	layout="absolute" width="384" height="314">
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
+            [Bindable]
+            [Embed("/icons/dynamobi_logo.png")]
+            public var logo:Class;
+            
 			public function init():void{
         		PopUpManager.centerPopUp(this);
    			}
@@ -26,10 +30,13 @@ Redistribution and use in source and binary forms, with or without modification,
         	}
 		]]>
 	</mx:Script>
-	<mx:Label x="117" y="22" text="Flex SQLAdmin" fontSize="15" fontWeight="bold"/>
-	<mx:Label x="27" y="101" text="Copyright 2006 Kevin Kazmierczak. All rights reserved."/>
-	<mx:Label x="83" y="146" text="Icons courtesy of" fontSize="10"/>
-	<mx:LinkButton x="107" y="71" label="www.flexsqladmin.com" click="navigateToURL(new URLRequest('http://www.flexsqladmin.com'), '_blank')"/>
-	<mx:LinkButton x="179" y="144" label="www.famfamfam.com" click="navigateToURL(new URLRequest('http://www.famfamfam.com'), '_blank')"/>
-	<mx:Label x="148" y="45" text="Version 2.1"/>
+	<mx:Label x="68" y="22" text="Flex SQLAdmin for LucidDB" fontSize="15" fontWeight="bold" textAlign="left"/>
+    <mx:Image width="100"  height="100" x="125" y="50" source="{logo}" />
+    <mx:Label x="69.5" y="204" text="Copyright 2010 Dynamo BI Corporation" />
+	<mx:Label x="64.5" y="218" text="Copyright 2006-2010 Kevin Kazmierczak."/>
+    <mx:Label x="123.5" y="230" text="All Rights Reserved." />
+	<mx:Label x="89" y="246" text="Icons courtesy of" fontSize="10"/>
+	<mx:LinkButton x="114.5" y="188" label="www.dynamobi.com" click="navigateToURL(new URLRequest('http://www.dynamobi.com'), '_blank')"/>
+	<mx:LinkButton x="179" y="244" label="www.famfamfam.com" click="navigateToURL(new URLRequest('http://www.famfamfam.com'), '_blank')"/>
+	<mx:Label x="140" y="165" text="Version 1.0M1"/>
 </mx:TitleWindow>
