@@ -32,13 +32,17 @@ package com.flexsqladmin.sqladmin.commands
         private var model:ModelLocator = ModelLocator.getInstance();
         private var request_type:ActionEnum;
         
+        private var schema:String;
+        private var table:String;
+        private var details:XML;
+        
         public function execute(event:CairngormEvent) : void {
             DebugWindow.log("TableDetails:execute()");
             var cat:String = TableDetailsEvent(event).catalog;
-            var schema:String = TableDetailsEvent(event).schema;
-            var table:String = TableDetailsEvent(event).table;
+            schema = TableDetailsEvent(event).schema;
+            table = TableDetailsEvent(event).table;
             var action:ActionEnum = TableDetailsEvent(event).action;
-            var details:XML = TableDetailsEvent(event).details;
+            details = TableDetailsEvent(event).details;
             request_type = action;
             
             var delegate:tableDetailsDelegate = new tableDetailsDelegate(this);
@@ -82,9 +86,10 @@ package com.flexsqladmin.sqladmin.commands
             } else {
                 var response:String = event.result['return'];
                 if (response == "true") {
-                    Alert.show("Execution Succeeded");
+                    Alert.show("Execution Succeeded", "Success");
+                    model.object_tree.addTable(schema, table, details);
                 } else {
-                    Alert.show("Execution Failed");
+                    Alert.show("Execution Failed", "Error");
                 }
             }
         }
@@ -99,6 +104,7 @@ package com.flexsqladmin.sqladmin.commands
                 var response:String = event.result;
                 if (response.length == 0) {
                     Alert.show("Schema created.", "Success");
+                    model.object_tree.addSchema(schema);
                 } else {
                     Alert.show("Schema could not be created.", "Error");
                 }

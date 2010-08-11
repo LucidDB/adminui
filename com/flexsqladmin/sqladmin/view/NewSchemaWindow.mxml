@@ -16,7 +16,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 >
     <mx:Validator source="{new_name}" property="text" />
 
-    <mx:Panel horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+    <!--<mx:Panel horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">-->
     <mx:Form top="10">
         <mx:FormItem label="Schema Name">
             <mx:TextInput id="new_name" />
@@ -26,7 +26,7 @@ Redistribution and use in source and binary forms, with or without modification,
             <mx:Button label="Create" icon="@Embed(source='/icons/exec.gif')" click="createSchema();" />
         </mx:FormItem>
     </mx:Form>
-    </mx:Panel>
+    <!--</mx:Panel>-->
     
     <mx:Script>
         <![CDATA[
@@ -52,8 +52,6 @@ Redistribution and use in source and binary forms, with or without modification,
                 if (new_name.text != '') {
                     var addSchEvent:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname, new_name.text, '', ActionEnum.PUT);
                     CairngormEventDispatcher.getInstance().dispatchEvent(addSchEvent);
-                    var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                    CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
                 } else {
                     new_name.setFocus();
                 }

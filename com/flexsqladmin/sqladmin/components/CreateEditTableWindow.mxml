@@ -192,7 +192,9 @@ Redistribution and use in source and binary forms, with or without modification,
             }
             
             public function submitCreateTable() : void {
-                TD.details.setChildren('');
+                for (var i:Number = 0; i < TD.details.children().length(); i++)
+                    delete TD.details.column[i];
+                    
                 if (table_schema.selectedIndex == -1) {
                     Alert.show("Please select a schema.", "Error");
                     return;

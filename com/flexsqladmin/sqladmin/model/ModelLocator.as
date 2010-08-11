@@ -12,6 +12,7 @@ Redistribution and use in source and binary forms, with or without modification,
 package com.flexsqladmin.sqladmin.model
 {
     import com.adobe.cairngorm.model.ModelLocator;
+    import com.flexsqladmin.sqladmin.components.ObjectTree;
     import com.flexsqladmin.sqladmin.vo.ConnectionVO;
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
@@ -48,6 +49,8 @@ package com.flexsqladmin.sqladmin.model
     	public var exectimer:ExecutionTimer;
     	public var catalogdata:XMLListCollection;
     	public var currentcatalogname:String = 'LOCALDB';
+        
+        public var object_tree:ObjectTree;
     	
         public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
         {

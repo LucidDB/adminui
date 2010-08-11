@@ -81,11 +81,7 @@ package com.flexsqladmin.sqladmin.commands
                     continue;
                 }
                 
-                trace(queryxml.toXMLString());
-                trace();
-                trace(queryxml.NewDataSet.Table.toXMLString());
                 result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
-                trace('...');
                 //result_info.querydata += new XMLListCollection(queryxml.NewDataSet.Table);
                 //result_info.querydata.addItem(new XML('<Table>' + queryxml.NewDataSet.Table.children() + '</Table>'));
                 

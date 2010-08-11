@@ -31,6 +31,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import com.flexsqladmin.sqladmin.view.OpenTableWindow;
             
             import mx.containers.VBox;
@@ -41,7 +42,12 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import mx.events.ListEvent;
             import mx.events.MenuEvent;
             import mx.managers.PopUpManager;
-            
+
+            [Embed("/icons/table_edit.png")]
+            public var ETimg:Class;
+            [Embed("/icons/script_edit.png")]
+            public var VWedImg:Class;
+
             [Embed(source="/icons/script_select.png")]
             private var selecticon:Class;
             [Embed(source="/icons/script_add.png")]
@@ -54,14 +60,12 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             private var opentableicon:Class;
             [Embed(source="/icons/script_exec.png")]
             private var scriptexec:Class;
+            
             [Embed("/icons/close_tab.png")]
             public var closeicon : Class;
             [Embed("/icons/confirm.png")]
             public var confirmicon : Class;
-            [Embed("/icons/table_edit.png")]
-            public var ETimg:Class;
-            [Embed("/icons/script_edit.png")]
-            public var VWedImg:Class;
+
             
             [Embed(source="/icons/database_add.png")]
             private var add_schema_icon:Class;
@@ -84,16 +88,33 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             
             private var object_menus:Object = new Object();
             
+            public function debug(e:KeyboardEvent) : void {
+                if (e.keyCode == 84) { // T
+                    tree_data.schemas.schema[0].tables.appendChild(<node label="Ough" />);
+                    //this.validateNow();
+                    //trace(XML(dataProvider).toXMLString());
+                } else if (e.keyCode == 82) { // R
+                    addTable('CRAPPY', 'deck', <details createTime="2010-08-11" name="deck">
+  
+  <column name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" defaultValue=""/>
+</details>);
+                } else if (e.keyCode == 68) { // D
+                    delete tree_data.schemas.schema[0].tables.table.(@label == 'Ough')[0];
+                } else if (e.keyCode == 78) {// N
+                    //for each (var el:XML in model.metadata.schema)
+                    //    tree_data.schemas.appendChild(el);
+                    trace(tree_data.toXMLString());
+                    //real_dp.appendChild(model.metadata);
+                    //delete real_dp.schemas[0];
+                }
+            }
+
+            /**
+            * Set up the skeleton for our tree, along with a few mouse click event handlers.
+            * Finally calls the function to setup all of the context menus and their handlers.
+            */
             public function init() : void {
                 /*
-                <schema label="Schema 1">
-                <tables label="Tables">
-                <table label="T1">
-                <column label="C1" />
-                </table>
-                </tables>
-                <views label="Views">
-                </views>
                 <foreign_tables label="Foreign Tables">
                 <foreign_table label="Salesforce Table 1" />
                 </foreign_tables>
@@ -104,11 +125,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 <procedure label="Proc1" />
                 </procedures>
                 </schema>
-                <schema label="Sys_root">
-                <tables label="Tables">
-                </tables>
-                </schema>
                 */
+                model.object_tree = this;
                 var schemas_load:String = JSON.encode(
                     {'service': 'sqlWebService', 'operation': 'getDBMetaData',
                      'arguments': {'connection': '', 'catalog': model.currentcatalogname} }
@@ -167,13 +185,272 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
                 this.addEventListener(ListEvent.ITEM_DOUBLE_CLICK, expandTree, false, 5);
             
+                // This is the meat of our tree and is an incredibly long function
+                // mostly due to the amount of configuration for all of the context menus.
                 register_contexts_and_handlers();
             }
             
-            public function register_context(element:String, menu_info:Array, handler:Function) : void {
+            // These three functions do all our mouse click event handling.
+            
+            private function clickHandler(e:MouseEvent):void{
+                clickx = e.stageX;
+                clicky = e.stageY;
+            }
+            
+            private function listItemClickHandler(event:ListEvent) : void {
+                // We use click intervals to get a better doubleClick than Flex's
+                // normal behavior because of interference with single-click
+                // context menus.
+                clearInterval(click_interval);
+                click_interval = setInterval(deferredListItemClickHandler, 200);
+            }
+            
+            private function deferredListItemClickHandler() : void {
+                clearInterval(click_interval);
+                
+                if (object_menus.hasOwnProperty(XML(selectedItem).localName())) {
+                    if (menu_closed) {
+                        menu_closed = false;
+                        var context:ObjectTree = this;
+                        var menu_info:Object = object_menus[XML(selectedItem).localName()];
+                        var myMenu:Menu = Menu.createMenu(null, menu_info['info']);
+                        myMenu.show(clickx + 25, clicky);
+                        myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
+                            menu_info['handler'](event.index, context);
+                        });
+                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed = true; });
+                    } else {
+                        menu_closed = true;
+                    }
+                }
+            }
+            
+
+            
+            //////////////////////////////////////////////////////////////////////////////////////            
+            // Define many helper functions and abstraction functions for
+            // register_contexts_and_handlers().
+            //////////////////////////////////////////////////////////////////////////////////////  
+            
+
+            
+
+            /**
+            * Creates a context menu along with its corresponding handler function called
+            * when an item in the menu is clicked.
+            * 
+            * @element - The XML tag name this context menu maps to.
+            * @menu_info - An array of objects passed to the Menu creator that determine labels, icons, 
+            *              separators, and groups.
+            * @handler - form: function(index:Number, context:ObjectTree). Will be called on a click,
+            *            the index being the clicked item's index and the context being
+            *            this entire ObjectTree.
+            */ 
+            private function register_context(element:String, menu_info:Array, handler:Function) : void {
                 object_menus[element] = {'info': menu_info, 'handler': handler};
             }
             
+            /**
+            * Generic handler for when we want a popup view for some action.
+            * 
+            * @cl - The class type of the view we're loading.
+            * @close - An optional function to call when the window is closed.
+            * 
+            * @return - Returns the created view for potential customization by the caller.
+            */
+            private function popup_new(cl:Class, close:Function=null) : Object {
+                var win:Object = Object(PopUpManager.createPopUp(parent.parent, cl, true));
+                win.setStyle("borderAlpha", 0.8);
+                win.showCloseButton = true;
+                if (close != null) {
+                    win.addEventListener(Event.CLOSE, close);
+                }
+                return win;
+            }
+            
+            /**
+            * Simple wrapper for a handler function, useful for the singleton
+            * 'add new' items that create a popup.
+            * 
+            * @inner_func - Custom inner function to call.
+            * @args - Optional arguments to pass to the inner function.
+            * 
+            * @return - Returns the created handler function. (This is like a decorator.) 
+            */
+            private function handler_wrapper(inner_func:Function=null, args:Array=null) : Function {
+                return function(index:Number, context:ObjectTree) : void {
+                    if (inner_func != null && index == 0) {
+                        if (args != null) {
+                            inner_func.apply(context, args);
+                        } else {
+                            inner_func();
+                        }
+                    }
+                }
+            }
+
+            /**
+            * Generic function to drop an item and remove it from our tree.
+            */
+            private function drop_remove_item(item:String, cascade:Boolean,
+                                              warn_msg:String, success_msg:String,
+                                              context:ObjectTree, remove_item:XML) : void {
+                var casc:String = (cascade) ? 'CASCADE' : '';
+                query_dispatcher('DROP ' + item + ' "' + context.model.currentcatalogname + '"."' +
+                    get_schema(context) + '"."' + context.selectedItem.@label + '" ' + casc,
+                    warn_msg,
+                    function(querydata:XML):void {
+                        if (querydata.datamap == 'Error') {
+                            Alert.show(querydata.NewDataSet.Table.Error, 'Error');
+                        } else {
+                            Alert.show(success_msg, 'Success');
+                            context.deleteItem(remove_item);
+                        }
+                    }
+                );
+            }
+            
+            /**
+            * Flex is really stupid about this,
+            * so we have to use this method to delete an item we have the node for.
+            * 
+            * @return - The success of the delete.
+            */
+            public function deleteItem(item:XML) : Boolean {
+                var parent_list:XMLList = XMLList(item.parent().children());
+                for (var i:Number = 0; i < parent_list.length(); i++) {
+                    if (parent_list[i] == item) {
+                        delete parent_list[i];
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            /**
+             * Adds a new schmea to our tree.
+             * TODO: abstract this into a generalized function like remove.
+             */
+            public function addSchema(name:String) : void {
+                var node:XML = <schema label={name}></schema>
+                for (var i:Number = 0; i < tree_data.schemas.children().length(); i++) {
+                    if (tree_data.schemas.schema[i].@label < name)
+                        continue;
+                    tree_data.schemas.insertChildBefore(tree_data.schemas.schema[i], node);
+                    return;
+                }
+                tree_data.schemas.appendChild(node);
+            }
+            
+            /**
+             * Adds a new table with columns to our tree.
+             * TODO: possibly abstract this into a generalized function like remove. (Too hard for
+             * this one?)
+             */
+            public function addTable(schema:String, name:String, details:XML) : void {
+                var cols:String = '';
+                var col_nodes:XMLList = new XMLList();
+                for (var i:Number = 0; i < details.children().length(); i++) {
+                    cols += "&quot;" + details.column[i].@name + "&quot;";
+                    var label:String = details.column[i].@name + ' (' + details.column[i].@datatype + ',';
+                    label += (details.column[i].@isNullable == 'true') ? 'NULL' : 'NOT NULL';
+                    label += ')';
+                    col_nodes += <column column={details.column[i].@name} label={label} />;
+                }
+                var sql:String = "SELECT " + cols + " FROM &quot;" + schema + "&quot;.&quot;" + name + "&quot;";
+                var node:XML = <table label={name} sqlquery={sql}>
+                {col_nodes}
+                </table>;
+                var schema_node:XML = tree_data.schemas.schema.(@label == schema)[0];
+                for (i = 0; i < schema_node.tables.children().length(); i++) {
+                    if (schema_node.tables.table[i].@label < name)
+                        continue;
+                    schema_node.tables.insertChildBefore(schema_node.tables.table[i], node);
+                    return;
+                }
+                schema_node.tables.appendChild(node);
+            }
+
+            /**
+            * Util for grabbing the column names of the selected item (assumed to be a table
+            * or something with column children), with the option of appending something to the
+            * quoted identifier.
+            */
+            private function get_column_names(context:ObjectTree, append:String='') : String {
+                var cols:String = '';
+                for (var x:Number = 0; x < context.selectedItem.children().length(); x++){
+                    cols += "&quot;" + context.selectedItem.column[x].@column + "&quot;" + append;
+                    if (x + 1 < this.selectedItem.children().length())
+                        cols += ", \r";
+                }
+                return cols;
+            }
+            
+            /**
+            * Util for getting the schema name of the selected item; assumes something like
+            * a schema->between_item->selected_item.
+            */
+            private function get_schema(context:ObjectTree) : String {
+                return context.getParentItem(context.getParentItem(context.selectedItem)).@label;
+            }
+            
+            /**
+            * Util for creating a script as query from the selected item.
+            */
+            private function script_as_query(context:ObjectTree) : void {
+                var query:String = "SELECT ";
+                var schema:String = get_schema(context);
+                query += get_column_names(context);
+                query += "\rFROM " + "\"" + context.model.currentcatalogname + "\".\"" + 
+                    schema + 
+                    "\".\"" + context.selectedItem.@label + "\"";
+                script_query(query, schema);
+            }
+            
+            /**
+            * Inserts a script-as command into an empty query window.
+            */
+            private function script_query(query:String, guessed_schema:String='') : void {
+                var qw:QueryWindow = model.aryQueryWindows[VBox(model.main_tabnav.selectedChild).id];
+                if (qw && qw.isEmpty()) {
+                    qw.setText(query);
+                } else {
+                    qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
+                    qw.setText(query);
+                }
+                qw.guessed_schema = guessed_schema;
+            }
+            
+            /**
+            * Dispatches a query which uses an Alert Confirmation before running.
+            * 
+            * @query - Query to execute
+            * @warn_msg - Confirmation message to send
+            * @special_func - Optional function to call on success instead of using the default
+            *                 executesql behavior.
+            */
+            private function query_dispatcher(query:String, warn_msg:String,
+                                              special_func:Function=null) : void {
+                Alert.show(warn_msg, "Confirmation", Alert.YES|Alert.NO,
+                    Application.application as Application,
+                    function(event:CloseEvent):void { // confirm handler
+                        if (event.detail == Alert.YES) {
+                            if (special_func == null) {
+                                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "normal");
+                            } else {
+                                sqlevent = new ExecuteSQLEvent(query, "special", special_func);
+                            }
+                            CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                        }
+                    }, confirmicon, Alert.NO);
+            }
+            
+
+            
+            /**
+            * Mega function that sets up all of our context menus with their
+            * corresponding handlers.
+            */
             public function register_contexts_and_handlers() : void {
                 var con_row:Function = function (label:String, icon:Class) : Object {
                     return {'label': label, 'icon': icon};
@@ -181,13 +458,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 var gen_add:Object = con_row('Add New', add_icon);
                 var gen_drop:Object = con_row('Drop', drop_icon);
                     
-                // I am certain I can create some abstractions for
-                // the passed function, especially when so many actions are
-                // so similar.
                 register_context("schemas", [con_row('Add New', add_schema_icon)],
-                    function (index:Number, context:ObjectTree) : void {
-                        // pop up new schema
-                    }
+                    handler_wrapper(popup_new, [NewSchemaWindow])
                 );
                 register_context("schema", [gen_drop,
                     con_row('Drop Cascade', drop_icon),
@@ -218,7 +490,60 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     con_row('Analyze Table', null)
                     ],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        var query:String = ''
+                        var schema:String = get_schema(context);
+                        if (index == 0) {
+                            script_as_query(context);
+                        } else if (index == 1) {
+                            query = "INSERT INTO " + "\"" + context.model.currentcatalogname + "\".\"" + 
+                            get_schema(context) + 
+                            "\".\"" + context.selectedItem.@label + "\"" + " \r(\r";
+                            query += get_column_names(context);
+                            query += "\r)\r VALUES\r (\r";
+                            /*for (x = 0; x < context.selectedItem.children().length(); x++){
+                                query += "{" + context.selectedItem.column[x].@label + "}";
+                                if (x + 1 < context.selectedItem.children().length())
+                                    query += ", \r";
+                            }*/
+                            query += "\r)";
+                        } else if (index == 2) {
+                            query = "UPDATE " + "\"" + context.model.currentcatalogname + "\".\"" +
+                            schema +
+                            "\".\"" + context.selectedItem.@label + "\"" + " \rSET\r";
+                            query += get_column_names(context, ' = { }');
+                            query += "\rWHERE {SEARCH_CONDITIONS}";
+                        } else if (index == 3) {
+                            query = "DELETE FROM " + "\"" + context.model.currentcatalogname + "\".\"" +
+                            schema +
+                            "\".\"" + context.selectedItem.@label + "\"" + "\rWHERE {SEARCH_CONDITIONS}";
+                        // 4 is the separator
+                        } else if (index == 5) {
+                            OpenTableWindow(popup_new(OpenTableWindow)).setTablename(schema +
+                                "." + context.selectedItem.@label);
+                        } else if (index == 6) {
+                            drop_remove_item('TABLE', true, 'Are you sure you want to\n' +
+                                'drop cascade this table?', 'Table Dropped Successfully', context, 
+                                tree_data.schemas.schema.(@label == schema)[0].tables.table.(
+                                                          @label == context.selectedItem.@label)[0]
+                            );
+                        } else if (index == 7) {
+                            var tab_win : CreateEditTableWindow = CreateEditTableWindow(
+                                Application.application.addTab("Edit Table " + context.selectedItem.@label,
+                                    context.model.main_tabnav, 'createTable', context.ETimg)
+                            );
+                            // Grab the table data.
+                            var td_event:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname,
+                                schema, context.selectedItem.@label, ActionEnum.GET);
+                            CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
+                        } else if (index == 8) {
+                            
+                        } else if (index == 9) {
+                            
+                        }
+
+                        if (query.length > 0) {
+                            script_query(query, schema);                            
+                        }
                     }
                 );
                 register_context('column', [con_row('Data Stats', null)],
@@ -235,7 +560,39 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     con_row('Edit', updateicon),
                     con_row('Select As', selecticon)],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        if (index == 0) {
+                            drop_remove_item('VIEW', true, 'Are you sure you want to\n' +
+                                'drop cascade this view?', 'View Dropped Successfully', context, 
+                                tree_data.schemas.schema.(@label == get_schema(context))[0].views.view.(
+                                    @label == context.selectedItem.@label)[0]
+                            );
+                        } else if (index == 1) {
+                            var loadCrap:Function = function(querydata:XML):void {
+                                var schema:String = querydata.NewDataSet.Table.SCHEMA_NAME;
+                                var view:String = querydata.NewDataSet.Table.VIEW_NAME;
+                                var desc:String = querydata.NewDataSet.Table.REMARKS;
+                                var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
+                                var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
+                                
+                                var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " +
+                                    view, model.main_tabnav, "viewWindow", VWedImg));
+                                vw.setText(text);
+                                vw.editing = true;
+                                vw.view_name.text = view;
+                                vw.view_desc.text = desc;
+                                callLater(vw.guess_schema, [schema]);
+                            };
+                            var query : String = 'SELECT SCHEMA_NAME, VIEW_NAME,' +
+                            ' REMARKS, ' +
+                            ' CREATION_TIMESTAMP, ORIGINAL_TEXT' +
+                            ' FROM "LOCALDB"."SYS_ROOT"."DBA_VIEWS" WHERE ' +
+                            "SCHEMA_NAME = '" + get_schema(context) + "' AND " +
+                            "VIEW_NAME = '" + context.selectedItem.@label + "'";
+                            var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "special", loadCrap);
+                            CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);             
+                        } else if (index == 2) {
+                            script_as_query(context);
+                        }
                     }
                 );
                 register_context('foreign_tables', [con_row('Import', null)],
@@ -344,257 +701,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                     
             }
-            
-            public function debug(e:KeyboardEvent) : void {
-                if (e.keyCode == 84) { // T
-                    tree_data.schemas.schema[0].tables.appendChild(<node label="Ough" />);
-                    //this.validateNow();
-                    //trace(XML(dataProvider).toXMLString());
-                } else if (e.keyCode == 82) { // R
-                } else if (e.keyCode == 68) { // D
-                    delete tree_data.schemas.schema[0].tables.table.(@label == 'Ough')[0];
-                } else if (e.keyCode == 78) {// N
-                    //for each (var el:XML in model.metadata.schema)
-                    //    tree_data.schemas.appendChild(el);
-                    trace(tree_data.toXMLString());
-                    //real_dp.appendChild(model.metadata);
-                    //delete real_dp.schemas[0];
-                }
-            }
-            
-            private function clickHandler(e:MouseEvent):void{
-                clickx = e.stageX;
-                clicky = e.stageY;
-            }
-            
-            private function listItemClickHandler(event:ListEvent) : void {
-                clearInterval(click_interval);
-                click_interval = setInterval(deferredListItemClickHandler, 200);
-            }
-            
-            private function deferredListItemClickHandler() : void {
-                clearInterval(click_interval);
-                var objMenu:Array = [];
-                var action:String = '';
-               
-                /*
-                // Schemas and tables/views menu roots:
-                if (XML(selectedItem).localName() == 'schema') {
-                    objMenu = [{label: "Drop Schema", icon: closeicon}
-                    ];
-                    action = 'schema_click';
-                }
-                
-                // Individual tables and views:
-                if(this.selectedItem.@sqlquery != null && this.selectedItem.@sqlquery.toString().length != 0) {
-                    action = 'element_click';
-                    if (this.getParentItem(this.selectedItem).@label == "Procedures")
-                        objMenu = [{label: "Script as Execute", icon:scriptexec}];
-                    else if (this.getParentItem(this.selectedItem).@label == "Tables")
-                        objMenu = [{label: "Script as Select", icon:selecticon},
-                            {label: "Script as Insert", icon:inserticon},
-                            {label: "Script as Update", icon:updateicon},
-                            {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
-                            {label: "Open Table", icon: opentableicon},
-                            {label: "View and Edit Table", icon: updateicon},
-                            {label: "Drop Table", icon: closeicon}
-                        ];
-                    else if (this.getParentItem(this.selectedItem).@label == "Views")
-                        objMenu = [{label: "Script as Select", icon:selecticon}
-                            , {type: "separator"}
-                            , {label: "Edit View", icon: updateicon}
-                            , {label: "Drop View", icon: closeicon}
-                        ];
-                }
-                
-                if (objMenu.length > 0) {
-                    if (menu_closed) {
-                        menu_closed = false;
-                        var myMenu:Menu = Menu.createMenu(null, objMenu);
-                        myMenu.show(clickx + 25, clicky);
-                        
-                        if (action == 'element_click')
-                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
-                        else if (action == 'schema_click')
-                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, schema_click_handler);
-                        
-                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed=true; });
-                    } else {
-                        menu_closed = true;
-                    }
-                }
-                */
-                
-                if (object_menus.hasOwnProperty(XML(selectedItem).localName())) {
-                    if (menu_closed) {
-                        menu_closed = false;
-                        var context:ObjectTree = this;
-                        var menu_info:Object = object_menus[XML(selectedItem).localName()];
-                        var myMenu:Menu = Menu.createMenu(null, menu_info['info']);
-                        myMenu.show(clickx + 25, clicky);
-                        myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
-                            menu_info['handler'](event.index, context);
-                        });
-                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed = true; });
-                    } else {
-                        menu_closed = true;
-                    }
-                }
-            }
-            
-            /*private function schema_click_handler(e:MenuEvent) : void {
-                if (e.index == 0) {
-                    query_dispatcher('DROP SCHEMA "' + model.currentcatalogname + '"."' +
-                        selectedItem.@label + '" CASCADE',
-                        "Are you sure you want to\ndrop this schema?");
-                }
-            }*/
-            
-            private function menuHandler(e:MenuEvent):void{
-                var catalogname : String = model.currentcatalogname;
-                var scriptquery:String = "";
-                var x:int = 0;
-                // todo: refactor this (in fact probably this whole class)
-                if (e.index == 0){
-                    if(this.getParentItem(this.selectedItem).@label == "Procedures"){
-                        scriptquery = "EXECUTE " + "\"" + catalogname + "\".\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " ";
-                        for (x = 0; x < this.selectedItem.children().length(); x++){
-                            if (this.selectedItem.node[x].@column != "None")
-                                scriptquery += this.selectedItem.node[x].@column;
-                            if (x + 1 < this.selectedItem.children().length())
-                                scriptquery += ", ";
-                        }
-                    } else { // label is Tables or Views
-                        scriptquery = "SELECT ";
-                        for (x = 0; x < this.selectedItem.children().length(); x++){
-                            scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
-                            if (x + 1 < this.selectedItem.children().length())
-                                scriptquery += ", ";
-                        }
-                        scriptquery += "\rFROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
-                    }
-                }
-                else if(e.index == 1) {
-                    if(this.getParentItem(this.selectedItem).@label == "Procedures"){
-                        scriptquery += "EXEC " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
-                    } else {
-                        scriptquery = "INSERT INTO " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \r(\r";
-                        for (x = 0; x < this.selectedItem.children().length(); x++){
-                            scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
-                            if (x + 1 < this.selectedItem.children().length())
-                                scriptquery += ", \r";
-                        }
-                        scriptquery += "\r)\r VALUES\r (\r";
-                        for (x = 0; x < this.selectedItem.children().length(); x++){
-                            scriptquery += "{" + this.selectedItem.node[x].@label + "}";
-                            if (x + 1 < this.selectedItem.children().length())
-                                scriptquery += ", \r";
-                        }
-                        scriptquery += "\r)";
-                    }
-                }
-                else if(e.index == 2) {
-                    // script-update for tables, edit for views
-                    if (getParentItem(this.selectedItem).@label == "Views") {
-                        var loadCrap:Function = function(querydata:XML):void {
-                            //trace(querydata.NewDataSet.Table.@SCHEMA_NAME);
-                            var schema:String = querydata.NewDataSet.Table.SCHEMA_NAME;
-                            var view:String = querydata.NewDataSet.Table.VIEW_NAME;
-                            var desc:String = querydata.NewDataSet.Table.REMARKS;
-                            var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
-                            var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
-                            
-                            var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " + view, model.main_tabnav, "viewWindow", VWedImg));
-                            vw.setText(text);
-                            vw.editing = true;
-                            vw.view_name.text = view;
-                            vw.view_desc.text = desc;
-                            callLater(vw.guess_schema, [schema]);
-                            
-                        };
-                        var query : String = 'SELECT SCHEMA_NAME, VIEW_NAME,' +
-                            ' REMARKS, ' +
-                            ' CREATION_TIMESTAMP, ORIGINAL_TEXT' +
-                            ' FROM "LOCALDB"."SYS_ROOT"."DBA_VIEWS" WHERE ' +
-                            "SCHEMA_NAME = '" + getParentItem(getParentItem(selectedItem)).@label + "' AND " +
-                            "VIEW_NAME = '" + selectedItem.@label + "'";
-                        var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "special", loadCrap);
-                        CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);                       
-                    } else {
-                        scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
-                        for (x = 0; x < this.selectedItem.children().length(); x++){
-                            scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
-                            if (x + 1 < this.selectedItem.children().length())
-                                scriptquery += ", \r";
-                        }
-                        scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
-                    }
-                }
-                else if(e.index == 3) {
-                    // script-delete for tabs, drop for views
-                    if (getParentItem(this.selectedItem).@label == "Views") {
-                        query_dispatcher('DROP VIEW "' + catalogname + '"."' + 
-                            getParentItem(getParentItem(selectedItem)).@label + 
-                            '"."' + selectedItem.@label + '" CASCADE',
-                            "Are you sure you want to\ndrop this view?");                        
-                    } else {
-                        scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
-                    }
-                }
-                else if(e.index == 5){
-                    // Open the table window
-                    //Application.application.openTableWindow(this.selectedItem.@label);
-                    var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this.parentDocument.parentDocument, OpenTableWindow, true));
-                    opentablewindow.setStyle("borderAlpha", 0.8);
-                    opentablewindow.showCloseButton = true; 
-                    opentablewindow.setTablename(getParentItem(getParentItem(this.selectedItem)).@label+"."+this.selectedItem.@label);
-                } else if (e.index == 6) {
-                    // Add New Table For Editing
-                    var tab_win : CreateEditTableWindow = CreateEditTableWindow(
-                        Application.application.addTab("Edit Table " + this.selectedItem.@label,
-                            model.main_tabnav, 'createTable', ETimg)
-                    );
-                    // Grab the table data.
-                    var td_event:TableDetailsEvent = new TableDetailsEvent(catalogname,
-                        getParentItem(getParentItem(this.selectedItem)).@label,
-                        this.selectedItem.@label, ActionEnum.GET
-                    );
-                    CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
-                } else if (e.index == 7) {
-                    // Drop table
-                    query_dispatcher('DROP TABLE "' + catalogname + '"."' +
-                        getParentItem(getParentItem(selectedItem)).@label + '"."' +
-                        selectedItem.@label + '" CASCADE',
-                        "Are you sure you want to\ndrop this table?");
-                }
-                DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
-                
-                if (scriptquery != "") {
-                    var makenewqw : Boolean = false;
-                    var qw : QueryWindow = model.aryQueryWindows[VBox(model.main_tabnav.selectedChild).id];
-                    if (qw && qw.isEmpty()) {
-                        qw.setText(scriptquery);
-                    } else {
-                        qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
-                        qw.setText(scriptquery);
-                    }
-                    qw.guessed_schema = String(getParentItem(getParentItem(this.selectedItem)).@label);
-                }
-            }
-            
-            private function query_dispatcher(query:String, warn_msg:String) : void {
-                Alert.show(warn_msg, "Confirmation", Alert.YES|Alert.NO,
-                    Application.application as Application,
-                    function(event:CloseEvent):void { // confirm handler
-                        if (event.detail == Alert.YES) {
-                            var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "normal");
-                            CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
-                            var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                            CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-                        }
-                    }, confirmicon, Alert.NO);
-            }
-            
         ]]>
     </mx:Script>
     
