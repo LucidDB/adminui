@@ -12,29 +12,9 @@ Redistribution and use in source and binary forms, with or without modification,
 package com.flexsqladmin.sqladmin.control
 {
 	import com.adobe.cairngorm.control.FrontController;
-    import com.flexsqladmin.sqladmin.commands.LoginCommand;
-    import com.flexsqladmin.sqladmin.commands.MetaDataCommand;
-    import com.flexsqladmin.sqladmin.commands.ExecuteSQLCommand;
-    import com.flexsqladmin.sqladmin.commands.OpenTableCommand;
-    import com.flexsqladmin.sqladmin.commands.TableMetaDataCommand;
-    import com.flexsqladmin.sqladmin.commands.DeleteRowCommand;
-    import com.flexsqladmin.sqladmin.commands.UpdateDataCommand;
-    import com.flexsqladmin.sqladmin.commands.InsertRowCommand;
-    import com.flexsqladmin.sqladmin.commands.ListCatalogsCommand;
-    import com.flexsqladmin.sqladmin.commands.TableDetailsCommand;
-    import com.flexsqladmin.sqladmin.commands.UsersAndRolesCommand;
-    
-    import com.flexsqladmin.sqladmin.events.LoginEvent;
-    import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-    import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-    import com.flexsqladmin.sqladmin.events.OpenTableEvent;
-    import com.flexsqladmin.sqladmin.events.TableMetaDataEvent;
-    import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
-	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
-	import com.flexsqladmin.sqladmin.events.InsertRowEvent;
-	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
-    import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-    import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
+
+    import com.flexsqladmin.sqladmin.commands.*;
+    import com.flexsqladmin.sqladmin.events.*;
 	
 	public class Controller extends FrontController
 	{
@@ -51,6 +31,7 @@ package com.flexsqladmin.sqladmin.control
 			addCommand(ListCatalogsEvent.LISTCATALOGS, ListCatalogsCommand);
             addCommand(TableDetailsEvent.TABLEDETAILS, TableDetailsCommand);
             addCommand(UsersAndRolesEvent.USERSANDROLES, UsersAndRolesCommand);
+            addCommand(ObjectTreeLoaderEvent.OBJECT_TREE_LOADER, ObjectTreeLoaderCommand);
 		}
 	}
 }

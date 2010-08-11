@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2010 Dynamo Business Intelligence Corporation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<mx:Tree xmlns:mx="http://www.adobe.com/2006/mxml"
+         itemRenderer="com.flexsqladmin.sqladmin.components.ObjectTreeRenderer"
+         dataDescriptor="{new ObjectTreeDataDescriptor()}"
+         dragMoveEnabled="false" 
+         height="95%" width="100%" 
+         doubleClickEnabled="true"
+         labelField="@label" 
+         showRoot="false" 
+         dataProvider="{tree_data}"
+         keyUp="debug(event);"
+         creationComplete="init();">
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.adobe.serialization.json.JSON;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.components.ObjectTreeRenderer;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
+            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+            
+            import mx.containers.VBox;
+            import mx.controls.Alert;
+            import mx.controls.Menu;
+            import mx.core.Application;
+            import mx.events.CloseEvent;
+            import mx.events.ListEvent;
+            import mx.events.MenuEvent;
+            import mx.managers.PopUpManager;
+            
+            [Embed(source="/icons/script_select.png")]
+            private var selecticon:Class;
+            [Embed(source="/icons/script_add.png")]
+            private var inserticon:Class;
+            [Embed(source="/icons/script_edit.png")]
+            private var updateicon:Class;
+            [Embed(source="/icons/script_delete.png")]
+            private var deleteicon:Class;
+            [Embed(source="/icons/open_table.png")]
+            private var opentableicon:Class;
+            [Embed(source="/icons/script_exec.png")]
+            private var scriptexec:Class;
+            [Embed("/icons/close_tab.png")]
+            public var closeicon : Class;
+            [Embed("/icons/confirm.png")]
+            public var confirmicon : Class;
+            [Embed("/icons/table_edit.png")]
+            public var ETimg:Class;
+            [Embed("/icons/script_edit.png")]
+            public var VWedImg:Class;
+            
+            [Embed(source="/icons/database_add.png")]
+            private var add_schema_icon:Class;
+            [Embed(source="/icons/delete.png")]
+            private var drop_icon:Class;
+            [Embed(source="/icons/add.png")]
+            private var add_icon:Class;
+            [Embed(source="/icons/group_edit.png")]
+            private var edit_user_icon:Class;
+            
+            private var clickx:int = 0;
+            private var clicky:int = 0;
+            private var click_interval:Number = 0;
+            
+            private var menu_closed:Boolean = true;
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            [Bindable]
+            public var tree_data:XML;
+            
+            private var object_menus:Object = new Object();
+            
+            public function init() : void {
+                /*
+                <schema label="Schema 1">
+                <tables label="Tables">
+                <table label="T1">
+                <column label="C1" />
+                </table>
+                </tables>
+                <views label="Views">
+                </views>
+                <foreign_tables label="Foreign Tables">
+                <foreign_table label="Salesforce Table 1" />
+                </foreign_tables>
+                <functions label="Functions">
+                <function label="UDF1" />
+                </functions>
+                <procedures label="Procedures">
+                <procedure label="Proc1" />
+                </procedures>
+                </schema>
+                <schema label="Sys_root">
+                <tables label="Tables">
+                </tables>
+                </schema>
+                */
+                var schemas_load:String = JSON.encode(
+                    {'service': 'sqlWebService', 'operation': 'getDBMetaData',
+                     'arguments': {'connection': '', 'catalog': model.currentcatalogname} }
+                    );
+                var skeleton:XML = <tree>
+                    <schemas label="Schemas" loadInfo={schemas_load}>
+                    </schemas>
+                    <security label="Security">
+                        <users label="Users">
+                            <user label="U1" />
+                        </users>
+                        <roles label="Roles">
+                            <role label="Role 1" />
+                        </roles>
+                    </security>
+                    <remote_data label="Remote Data">
+                        <wrapper label="Wrapper 1">
+                            <servers label="Servers">
+                                <server label="SFDC_WRAPPER" />
+                            </servers>
+                        </wrapper>
+                        <wrapper label="Wrapper 2">
+                            <servers label="Servers">
+                                <server label="MYSQL_SRV1" />
+                                <server label="ORACLE_SRV2" />
+                            </servers>
+                        </wrapper>
+                    </remote_data>
+                    <jars label="Jars">
+                        <jar label="Jar1" />
+                        <jar label="Jar2" />
+                    </jars>
+                    <system label="System">
+                        <counters label="Counters" />
+                        <configuration label="Configuration" />
+                    </system>
+                    <networks label="Networks">
+                        <network label="network.dynamobi.com">
+                            <package label="SFDC package" />
+                            <package label="Stats package" />
+                            <package label="Zendesk package" />
+                            <package label="Google Analytics package" />
+                        </network>
+                    </networks>
+                    </tree>
+                    ;
+                //trace(skeleton.toXMLString());
+                tree_data = skeleton;
+                
+                var expandTree:Function = function():void {
+                    clearInterval(click_interval);
+                    expandItem(selectedItem, !isItemOpen(selectedItem), true, true);
+                };
+                
+                this.addEventListener(MouseEvent.CLICK, clickHandler, false, 1);
+                this.addEventListener(ListEvent.ITEM_CLICK, listItemClickHandler, false, 2);
+                this.addEventListener(ListEvent.ITEM_DOUBLE_CLICK, expandTree, false, 5);
+            
+                register_contexts_and_handlers();
+            }
+            
+            public function register_context(element:String, menu_info:Array, handler:Function) : void {
+                object_menus[element] = {'info': menu_info, 'handler': handler};
+            }
+            
+            public function register_contexts_and_handlers() : void {
+                var con_row:Function = function (label:String, icon:Class) : Object {
+                    return {'label': label, 'icon': icon};
+                };
+                var gen_add:Object = con_row('Add New', add_icon);
+                var gen_drop:Object = con_row('Drop', drop_icon);
+                    
+                // I am certain I can create some abstractions for
+                // the passed function, especially when so many actions are
+                // so similar.
+                register_context("schemas", [con_row('Add New', add_schema_icon)],
+                    function (index:Number, context:ObjectTree) : void {
+                        // pop up new schema
+                    }
+                );
+                register_context("schema", [gen_drop,
+                    con_row('Drop Cascade', drop_icon),
+                    con_row('Analyze All Tables In Schema', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        if (index == 0 || index == 1) {
+                            var casc:String = (index == 1) ? 'CASCADE' : '';
+                            query_dispatcher('DROP SCHEMA "' + context.model.currentcatalogname + '"."' +
+                                context.selectedItem.@label + '" ' + casc,
+                                "Are you sure you want to\ndrop this schema?");
+                        }
+                    }
+                );
+                register_context("tables", [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        //
+                    }
+                );
+                register_context('table', [con_row('Script as Select', selecticon),
+                    con_row('Script as Insert', inserticon),
+                    con_row('Script as Update', updateicon),
+                    con_row('Script as Delete', deleteicon),
+                    {type: 'separator'},
+                    con_row('Open', opentableicon),
+                    gen_drop,
+                    con_row('Edit', updateicon),
+                    con_row('Storage Report', null),
+                    con_row('Analyze Table', null)
+                    ],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('column', [con_row('Data Stats', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('views', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('view', [gen_drop,
+                    con_row('Edit', updateicon),
+                    con_row('Select As', selecticon)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('foreign_tables', [con_row('Import', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('foreign_table', [con_row('Select As', null),
+                    gen_drop,
+                    con_row('Reimport', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('functions', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('function', [gen_drop,
+                    con_row('View Details', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('procedures', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('procedure', [con_row('View Details', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                // None for security?
+                register_context('users', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('user', [con_row('Edit', edit_user_icon),
+                    gen_drop],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('roles', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('role', [con_row('Edit', edit_user_icon)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('remote_data', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('wrapper', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('wrapper', [con_row('View Details', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('servers', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('server', [gen_drop,
+                    con_row('Edit', null),
+                    con_row('Import Objects', null),
+                    con_row('Verify', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('jars', [gen_add],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('jar', [gen_drop,
+                    con_row('Add', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('counters', [con_row('Performance Monitor', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                register_context('configuration', [con_row('Edit', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        
+                    }
+                );
+                    
+            }
+            
+            public function debug(e:KeyboardEvent) : void {
+                if (e.keyCode == 84) { // T
+                    tree_data.schemas.schema[0].tables.appendChild(<node label="Ough" />);
+                    //this.validateNow();
+                    //trace(XML(dataProvider).toXMLString());
+                } else if (e.keyCode == 82) { // R
+                } else if (e.keyCode == 68) { // D
+                    delete tree_data.schemas.schema[0].tables.table.(@label == 'Ough')[0];
+                } else if (e.keyCode == 78) {// N
+                    //for each (var el:XML in model.metadata.schema)
+                    //    tree_data.schemas.appendChild(el);
+                    trace(tree_data.toXMLString());
+                    //real_dp.appendChild(model.metadata);
+                    //delete real_dp.schemas[0];
+                }
+            }
+            
+            private function clickHandler(e:MouseEvent):void{
+                clickx = e.stageX;
+                clicky = e.stageY;
+            }
+            
+            private function listItemClickHandler(event:ListEvent) : void {
+                clearInterval(click_interval);
+                click_interval = setInterval(deferredListItemClickHandler, 200);
+            }
+            
+            private function deferredListItemClickHandler() : void {
+                clearInterval(click_interval);
+                var objMenu:Array = [];
+                var action:String = '';
+               
+                /*
+                // Schemas and tables/views menu roots:
+                if (XML(selectedItem).localName() == 'schema') {
+                    objMenu = [{label: "Drop Schema", icon: closeicon}
+                    ];
+                    action = 'schema_click';
+                }
+                
+                // Individual tables and views:
+                if(this.selectedItem.@sqlquery != null && this.selectedItem.@sqlquery.toString().length != 0) {
+                    action = 'element_click';
+                    if (this.getParentItem(this.selectedItem).@label == "Procedures")
+                        objMenu = [{label: "Script as Execute", icon:scriptexec}];
+                    else if (this.getParentItem(this.selectedItem).@label == "Tables")
+                        objMenu = [{label: "Script as Select", icon:selecticon},
+                            {label: "Script as Insert", icon:inserticon},
+                            {label: "Script as Update", icon:updateicon},
+                            {label: "Script as Delete", icon:deleteicon}, {type: "separator"},
+                            {label: "Open Table", icon: opentableicon},
+                            {label: "View and Edit Table", icon: updateicon},
+                            {label: "Drop Table", icon: closeicon}
+                        ];
+                    else if (this.getParentItem(this.selectedItem).@label == "Views")
+                        objMenu = [{label: "Script as Select", icon:selecticon}
+                            , {type: "separator"}
+                            , {label: "Edit View", icon: updateicon}
+                            , {label: "Drop View", icon: closeicon}
+                        ];
+                }
+                
+                if (objMenu.length > 0) {
+                    if (menu_closed) {
+                        menu_closed = false;
+                        var myMenu:Menu = Menu.createMenu(null, objMenu);
+                        myMenu.show(clickx + 25, clicky);
+                        
+                        if (action == 'element_click')
+                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, menuHandler);
+                        else if (action == 'schema_click')
+                            myMenu.addEventListener(MenuEvent.ITEM_CLICK, schema_click_handler);
+                        
+                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed=true; });
+                    } else {
+                        menu_closed = true;
+                    }
+                }
+                */
+                
+                if (object_menus.hasOwnProperty(XML(selectedItem).localName())) {
+                    if (menu_closed) {
+                        menu_closed = false;
+                        var context:ObjectTree = this;
+                        var menu_info:Object = object_menus[XML(selectedItem).localName()];
+                        var myMenu:Menu = Menu.createMenu(null, menu_info['info']);
+                        myMenu.show(clickx + 25, clicky);
+                        myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
+                            menu_info['handler'](event.index, context);
+                        });
+                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed = true; });
+                    } else {
+                        menu_closed = true;
+                    }
+                }
+            }
+            
+            /*private function schema_click_handler(e:MenuEvent) : void {
+                if (e.index == 0) {
+                    query_dispatcher('DROP SCHEMA "' + model.currentcatalogname + '"."' +
+                        selectedItem.@label + '" CASCADE',
+                        "Are you sure you want to\ndrop this schema?");
+                }
+            }*/
+            
+            private function menuHandler(e:MenuEvent):void{
+                var catalogname : String = model.currentcatalogname;
+                var scriptquery:String = "";
+                var x:int = 0;
+                // todo: refactor this (in fact probably this whole class)
+                if (e.index == 0){
+                    if(this.getParentItem(this.selectedItem).@label == "Procedures"){
+                        scriptquery = "EXECUTE " + "\"" + catalogname + "\".\""+getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " ";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            if (this.selectedItem.node[x].@column != "None")
+                                scriptquery += this.selectedItem.node[x].@column;
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", ";
+                        }
+                    } else { // label is Tables or Views
+                        scriptquery = "SELECT ";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", ";
+                        }
+                        scriptquery += "\rFROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
+                    }
+                }
+                else if(e.index == 1) {
+                    if(this.getParentItem(this.selectedItem).@label == "Procedures"){
+                        scriptquery += "EXEC " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"";
+                    } else {
+                        scriptquery = "INSERT INTO " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \r(\r";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            scriptquery += "&quot;" + this.selectedItem.node[x].@column + "&quot;";
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", \r";
+                        }
+                        scriptquery += "\r)\r VALUES\r (\r";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            scriptquery += "{" + this.selectedItem.node[x].@label + "}";
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", \r";
+                        }
+                        scriptquery += "\r)";
+                    }
+                }
+                else if(e.index == 2) {
+                    // script-update for tables, edit for views
+                    if (getParentItem(this.selectedItem).@label == "Views") {
+                        var loadCrap:Function = function(querydata:XML):void {
+                            //trace(querydata.NewDataSet.Table.@SCHEMA_NAME);
+                            var schema:String = querydata.NewDataSet.Table.SCHEMA_NAME;
+                            var view:String = querydata.NewDataSet.Table.VIEW_NAME;
+                            var desc:String = querydata.NewDataSet.Table.REMARKS;
+                            var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
+                            var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
+                            
+                            var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " + view, model.main_tabnav, "viewWindow", VWedImg));
+                            vw.setText(text);
+                            vw.editing = true;
+                            vw.view_name.text = view;
+                            vw.view_desc.text = desc;
+                            callLater(vw.guess_schema, [schema]);
+                            
+                        };
+                        var query : String = 'SELECT SCHEMA_NAME, VIEW_NAME,' +
+                            ' REMARKS, ' +
+                            ' CREATION_TIMESTAMP, ORIGINAL_TEXT' +
+                            ' FROM "LOCALDB"."SYS_ROOT"."DBA_VIEWS" WHERE ' +
+                            "SCHEMA_NAME = '" + getParentItem(getParentItem(selectedItem)).@label + "' AND " +
+                            "VIEW_NAME = '" + selectedItem.@label + "'";
+                        var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "special", loadCrap);
+                        CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);                       
+                    } else {
+                        scriptquery = "UPDATE " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + " \rSET\r";
+                        for (x = 0; x < this.selectedItem.children().length(); x++){
+                            scriptquery += this.selectedItem.node[x].@column + " = {" + this.selectedItem.node[x].@label + "}";
+                            if (x + 1 < this.selectedItem.children().length())
+                                scriptquery += ", \r";
+                        }
+                        scriptquery += "\rWHERE {SEARCH_CONDITIONS}";
+                    }
+                }
+                else if(e.index == 3) {
+                    // script-delete for tabs, drop for views
+                    if (getParentItem(this.selectedItem).@label == "Views") {
+                        query_dispatcher('DROP VIEW "' + catalogname + '"."' + 
+                            getParentItem(getParentItem(selectedItem)).@label + 
+                            '"."' + selectedItem.@label + '" CASCADE',
+                            "Are you sure you want to\ndrop this view?");                        
+                    } else {
+                        scriptquery = "DELETE FROM " + "\"" + catalogname + "\".\"" +getParentItem(getParentItem(this.selectedItem)).@label+"\".\""+this.selectedItem.@label +"\"" + "\rWHERE {SEARCH_CONDITIONS}";
+                    }
+                }
+                else if(e.index == 5){
+                    // Open the table window
+                    //Application.application.openTableWindow(this.selectedItem.@label);
+                    var opentablewindow:OpenTableWindow = OpenTableWindow(PopUpManager.createPopUp(this.parentDocument.parentDocument, OpenTableWindow, true));
+                    opentablewindow.setStyle("borderAlpha", 0.8);
+                    opentablewindow.showCloseButton = true; 
+                    opentablewindow.setTablename(getParentItem(getParentItem(this.selectedItem)).@label+"."+this.selectedItem.@label);
+                } else if (e.index == 6) {
+                    // Add New Table For Editing
+                    var tab_win : CreateEditTableWindow = CreateEditTableWindow(
+                        Application.application.addTab("Edit Table " + this.selectedItem.@label,
+                            model.main_tabnav, 'createTable', ETimg)
+                    );
+                    // Grab the table data.
+                    var td_event:TableDetailsEvent = new TableDetailsEvent(catalogname,
+                        getParentItem(getParentItem(this.selectedItem)).@label,
+                        this.selectedItem.@label, ActionEnum.GET
+                    );
+                    CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
+                } else if (e.index == 7) {
+                    // Drop table
+                    query_dispatcher('DROP TABLE "' + catalogname + '"."' +
+                        getParentItem(getParentItem(selectedItem)).@label + '"."' +
+                        selectedItem.@label + '" CASCADE',
+                        "Are you sure you want to\ndrop this table?");
+                }
+                DebugWindow.log("ObjectBrowser.mxml:menuHandler() - " + e.index + " - " + scriptquery);
+                
+                if (scriptquery != "") {
+                    var makenewqw : Boolean = false;
+                    var qw : QueryWindow = model.aryQueryWindows[VBox(model.main_tabnav.selectedChild).id];
+                    if (qw && qw.isEmpty()) {
+                        qw.setText(scriptquery);
+                    } else {
+                        qw = QueryWindow(Application.application.addTab("Query Window", model.main_tabnav));
+                        qw.setText(scriptquery);
+                    }
+                    qw.guessed_schema = String(getParentItem(getParentItem(this.selectedItem)).@label);
+                }
+            }
+            
+            private function query_dispatcher(query:String, warn_msg:String) : void {
+                Alert.show(warn_msg, "Confirmation", Alert.YES|Alert.NO,
+                    Application.application as Application,
+                    function(event:CloseEvent):void { // confirm handler
+                        if (event.detail == Alert.YES) {
+                            var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "normal");
+                            CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
+                            var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                            CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                        }
+                    }, confirmicon, Alert.NO);
+            }
+            
+        ]]>
+    </mx:Script>
+    
+</mx:Tree>
