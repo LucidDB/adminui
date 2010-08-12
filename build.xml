@@ -1,0 +1,97 @@
+<project name="FlexSQLAdmin" default="deploy">
+
+  <property name="webapp.dir" value="/var/lib/jetty/webapps"/>
+  <!-- Change this to your SDK location. -->
+  <property name="FLEX_HOME" value="/home/kevin/Desktop/flex_sdk_4" />
+
+  <property name="DEPLOY_DIR" value="${basedir}/deploy" />
+  <property name="LIBS" value="${basedir}/com/flexlib/,${basedir}/com/adobe/Cairngorm,${basedir}/com/as3corelib,${FLEX_HOME}/frameworks/libs/,${FLEX_HOME}/frameworks/projects/framework/bundles/en_US/,${FLEX_HOME}/frameworks/locale/en_US/" />
+  <property name="COMPILER_VERSION" value="3.5" />
+  <property name="THEMES" value="${FLEX_HOME}/frameworks/themes/Halo/halo.swc,${FLEX_HOME}/frameworks/themes/Spark/spark.css" />
+
+  <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
+
+  <target name="init">
+    <mkdir dir="${DEPLOY_DIR}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${DEPLOY_DIR}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <exec executable="${FLEX_HOME}/bin/mxmlc" failonerror="true">
+      <arg line="-theme=${THEMES} -compiler.library-path=${LIBS} -compiler.incremental -compiler.mxml.compatibility-version=${COMPILER_VERSION} -compiler.show-deprecation-warnings=false -static-link-runtime-shared-libraries -locale=en_US -output=${DEPLOY_DIR}/SQLAdmin.swf SQLAdmin.mxml" />
+    </exec>
+  </target>
+
+  <target name="generate_war" depends="package">
+    <war destfile="adminui.war" needxmlfile="false">
+      <fileset dir="./deploy">
+        <exclude name="**.cache" />
+      </fileset>
+    </war>
+  </target>
+
+  <target name="deploy" depends="generate_war">
+    <copy file="adminui.war" toFile="${webapp.dir}/adminui.war" />
+    <copy file="adminui.war" tofile="../dynamodb-services/wars/adminui.war"/>
+    <delete file="adminui.war" />
+  </target>
+
+  <!-- Apparently we can't simply use html-template for custom templates,
+       so we use the macro below.
+  <target name="package" depends="compile">
+    <html-wrapper file="SQLAdmin.html"
+      height="100%"
+      width="100%"
+      swf="SQLAdmin"
+      output="${DEPLOY_DIR}" />
+  </target>
+  -->
+
+  <target name="package" depends="compile">
+    <generateHtmlWrapper file="SQLAdmin.html"
+      height="100%" width="100%" swf="SQLAdmin" output="${DEPLOY_DIR}"
+      title="SQLAdmin" template="express-installation"
+      version-major="6" version-minor="0" version-revision="65"
+      />
+  </target>
+
+  <macrodef name="generateHtmlWrapper" description="Generates HTML Wrapper using custom template">
+    <attribute name="file"/>
+    <attribute name="title"/>
+    <!--<attribute name="application"/>-->
+    <attribute name="swf"/>
+    <attribute name="width"/>
+    <attribute name="height"/>
+    <!--<attribute name="bgcolor"/>-->
+    <attribute name="version-major"/>
+    <attribute name="version-minor"/>
+    <attribute name="version-revision"/>
+    <attribute name="template"/>
+    <attribute name="output"/>
+
+    <sequential>
+      <!--<copy todir="@{output}/history">
+        <fileset dir="html-template/history"/>
+      </copy>-->
+      <copy file="html-template/history.js" todir="@{output}" />
+      <copy file="html-template/history.htm" todir="@{output}" />
+      <copy file="html-template/history.swf" todir="@{output}" />
+      <copy file="html-template/AC_OETags.js" todir="@{output}"/>
+      <copy file="html-template/playerProductInstall.swf" todir="@{output}" />
+      <copy file="html-template/index.template.html" tofile="@{output}/@{file}" />
+
+      <replace file="@{output}/@{file}" token="$${title}" value="@{title}"/>
+      <replace file="@{output}/@{file}" token="$${swf}" value="@{swf}"/>
+      <replace file="@{output}/@{file}" token="$${width}" value="@{width}"/>
+      <replace file="@{output}/@{file}" token="$${height}" value="@{height}"/>
+      <replace file="@{output}/@{file}" token="$${bgcolor}" value="@{bgcolor}"/>
+      <replace file="@{output}/@{file}" token="$${application}" value="@{application}"/>
+      <replace file="@{output}/@{file}" token="$${version_major}" value="@{version-major}"/>
+      <replace file="@{output}/@{file}" token="$${version_minor}" value="@{version-minor}"/>
+      <replace file="@{output}/@{file}" token="$${version_revision}" value="@{version-revision}"/>
+    </sequential>
+  </macrodef>
+</project>
