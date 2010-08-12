@@ -131,15 +131,14 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     {'service': 'sqlWebService', 'operation': 'getDBMetaData',
                      'arguments': {'connection': '', 'catalog': model.currentcatalogname} }
                     );
+                //var users_load:String = JSON.encode({'service': '
                 var skeleton:XML = <tree>
                     <schemas label="Schemas" loadInfo={schemas_load}>
                     </schemas>
                     <security label="Security">
                         <users label="Users">
-                            <user label="U1" />
                         </users>
                         <roles label="Roles">
-                            <role label="Role 1" />
                         </roles>
                     </security>
                     <remote_data label="Remote Data">
@@ -162,6 +161,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     <system label="System">
                         <counters label="Counters" />
                         <configuration label="Configuration" />
+                        <sessions label="Active Sessions" />
                     </system>
                     <networks label="Networks">
                         <network label="network.dynamobi.com">
@@ -696,7 +696,13 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('configuration', [con_row('Edit', null)],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                            
+                    }
+                );
+                register_context('sessions', [con_row('Active Sessions', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        Application.application.addTab("Active Sessions",
+                            context.model.main_tabnav, 'usersWindow');
                     }
                 );
                     

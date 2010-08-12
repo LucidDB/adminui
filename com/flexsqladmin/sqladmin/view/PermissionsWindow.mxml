@@ -9,16 +9,16 @@ Redistribution and use in source and binary forms, with or without modification,
 
   THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="500" height="500"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
                 xmlns:com="com.flexsqladmin.sqladmin.components.*"
-                creationComplete="init();"
                 title="Grant Permissions"
+                creationComplete="init();"
                 close="closeWin();" xmlns:treeClasses="mx.controls.treeClasses.*"
                 >
     <mx:Style>
         .win {backgroundColor: #869ca7; backgroundGradientColors: #9bafb9, #68808c; }
     </mx:Style>
-    <mx:VBox top="10" left="10" right="10" bottom="10" width="100%" textAlign="center" styleName="win">        
+    <mx:HBox top="10" left="10" right="10" bottom="10" width="100%" textAlign="center" styleName="win">        
         <!--<mx:Text selectable="true" link="selectClick(event);">
             <mx:htmlText>
                 <![CDATA[
@@ -38,7 +38,7 @@ Redistribution and use in source and binary forms, with or without modification,
                  folderClosedIcon="@Embed(source='/icons/database.png')" 
                  showRoot="false"
                  rowHeight="25"
-                 left="5" right="5" width="100%"
+                 left="5" right="5" width="50%"
                  textAlign="left"
                  itemClick="tree_itemClick(event);"
                  >
@@ -140,6 +140,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 </mx:Component>
             </mx:itemRenderer>
         </mx:Tree>
+        <mx:VBox width="50%">
         <mx:Box />
         <mx:HBox textAlign="center" width="100%">
             <mx:Spacer width="50%" />
@@ -178,7 +179,8 @@ Redistribution and use in source and binary forms, with or without modification,
             <mx:Button label="Save Changes" click="savePerms();" icon="@Embed(source='/icons/exec.gif')" />
         </mx:HBox>
 
-    </mx:VBox>
+        </mx:VBox>
+    </mx:HBox>
 
     <mx:Script>
         <![CDATA[
@@ -243,7 +245,7 @@ Redistribution and use in source and binary forms, with or without modification,
             };
 
             public function init() : void {
-                PopUpManager.centerPopUp(this);
+                //PopUpManager.centerPopUp(this);
 
                 datacopy = new XML(model.metadata);
                 // remove cols from consideration
@@ -251,6 +253,19 @@ Redistribution and use in source and binary forms, with or without modification,
                 for (var i:Number = cols.length()-1; i >= 0; i--) {
                     delete cols[i];
                 }
+                original_data = new XML(datacopy);
+                // Add icons to form items and disable entry until they click something
+                for (var p:String in perms_key) {
+                    var checkbox:CheckBox = CheckBox(this['p_' + p.toLowerCase()]);
+                    if (p != 'ALL')
+                        FormItemWithImage(checkbox.parent).imageSource = perms_key[p].source;
+                    checkbox.addEventListener(MouseEvent.CLICK, permClick);
+                    checkbox.enabled = false;
+                }
+                
+                // Block until we have the info (supplied by the user of this view.)
+                CustomFuncs.when(model.roles_info, '!=', null, function():void {
+                    
                 for each (var role:XML in model.roles_info.children()) {
                     if (role.@name == role_name) {
                         for each (var perm:XML in role.permission) {
@@ -263,15 +278,7 @@ Redistribution and use in source and binary forms, with or without modification,
                         }
                     }
                 }
-                original_data = new XML(datacopy);
-                // Add colors to form items and disable entry until they click something
-                for (var p:String in perms_key) {
-                    var checkbox:CheckBox = CheckBox(this['p_' + p.toLowerCase()]);
-                    if (p != 'ALL')
-                        FormItemWithImage(checkbox.parent).imageSource = perms_key[p].source;
-                    checkbox.addEventListener(MouseEvent.CLICK, permClick);
-                    checkbox.enabled = false;
-                }
+                });
             }
             
             public function closeWin() : void {

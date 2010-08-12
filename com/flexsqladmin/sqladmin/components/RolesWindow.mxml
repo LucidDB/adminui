@@ -11,13 +11,15 @@ Redistribution and use in source and binary forms, with or without modification,
 -->
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:components="com.flexsqladmin.sqladmin.components.*"
+           xmlns:views="com.flexsqladmin.sqladmin.views.*"
            width="100%"
            height="100%"
-           creationComplete="init();"
+           creationComplete="init();" xmlns:view="com.flexsqladmin.sqladmin.view.*"
            >
 
-    <mx:VBox left="10" right="10" top="10" bottom="10" width="100%">
-        <mx:Panel id="r_pan" creationComplete="{if (modding) r_pan.title='Modify Role'; else r_pan.title='New Role';}">
+    <mx:VBox width="100%">
+    <mx:HBox left="10" right="10" top="10" bottom="10" width="100%">
+        <mx:Panel id="r_pan" creationComplete="{if (modding) r_pan.title='Modify Role'; else r_pan.title='New Role';}" height="100%">
             <mx:Form>
                 <mx:FormItem label="Name: ">
                     <mx:TextInput creationComplete="{role_name.enabled=!modding;}" id="role_name" />
@@ -32,35 +34,43 @@ Redistribution and use in source and binary forms, with or without modification,
                     <mx:Button enabled="{modding}" label="Delete Role" click="deleteRole();" icon="@Embed(source='/icons/close_tab.png')" />
                 </mx:FormItem>
             </mx:Form>
-            <mx:AdvancedDataGrid enabled="{modding}" id="role_users" dataProvider="{role_users_data_collection()}" width="100%">
-                <mx:columns>
-                    <mx:AdvancedDataGridColumn id="r_user" headerText="User" dataField="@user" />
-                    <mx:AdvancedDataGridColumn editable="{modding}" rendererIsEditor="true" textAlign="center" id="r_add" headerText="Added To This Role">
-                        <mx:itemRenderer>
-                            <mx:Component>
-                                <!-- Currently can't revoke -->
-                                <mx:CheckBox click="if (!selected) { event.preventDefault(); selected=true; return; }
-                                             data.@added = selected; data.@with_grant = (!selected) ? 'false' : data.@with_grant;
-                                             outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
-                                             enabled="{outerDocument.modding}" updateComplete="{selected = (data.@added == 'true');}"
-                                             />
-                            </mx:Component>
-                        </mx:itemRenderer>
-                    </mx:AdvancedDataGridColumn>
-                    <mx:AdvancedDataGridColumn textAlign="center" id="r_grant" headerText="With Grant Option">
-                        <mx:itemRenderer>
-                            <mx:Component>
-                                <mx:CheckBox click="data.@with_grant = selected; data.@added = 'true';
-                                             outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
-                                             enabled="{outerDocument.modding}" updateComplete="{selected = (data.@with_grant == 'true');}" />
-                            </mx:Component>
-                        </mx:itemRenderer>
-                    </mx:AdvancedDataGridColumn>
-                </mx:columns>
-            </mx:AdvancedDataGrid>
         </mx:Panel>
+        <mx:Panel title="Assign Users to Roles" width="100%" height="100%">
+        <mx:AdvancedDataGrid enabled="{modding}" id="role_users" dataProvider="{role_users_data_collection()}" width="100%">
+            <mx:columns>
+                <mx:AdvancedDataGridColumn id="r_user" headerText="User" dataField="@user" />
+                <mx:AdvancedDataGridColumn editable="{modding}" rendererIsEditor="true" textAlign="center" id="r_add" headerText="Added To This Role">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <!-- Currently can't revoke -->
+                            <mx:CheckBox click="if (!selected) { event.preventDefault(); selected=true; return; }
+                                         data.@added = selected; data.@with_grant = (!selected) ? 'false' : data.@with_grant;
+                                         outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
+                                         enabled="{outerDocument.modding}" updateComplete="{selected = (data.@added == 'true');}"
+                                         />
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:AdvancedDataGridColumn>
+                <mx:AdvancedDataGridColumn textAlign="center" id="r_grant" headerText="With Grant Option">
+                    <mx:itemRenderer>
+                        <mx:Component>
+                            <mx:CheckBox click="data.@with_grant = selected; data.@added = 'true';
+                                         outerDocument.user_click(data.@user, data.@added, data.@with_grant);"
+                                         enabled="{outerDocument.modding}" updateComplete="{selected = (data.@with_grant == 'true');}" />
+                        </mx:Component>
+                    </mx:itemRenderer>
+                </mx:AdvancedDataGridColumn>
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+        </mx:Panel>
+    </mx:HBox>
+
+        <mx:ComboBox height="0%" valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />
+
+    <view:PermissionsWindow id="perm_window" role_name="{role_name.text}" left="10" right="10" bottom="0"
+                            width="100%"  height="100%"/>
+    
     </mx:VBox>
-    <mx:ComboBox valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />
 
     <mx:Script>
         <![CDATA[

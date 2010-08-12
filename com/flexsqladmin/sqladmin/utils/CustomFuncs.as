@@ -10,7 +10,28 @@ Redistribution and use in source and binary forms, with or without modification,
 */
 package com.flexsqladmin.sqladmin.utils
 {
+    import mx.core.Application;
+
     public final class CustomFuncs {
+        
+        // Blocks execution of a function until the given condition without blocking execution of the program.
+        public static function when(what:*, comparison:String, with_what:*, do_what:Function) : void {
+            if (comparison == '==' && what == with_what)
+                do_what();
+            else if (comparison == '!=' && what != with_what)
+                do_what();
+            else if (comparison == '<' && what < with_what)
+                do_what();
+            else if (comparison == '>' && what > with_what)
+                do_what();
+            else if (comparison == '&&' && (what && with_what))
+                do_what();
+            else if (comparison == '||' && (what || with_what))
+                do_what();
+            else
+                Application.application.callLater(when, [what, comparison, with_what, do_what]);
+        }
+        
         public static function wordMult(word:String, times:Number) : String {
             // 'hello' * 2 = 'hellohello'
             // Note: the make array, push, push, array.join('') idiom is much slower in flex,
