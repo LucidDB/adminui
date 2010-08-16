@@ -13,8 +13,22 @@ Redistribution and use in source and binary forms, with or without modification,
            xmlns:components="com.flexsqladmin.sqladmin.components.*"
            width="100%"
            height="100%"
-           creationComplete="init();"
+           creationComplete="init();" xmlns:view="com.flexsqladmin.sqladmin.view.*"
            >
+
+    <mx:states>
+        <mx:State name="create">
+            <mx:SetProperty target="{pan}" name="title" value="Create New User" />
+        </mx:State>
+        <mx:State name="edit">
+            <mx:SetProperty target="{pan}" name="title" value="Edit User" />
+            <mx:AddChild relativeTo="{pan}" position="firstChild">
+                <view:ModifyUserWindow id="modify_user" user="{user_name.text}" />
+            </mx:AddChild>
+            <mx:RemoveChild target="{create_form}" />
+        </mx:State>
+    </mx:states>
+    
     
     <mx:Validator source="{user_name}" property="text" />
     <mx:Validator source="{user_pass}" property="text" />
@@ -22,8 +36,8 @@ Redistribution and use in source and binary forms, with or without modification,
     
     <mx:VBox width="100%" left="10" right="10" top="10" bottom="10">
     <mx:HBox width="100%">
-        <mx:Panel title="Create New User">
-            <mx:Form>
+        <mx:Panel id="pan">
+            <mx:Form id="create_form">
                 <mx:FormItem label="Name: ">
                     <mx:TextInput id="user_name" />
                 </mx:FormItem>
@@ -41,68 +55,42 @@ Redistribution and use in source and binary forms, with or without modification,
                 </mx:FormItem>
             </mx:Form>
         </mx:Panel>
-        <mx:Spacer width="15%" />
-        <mx:VBox height="100%">
-            <mx:ComboBox id="users_list" prompt="Select User" selectedIndex="-1" creationComplete="checkUsersList();" dataProvider="{model.users_list}" />
-            <mx:Button label="Modify User" click="modifyUser();" icon="@Embed(source='/icons/exec.gif')" />
-            <mx:Spacer height="25%" />
-            <mx:ComboBox id="roles_list" prompt="Select Role" selectedIndex="-1" creationComplete="checkRolesList();" dataProvider="{model.roles_list}" />
-            <mx:Button label="Modify Role" click="modifyRole();" icon="@Embed(source='/icons/exec.gif')" />
-        </mx:VBox>
-        <mx:Spacer width="15%" />
-        <mx:Panel title="Active User Sessions" width="100%">
-            <mx:HBox>
-            <mx:Label text="Update every: " />
-            <mx:NumericStepper id="update_interval" value="10" maximum="300" minimum="0" />
-            <mx:Label text="seconds. (0 means off.)" />
-            </mx:HBox>
-            <mx:AdvancedDataGrid width="100%" id="session_info" dataProvider="{model.session_info}">
-                <mx:columns>
-                    <mx:AdvancedDataGridColumn id="s_id" headerText="ID" dataField="@id" />
-                    <mx:AdvancedDataGridColumn id="s_user" headerText="User" dataField="@user" />
-                    <mx:AdvancedDataGridColumn id="s_query"  editable="false" rendererIsEditor="true" itemRenderer="mx.controls.TextInput" headerText="SQL Query" dataField="@query" />
-                </mx:columns>
-            </mx:AdvancedDataGrid>
-        </mx:Panel>
     </mx:HBox>
     
     </mx:VBox>
 
     <mx:Script>
         <![CDATA[
-            import mx.controls.Alert;
-            import mx.managers.PopUpManager;
-            import mx.core.Application;
-
-            import com.flexsqladmin.sqladmin.view.ModifyUserWindow;
-            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import com.flexsqladmin.sqladmin.view.ModifyUserWindow;
             
             import flash.text.TextLineMetrics;
             
-            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import mx.controls.Alert;
+            import mx.core.Application;
+            import mx.managers.PopUpManager;
             
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
-            public var sessionTimer:Timer;
+            public function debug() : void {
+                currentState = (currentState == 'edit') ? 'create' : 'edit';
+            }
             
             public function init() : void {
                 model.users_windows[id] = this;
                 model.users_windows._len += 1;
+                currentState = 'create';
+            }
+            
+            public function set_name(name:String) : void {
+                user_name.text = name;
                 
-                sessionTimer = new Timer(update_interval.value * 1000);
-                sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
-                sessionTimer.start();
-                sessionUpdate(null);
-                
-                s_id.width = measureText(CustomFuncs.wordMult("W", 4)).width;
-                s_user.width = measureText(CustomFuncs.wordMult("W", 6)).width;
-                //s_query.width = measureText(CustomFuncs.wordMult("W", 100)).width;
-                 
             }
             
             public function passValidate() : Boolean {
@@ -125,40 +113,6 @@ Redistribution and use in source and binary forms, with or without modification,
                 } else {
                     user_pass.setFocus();
                 }
-            }
-            
-            public function modifyUser() : void {
-                if (users_list.selectedIndex != -1) {
-                    var mod_win:ModifyUserWindow = ModifyUserWindow(PopUpManager.createPopUp(this, ModifyUserWindow, true));
-                    mod_win.setStyle("borderAlpha", 0.8);
-                    mod_win.showCloseButton = true;
-                    mod_win.user = users_list.selectedLabel;
-                } else {
-                    Alert.show("Please select a user.", "Error");
-                }
-            }
-            
-            public function modifyRole() : void {
-                if (roles_list.selectedIndex == -1) {
-                    Alert.show("Please select a role.", "Error");
-                    return;
-                }
-                var mod_role:RolesWindow = Application.application.addTab('Modify Role', model.main_tabnav, 'rolesWindow');
-                mod_role.modding = true;
-                mod_role.role_name.text = roles_list.selectedLabel;
-            }
-            
-            public function sessionUpdate(event:TimerEvent) : void {
-                if (update_interval.value == 0)
-                    return;
-                if (update_interval.value * 1000 != sessionTimer.delay) {
-                    sessionTimer.stop();
-                    sessionTimer = new Timer(update_interval.value * 1000);
-                    sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
-                    sessionTimer.start();
-                }
-                var upEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getCurrentSessions');
-                CairngormEventDispatcher.getInstance().dispatchEvent(upEvent);
             }
             
             public function checkUsersList() : void {

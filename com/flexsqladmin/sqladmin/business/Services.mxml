@@ -50,6 +50,12 @@ Redistribution and use in source and binary forms, with or without modification,
                 <toomany></toomany>
             </mx:request>
         </mx:operation>
+        <mx:operation name="getUsers" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request></mx:request>
+        </mx:operation>
+        <mx:operation name="getRoles" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request></mx:request>
+        </mx:operation>
     </mx:WebService>
     
     <mx:WebService

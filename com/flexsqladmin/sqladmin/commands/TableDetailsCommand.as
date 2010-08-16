@@ -104,7 +104,7 @@ package com.flexsqladmin.sqladmin.commands
                 var response:String = event.result;
                 if (response.length == 0) {
                     Alert.show("Schema created.", "Success");
-                    model.object_tree.addSchema(schema);
+                    model.object_tree.addSchema(schema.toUpperCase());
                 } else {
                     Alert.show("Schema could not be created.", "Error");
                 }

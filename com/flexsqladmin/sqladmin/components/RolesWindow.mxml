@@ -17,21 +17,27 @@ Redistribution and use in source and binary forms, with or without modification,
            creationComplete="init();" xmlns:view="com.flexsqladmin.sqladmin.view.*"
            >
 
-    <mx:VBox width="100%">
+    <mx:states>
+        <mx:State name="edit">
+            <mx:SetProperty target="{r_pan}" name="title" value="Modify Role" />
+            <mx:AddChild relativeTo="{r_name_item}">
+                <mx:ComboBox id="edit_role_list" dataProvider="{model.roles_list}"
+                             creationComplete="select_role(selected_role);"
+                             change="role_change();" />
+            </mx:AddChild>
+            <mx:RemoveChild target="{role_name}" />
+            <mx:RemoveChild target="{save_btn}" />
+        </mx:State>
+    </mx:states>
+    
     <mx:HBox left="10" right="10" top="10" bottom="10" width="100%">
-        <mx:Panel id="r_pan" creationComplete="{if (modding) r_pan.title='Modify Role'; else r_pan.title='New Role';}" height="100%">
+        <mx:Panel id="r_pan" title="New Role" height="100%">
             <mx:Form>
-                <mx:FormItem label="Name: ">
+                <mx:FormItem id="r_name_item" label="Name: ">
                     <mx:TextInput creationComplete="{role_name.enabled=!modding;}" id="role_name" />
                 </mx:FormItem>
                 <mx:FormItem>
                     <mx:Button creationComplete="{save_btn.enabled=!modding;}" id="save_btn" label="Save Name" click="saveName();" icon="@Embed(source='/icons/exec.gif')" />                    
-                </mx:FormItem>
-                <mx:FormItem>
-                    <mx:Button enabled="{modding}" label="Grant Permissions On Schemas And Tables" click="grantPerms();" icon="@Embed(source='/icons/exec.gif')" />
-                </mx:FormItem>
-                <mx:FormItem>
-                    <mx:Button enabled="{modding}" label="Delete Role" click="deleteRole();" icon="@Embed(source='/icons/close_tab.png')" />
                 </mx:FormItem>
             </mx:Form>
         </mx:Panel>
@@ -65,21 +71,16 @@ Redistribution and use in source and binary forms, with or without modification,
         </mx:Panel>
     </mx:HBox>
 
-        <mx:ComboBox height="0%" valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />
-
-    <view:PermissionsWindow id="perm_window" role_name="{role_name.text}" left="10" right="10" bottom="0"
-                            width="100%"  height="100%"/>
-    
-    </mx:VBox>
+    <mx:ComboBox height="0%" valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />
 
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.view.PermissionsWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.view.PermissionsWindow;
             
             import mx.collections.ArrayCollection;
             import mx.controls.CheckBox;
@@ -94,6 +95,9 @@ Redistribution and use in source and binary forms, with or without modification,
             
             [Bindable]
             public var modding:Boolean = false;
+            
+            [Bindable]
+            public var selected_role:String;
             
             public function init() : void {
                 model.roles_windows[id] = this;
@@ -112,6 +116,10 @@ Redistribution and use in source and binary forms, with or without modification,
             }
             
             public function reloadUsers() : void {
+                if (model.roles_info == null) {
+                    callLater(reloadUsers);
+                    return;
+                }
                 role_users_data = new Dictionary();
                 //var blah:Array = ['no', 'yes', 'blah', 'sha', 'crap', 'fill', 'me', 'up', 'big', 'boy'];
                 //for each (var b:String in model.users_list) {blah.push(b);}
@@ -121,7 +129,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 
                 if (modding) {
                     for each (var el:XML in model.roles_info.children()) {
-                        if (el.@name == role_name.text) {
+                        if (el.@name == selected_role) {
                             var users:Array = String(el.users).split(' ');
                             var grant_users:Array = String(el.users_with_grant_option).split(' ');
                             for each (user in users)
@@ -151,6 +159,7 @@ Redistribution and use in source and binary forms, with or without modification,
             
             public function saveName() : void {
                 if (role_name.text != '') {
+                    selected_role = role_name.text.toUpperCase();
                     var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('addNewRole', '','', role_name.text);
                     CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
                     modding = true;
@@ -162,16 +171,30 @@ Redistribution and use in source and binary forms, with or without modification,
                 CairngormEventDispatcher.getInstance().dispatchEvent(dr);
             }
             
-            public function grantPerms() : void {
-                var grant_win:PermissionsWindow = PermissionsWindow(PopUpManager.createPopUp(this, PermissionsWindow, true));
-                grant_win.setStyle("borderAlpha", 0.8);
-                grant_win.showCloseButton = true;
-                grant_win.role_name = role_name.text;
-            }
-            
             public function user_click(name:String, added:String, with_grant:String) : void {
                 var user_to_role:UsersAndRolesEvent = new UsersAndRolesEvent('userToRole', name, '', role_name.text, added, with_grant);
                 CairngormEventDispatcher.getInstance().dispatchEvent(user_to_role);
+            }
+            
+            public function select_role(role:String='') : void {
+                if (role == '')
+                    role = selected_role;
+                else
+                    selected_role = role;
+                for (var i:Number = 0; i < edit_role_list.dataProvider.length; i++) {
+                    if (edit_role_list.dataProvider[i] == role) {
+                        edit_role_list.selectedIndex = i;
+                        return;
+                    }
+                }
+            }
+            
+            public function role_change() : void {
+                selected_role = edit_role_list.selectedLabel;
+                model.roles_info = null;
+                var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
+                reloadUsers();
             }
             
         ]]>

@@ -114,31 +114,22 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             * Finally calls the function to setup all of the context menus and their handlers.
             */
             public function init() : void {
-                /*
-                <foreign_tables label="Foreign Tables">
-                <foreign_table label="Salesforce Table 1" />
-                </foreign_tables>
-                <functions label="Functions">
-                <function label="UDF1" />
-                </functions>
-                <procedures label="Procedures">
-                <procedure label="Proc1" />
-                </procedures>
-                </schema>
-                */
                 model.object_tree = this;
                 var schemas_load:String = JSON.encode(
                     {'service': 'sqlWebService', 'operation': 'getDBMetaData',
                      'arguments': {'connection': '', 'catalog': model.currentcatalogname} }
                     );
-                //var users_load:String = JSON.encode({'service': '
+                var users_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getUsers',
+                    'arguments': {}});
+                var roles_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getRoles',
+                    'arguments': {}});
                 var skeleton:XML = <tree>
                     <schemas label="Schemas" loadInfo={schemas_load}>
                     </schemas>
                     <security label="Security">
-                        <users label="Users">
+                        <users label="Users" loadInfo={users_load}>
                         </users>
-                        <roles label="Roles">
+                        <roles label="Roles" loadInfo={roles_load}>
                         </roles>
                     </security>
                     <remote_data label="Remote Data">
@@ -296,8 +287,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                                               warn_msg:String, success_msg:String,
                                               context:ObjectTree, remove_item:XML) : void {
                 var casc:String = (cascade) ? 'CASCADE' : '';
-                query_dispatcher('DROP ' + item + ' "' + context.model.currentcatalogname + '"."' +
-                    get_schema(context) + '"."' + context.selectedItem.@label + '" ' + casc,
+                query_dispatcher('DROP ' + item + ' ' + casc,
                     warn_msg,
                     function(querydata:XML):void {
                         if (querydata.datamap == 'Error') {
@@ -328,11 +318,11 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             /**
-             * Adds a new schmea to our tree.
+             * Adds a new schema to our tree.
              * TODO: abstract this into a generalized function like remove.
              */
             public function addSchema(name:String) : void {
-                var node:XML = <schema label={name}></schema>
+                var node:XML = <schema label={name}></schema>;
                 for (var i:Number = 0; i < tree_data.schemas.children().length(); i++) {
                     if (tree_data.schemas.schema[i].@label < name)
                         continue;
@@ -341,6 +331,49 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 }
                 tree_data.schemas.appendChild(node);
             }
+            
+            /**
+            * This is to become our generic add loader; need to abstract
+            * the other add functions as special cases of this one.
+            */
+            public function addItem(tag:String, label:String, ... structure) : void {
+                var parent:XML = tree_data[structure[0]][0];
+                var node:XML = <{tag} label={label} />;
+                for (var i:Number = 1; i < structure.length; i++) {
+                    parent = parent[structure[i]][0];
+                }
+                if (parent.children().length() == 0 && parent.hasOwnProperty('@loadInfo')) {
+                    // should only call this on a successful post anyway, so whatever was added
+                    // should be returned in the call.
+                    expandItem(parent, true);
+                    return;
+                }
+                for (i = 0; i < parent.children().length(); i++) {
+                    if (parent.children()[i].@label < label)
+                        continue;
+                    parent.insertChildBefore(parent.children()[i], node);
+                    return;
+                }
+                parent.appendChild(node);
+            }
+            
+            /**
+            * New view..
+            */
+            public function addView(schema:String, name:String) : void {
+                // todo: figure out cols and/or stick a loadinfo in here.
+                var sql:String = "SELECT * FROM &quot;" + schema + "&quot;.&quot;" + name + "&quot;";
+                var node:XML = <view label={name} sqlquery={sql}></view>;
+                var schema_node:XML = tree_data.schemas.schema.(@label == schema)[0];
+                for (var i:Number = 0; i < schema_node.views.children().length(); i++) {
+                    if (schema_node.views.view[i].@label < name)
+                        continue;
+                    schema_node.views.insertChildBefore(schema_node.views.view[i], node);
+                    return;
+                }
+                schema_node.views.appendChild(node);
+            } 
+            
             
             /**
              * Adds a new table with columns to our tree.
@@ -466,10 +499,11 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     con_row('Analyze All Tables In Schema', null)],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0 || index == 1) {
-                            var casc:String = (index == 1) ? 'CASCADE' : '';
-                            query_dispatcher('DROP SCHEMA "' + context.model.currentcatalogname + '"."' +
-                                context.selectedItem.@label + '" ' + casc,
-                                "Are you sure you want to\ndrop this schema?");
+                            var casc:Boolean = (index == 1);
+                            drop_remove_item('SCHEMA "' + context.model.currentcatalogname + '"."' +
+                                context.selectedItem.@label + '"', casc, 'Are you sure you want to\n' +
+                                'drop this schema?', 'Schema sucessfully dropped.', context,
+                                context.selectedItem as XML);
                         }
                     }
                 );
@@ -521,11 +555,11 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                             OpenTableWindow(popup_new(OpenTableWindow)).setTablename(schema +
                                 "." + context.selectedItem.@label);
                         } else if (index == 6) {
-                            drop_remove_item('TABLE', true, 'Are you sure you want to\n' +
-                                'drop cascade this table?', 'Table Dropped Successfully', context, 
-                                tree_data.schemas.schema.(@label == schema)[0].tables.table.(
-                                                          @label == context.selectedItem.@label)[0]
-                            );
+                            drop_remove_item('TABLE "' + context.model.currentcatalogname + '"."' +
+                                get_schema(context) + '"."' + context.selectedItem.@label + '" ', true,
+                                'Are you sure you want to\n' +
+                                'drop cascade this table?', 'Table Dropped Successfully', context,
+                                context.selectedItem as XML);
                         } else if (index == 7) {
                             var tab_win : CreateEditTableWindow = CreateEditTableWindow(
                                 Application.application.addTab("Edit Table " + context.selectedItem.@label,
@@ -553,19 +587,20 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('views', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        var vw:ViewWindow = ViewWindow(Application.application.addTab('New View', context.model.main_tabnav, 'viewWindow'));
+                        callLater(vw.guess_schema, [context.getParentItem(context.selectedItem).@label]);
                     }
                 );
                 register_context('view', [gen_drop,
                     con_row('Edit', updateicon),
-                    con_row('Select As', selecticon)],
+                    con_row('Select As', selecticon)].reverse(), // sorry!
                     function (index:Number, context:ObjectTree) : void {
-                        if (index == 0) {
-                            drop_remove_item('VIEW', true, 'Are you sure you want to\n' +
-                                'drop cascade this view?', 'View Dropped Successfully', context, 
-                                tree_data.schemas.schema.(@label == get_schema(context))[0].views.view.(
-                                    @label == context.selectedItem.@label)[0]
-                            );
+                        if (index == 2) {
+                            drop_remove_item('VIEW "' + context.model.currentcatalogname + '"."' +
+                                get_schema(context) + '"."' + context.selectedItem.@label + '" ', true,
+                                'Are you sure you want to\n' +
+                                'drop cascade this view?', 'View Dropped Successfully', context,
+                                context.selectedItem as XML);
                         } else if (index == 1) {
                             var loadCrap:Function = function(querydata:XML):void {
                                 var schema:String = querydata.NewDataSet.Table.SCHEMA_NAME;
@@ -590,7 +625,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                             "VIEW_NAME = '" + context.selectedItem.@label + "'";
                             var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(query, "special", loadCrap);
                             CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);             
-                        } else if (index == 2) {
+                        } else if (index == 0) {
                             script_as_query(context);
                         }
                     }
@@ -631,23 +666,54 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 // None for security?
                 register_context('users', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        UsersAndRolesWindow(
+                            Application.application.addTab(
+                                'Users', context.model.main_tabnav, 'usersandroles',
+                                Application.application.UsersImg)).currentState = 'users';
                     }
                 );
                 register_context('user', [con_row('Edit', edit_user_icon),
                     gen_drop],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        if (index == 0) {
+                            var urw:UsersAndRolesWindow = UsersAndRolesWindow(
+                                Application.application.addTab(
+                                    'Users', context.model.main_tabnav, 'usersandroles',
+                                    Application.application.UsersImg));
+                            urw.currentState = 'users';
+                            urw.set_user_mode('edit', context.selectedItem.@label);
+                        } else if (index == 1) {
+                            drop_remove_item('USER "' + context.selectedItem.@label + '" ', false,
+                                'Are you sure you want to\n' +
+                                'drop this user?', 'User Dropped Successfully', context,
+                                context.selectedItem as XML);
+                        }
                     }
                 );
                 register_context('roles', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        UsersAndRolesWindow(
+                            Application.application.addTab(
+                                'Roles', context.model.main_tabnav, 'usersandroles',
+                                Application.application.UsersImg)).currentState = 'roles';
                     }
                 );
-                register_context('role', [con_row('Edit', edit_user_icon)],
+                register_context('role', [con_row('Edit', edit_user_icon),
+                    gen_drop],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        if (index == 0) {
+                            var urwr:UsersAndRolesWindow = UsersAndRolesWindow(
+                                Application.application.addTab(
+                                    'Roles', context.model.main_tabnav, 'usersandroles',
+                                    Application.application.UsersImg));
+                            urwr.currentState = 'roles';
+                            urwr.set_role_mode('edit', context.selectedItem.@label);
+                        } else if (index == 1) {
+                            drop_remove_item('ROLE "' + context.selectedItem.@label + '" ', false,
+                                'Are you sure you want to\n' +
+                                'drop this role?', 'Role Dropped Successfully', context,
+                                context.selectedItem as XML);
+                        }
                     }
                 );
                 register_context('remote_data', [gen_add],
@@ -702,7 +768,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 register_context('sessions', [con_row('Active Sessions', null)],
                     function (index:Number, context:ObjectTree) : void {
                         Application.application.addTab("Active Sessions",
-                            context.model.main_tabnav, 'usersWindow');
+                            context.model.main_tabnav, 'sessionsWindow');
                     }
                 );
                     

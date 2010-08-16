@@ -28,6 +28,8 @@ Redistribution and use in source and binary forms, with or without modification,
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.components.QueryWindow;
             import com.flexsqladmin.sqladmin.components.RolesWindow;
+            import com.flexsqladmin.sqladmin.components.SessionsWindow;
+            import com.flexsqladmin.sqladmin.components.UsersAndRolesWindow;
             import com.flexsqladmin.sqladmin.components.UsersWindow;
             import com.flexsqladmin.sqladmin.components.ViewWindow;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -47,11 +49,14 @@ Redistribution and use in source and binary forms, with or without modification,
             import mx.controls.Alert;
             import mx.controls.ComboBox;
             import mx.events.DropdownEvent;
+            import mx.events.ListEvent;
             import mx.managers.PopUpManager;
             import mx.rpc.soap.mxml.WebService;
 			
 			public var debug_win:DebugWindow;
 			private var exectimer:Timer;
+            
+            [Bindable]
 			private var DEBUG:Boolean;
 			
 			[Embed("/icons/close_tab.png")]
@@ -124,7 +129,7 @@ Redistribution and use in source and binary forms, with or without modification,
             */
 			private function showLogin(firstTime : Boolean = false) : void {
 				DebugWindow.log("main.mxml:showLogin()");
-				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, !DEBUG));
+				var loginForm:LoginWindow = LoginWindow(PopUpManager.createPopUp(this, LoginWindow, true));
 				loginForm.setStyle("borderAlpha", 0.8);
 				loginForm.showCloseButton = true;
 				if (firstTime) { // need to remove closability from initial tab at this point.
@@ -148,6 +153,7 @@ Redistribution and use in source and binary forms, with or without modification,
 				}
 			}
 						
+            /* TODO: refactor this to use a passed Class obj. instead of string. */
 			public function addTab(lbl:String, navigator:SuperTabNavigator,
 								   child_obj:String = "", icon:Class=null) : Object {
 				
@@ -172,7 +178,7 @@ Redistribution and use in source and binary forms, with or without modification,
                     child.icon = NTimg;
                 } else if (child_obj == "viewWindow") {
                     var vw:ViewWindow = new ViewWindow();
-                    vw.id = "vw-" + (model.table_details._len + 1).toString();
+                    vw.id = "vw-" + (model.aryQueryWindows._len + 1).toString();
                     added_obj = vw;
                     child.id = vw.id;
                 } else if (child_obj == "usersWindow") {
@@ -186,6 +192,16 @@ Redistribution and use in source and binary forms, with or without modification,
                     rw.id = "rw-" + (model.roles_windows._len + 1).toString();
                     added_obj = rw;
                     child.id = rw.id;
+                } else if (child_obj == 'usersandroles') {
+                    var uwrw:UsersAndRolesWindow = new UsersAndRolesWindow();
+                    uwrw.id = "uwrw-" + (model.roles_windows._len + 1).toString();
+                    added_obj = uwrw;
+                    child.id = uwrw.id;
+                } else if (child_obj == 'sessionsWindow') {
+                    var sw:SessionsWindow = new SessionsWindow();
+                    sw.id = "sw-" + (model.sessions_windows._len + 1).toString();
+                    added_obj = sw;
+                    child.id = sw.id;
                 } else {
                     return null;
                 }
@@ -210,9 +226,11 @@ Redistribution and use in source and binary forms, with or without modification,
                     model.query_results[id] = null;
                 if (model.roles_windows[id] != null)
                     model.roles_windows[id] = null;
-                if (model.users_windows[id] != null) {
-                    UsersWindow(model.users_windows[id]).sessionTimer.stop();
+                if (model.users_windows[id] != null)
                     model.users_windows[id] = null;
+                if (model.sessions_windows[id] != null) {
+                    SessionsWindow(model.sessions_windows[id]).sessionTimer.stop();
+                    model.sessions_windows[id] = null;
                 }
 			}
 			
@@ -240,24 +258,30 @@ Redistribution and use in source and binary forms, with or without modification,
 				CairngormEventDispatcher.getInstance().dispatchEvent(metadata);
 			}   
 
-      private function add_item_click(event:DropdownEvent) : void {
-        if (event.triggerEvent != null)
-          return;
-        
-        trace(event.triggerEvent);
-        trace(event);
-        var selected:Object = add_item_list.selectedItem;
-        if (selected.action == 'query') {
-          addTab('', tabnavigator);
-        } else if (selected.action == 'table') {
-          addTab('New Table', tabnavigator, 'createTable');
-        } else if (selected.action == 'users') {
-          addTab('Users', tabnavigator, 'usersWindow');
-        } else if (selected.action == 'roles') {
-          addTab('New Role', tabnavigator, 'rolesWindow');
-        }
-      }
-			
+            private function add_item_click(event:DropdownEvent) : void {
+                // Hack to only continue if they clicked inside the items box.
+                if (event.triggerEvent != null || !(573 > this.contentMouseX && this.contentMouseX > 360 &&
+                    35 < this.contentMouseY && this.contentMouseY < 145))
+                    return;
+                add_item_change(event as ListEvent);
+            }
+            
+            private function add_item_change(event:ListEvent) : void {
+               //trace(this.contentMouseX + ' ' + this.contentMouseY);
+                var selected:Object = add_item_list.selectedItem;
+                if (selected.action == 'query') {
+                    addTab('', tabnavigator);
+                } else if (selected.action == 'table') {
+                    addTab('New Table', tabnavigator, 'createTable');
+                } else if (selected.action == 'users') {
+                    UsersAndRolesWindow(addTab('Users', tabnavigator, 'usersandroles', UsersImg)).currentState = 'users';
+                } else if (selected.action == 'roles') {
+                    UsersAndRolesWindow(addTab('New Role', tabnavigator, 'usersandroles')).currentState = 'roles';
+                } else if (selected.action == 'views') {
+                    addTab('New View', tabnavigator, 'viewWindow');
+                }
+            }
+            
 		]]>
 	</mx:Script>
 	
@@ -285,65 +309,18 @@ Redistribution and use in source and binary forms, with or without modification,
             fontFamily: Verdana; 
             fontSize: 12pt;
         }
-        
-        /*HAccordion
-        {
-            backgroundColor: #FFFFFF;
-            borderStyle: "solid";
-            
-            paddingBottom: -1;
-            paddingLeft: -1;
-            paddingRight: -1;
-            paddingTop: -1;
-            verticalGap: -1;
-            horizontalGap: -1;
-            textAlign: "left";
-        }*/
-        
-       /*AccordionHeader
-        {
-            /*	selectedFillColors: #FFFFFF, #FFFFFF; */ /* overrides the calculated fillcolors */
-            
-            /*	disabledIcon: null; */
-        /*    disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            /*	downIcon: null; */
-        /*    downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            horizontalGap: 5;
-            /*	overIcon: null; */
-        /*    overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            paddingTop: 5;
-            paddingBottom: 5;
-            /*	selectedDisabledIcon: null; */
-        /*    selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            /*	selectedDownIcon: null; */
-        /*    selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            /*	selectedOverIcon: null; */
-        /*    selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            /*	selectedUpIcon: null; */
-        /*    selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            
-            /*	upIcon: null; */
-        /*    upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
-            
-            fontFamily: accordionHeader; 
-            fontWeight:bold;
-            fontSize:11;
-            fontSharpness:-200;
-            fontThickness:-100;
-            fontGridFitType: none;
-        }*/
     </mx:Style>
     
 	<mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true">
 		
 		<mx:VBox height="100%" width="35%" >
 			<mx:HBox width="100%">
-				<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>
+				<!--<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>-->
 				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" change="changeHandler(event)"/>
 				
 			</mx:HBox>
             <components:ObjectTree id="new_metadata_tree" />
-			<components:ObjectBrowser id="metadata_tree" dataProvider="{model.metadata}"/>
+			<!--<components:ObjectBrowser id="metadata_tree" dataProvider="{model.metadata}"/>-->
             </mx:VBox>
 		
 		<mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">
@@ -354,11 +331,11 @@ Redistribution and use in source and binary forms, with or without modification,
             <mx:Object label="Launch Query Tab" action="query" />
             <mx:Object label="New Table" action="table" />
             <mx:Object label="New User" action="users" />
-            <!--<mx:Object label="New Schema" action="" />-->
-            <mx:Object label="New Role and Permissions Tab" action="roles" />
-            <!--<mx:Object label="New View" action="" />-->
+            <mx:Object label="New Role" action="roles" />
+            <mx:Object label="New View" action="views" />
           </mx:ComboBox>
 					<mx:Spacer width="100%"/>
+                    <mx:Button label="Debug Window" click="toggleDebugWindow();" visible="{DEBUG}" />
 					<mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>
 				</mx:HBox>
 				<flexlib:SuperTabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8"

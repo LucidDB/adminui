@@ -116,16 +116,24 @@ package com.flexsqladmin.sqladmin.commands
                         model.users_list.push(el.@name);
                     }
                 } else if (call == 'getRolesDetails') {
+                    CursorManager.removeBusyCursor();
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getRolesDetails");
                     model.roles_info = new XML(XML(event.result).children());
                     model.roles_list = new Array();
                     for each (el in model.roles_info.children()) {
                         model.roles_list.push(el.@name);
                     }
+                    try {
+                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].rw.select_role();
+                    } catch (e:Error) {
+                        //pass
+                    }
                 } else if (call == 'addNewUser') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewUser");
                     response = event.result;
                     if (response == "") {
+                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user.toUpperCase());
+                        model.object_tree.addItem('user', user.toUpperCase(), 'security', 'users');
                         Alert.show("New User Created", "Success", 4, null, function():void {
                             var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
                             CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
@@ -137,6 +145,8 @@ package com.flexsqladmin.sqladmin.commands
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewRole");
                     response = event.result;
                     if (response == "") {
+                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].set_role_mode('edit', role_name.toUpperCase());
+                        model.object_tree.addItem('role', role_name.toUpperCase(), 'security', 'roles');
                         Alert.show("New Role Created", "Success", 4, null, function():void {
                             var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
                             CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
@@ -197,6 +207,7 @@ package com.flexsqladmin.sqladmin.commands
         }
                 
        public function onFault(event:*=null) : void {
+           CursorManager.removeBusyCursor();
             DebugWindow.log("UsersAndRolesCommand:onFault()");
         }
    }

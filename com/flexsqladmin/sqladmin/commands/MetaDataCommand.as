@@ -28,6 +28,7 @@ package com.flexsqladmin.sqladmin.commands
 		
 		public function execute(event:CairngormEvent):void
 		{
+            /* This class used to get new data when a catalog changes or on refresh...*/
 			DebugWindow.log("MetaDataCommand:execute()");
 			var metaevent:MetaDataEvent = MetaDataEvent(event);
 			var catalog:String = metaevent.catalog_name;
@@ -43,7 +44,8 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("MetaDataCommand:onResult()");
-            model.metadata = new XML(event.result);
+            XML(model.object_tree.tree_data.schemas).setChildren(new XML(event.result).children());
+            //model.metadata = new XML(event.result);
             //trace(model.metadata.toXMLString());
         }
 		

@@ -59,6 +59,7 @@ package com.flexsqladmin.sqladmin.commands
 			var querycols:Array = new Array();
            	var datagridcols:Array = new Array();
 			
+            var orig_selected:Number = model.main_tabnav.selectedIndex;
             try {
                 model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
@@ -106,6 +107,7 @@ package com.flexsqladmin.sqladmin.commands
                     result_info.showplanwindow.drawPlan(queryxml);
                 }
             }
+            model.main_tabnav.selectedIndex = orig_selected;
             if (sqlquerytype == 'special')
                 return;
             

@@ -15,6 +15,7 @@ package com.flexsqladmin.sqladmin.utils
     public final class CustomFuncs {
         
         // Blocks execution of a function until the given condition without blocking execution of the program.
+        // (Experimental) This appears to fail when what is null.
         public static function when(what:*, comparison:String, with_what:*, do_what:Function) : void {
             if (comparison == '==' && what == with_what)
                 do_what();

@@ -34,7 +34,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 <mx:Label text="{model.currentcatalogname}" />
             </mx:FormItem>
             <mx:FormItem label="Schema">
-                <mx:ComboBox id="view_schema" dataProvider="{model.metadata.children()}"
+                <mx:ComboBox id="view_schema" dataProvider="{model.metadata.schemas.children()}"
                              labelField="@label" />
                 <mx:Button click="newSchema();" label="New Schema"
                            icon="@Embed(source='/icons/database_add.png')" />
@@ -48,8 +48,10 @@ Redistribution and use in source and binary forms, with or without modification,
                 <mx:TextInput id="view_desc" />
             </mx:FormItem>
             <mx:FormItem>
-                <mx:Button click="makeView();" label="Create View" icon="@Embed(source='/icons/exec.gif')" />
+                <mx:HBox>
+                <mx:Button id="makeview_btn" click="makeView();" label="Create View" icon="@Embed(source='/icons/exec.gif')" />
                 <mx:Button click="submitQuery();" toolTip="(F5) Preview Results" label="Preview Results" icon="@Embed(source='/icons/exec.gif')" />
+                </mx:HBox>
             </mx:FormItem>
         </mx:Form>
     </mx:HBox>

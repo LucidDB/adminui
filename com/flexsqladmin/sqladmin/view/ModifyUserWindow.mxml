@@ -9,19 +9,19 @@ Redistribution and use in source and binary forms, with or without modification,
 
   THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="300"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
                 creationComplete="init();"
-                title="Modifying User {user}"
-                close="closeWin();"
                 >
     
-    <mx:Validator source="{new_name}" property="text" />
     <mx:Validator source="{new_pass}" property="text" />
     <mx:Validator source="{new_pass2}" property="text" />
 
     <mx:Form>
-        <mx:FormItem label="Change Name">
-            <mx:TextInput editable="{user == ''}" id="new_name" text="{user}" change="{user = new_name.text;}" />
+        <mx:FormItem label="Editing User">
+            <mx:ComboBox id="users" dataProvider="{model.object_tree.tree_data.security.users.children()}"
+                         labelField="@label"
+                         change="user_change();"
+                         creationComplete="select_user();" />
         </mx:FormItem>
         <mx:FormItem label="Change Password">
             <mx:TextInput id="new_pass" displayAsPassword="true" />
@@ -34,9 +34,6 @@ Redistribution and use in source and binary forms, with or without modification,
         </mx:FormItem>
         <mx:FormItem>
             <mx:Button label="Save Changes" icon="@Embed(source='/icons/exec.gif')" click="modUser();" />
-        </mx:FormItem>
-        <mx:FormItem>
-            <mx:Button label="Delete User" icon="@Embed(source='/icons/close_tab.png')" click="deleteUser();" />
         </mx:FormItem>
         
     </mx:Form>
@@ -55,35 +52,33 @@ Redistribution and use in source and binary forms, with or without modification,
             [Embed("/icons/confirm.png")]
             public var confirmicon : Class;
             
+            [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
             [Bindable]
             public var user:String;
 
             public function init() : void {
-                PopUpManager.centerPopUp(this);
-                new_name.setFocus();
-                
+                //PopUpManager.centerPopUp(this);
+                select_user();
+            }
+            
+            public function select_user() : void {
+                for (var i:Number = 0; i < users.dataProvider.length; i++) {
+                    if (users.dataProvider[i].@label == user) {
+                        users.selectedIndex = i;
+                        break;
+                    }
+                }
             }
             
             public function modUser() : void {
-                if (new_name.text != '' && new_pass.text != '' && passValidate()) {
-                    var addUserEvent:UsersAndRolesEvent = new UsersAndRolesEvent('modifyUser', new_name.text, new_pass.text);
+                if (new_pass.text != '' && passValidate()) {
+                    var addUserEvent:UsersAndRolesEvent = new UsersAndRolesEvent('modifyUser', users.selectedLabel, new_pass.text);
                     CairngormEventDispatcher.getInstance().dispatchEvent(addUserEvent);
                 } else {
                     new_pass.setFocus();
                 }
-            }
-            
-            public function deleteUser() : void {
-                var conf:Alert = Alert.show("Are you sure you want to\ndrop this user?",
-                    "Confirmation", Alert.YES|Alert.NO, this,
-                    function(event:CloseEvent):void { // confirm handler
-                        if (event.detail == Alert.YES) {
-                            var dropEvent:UsersAndRolesEvent = new UsersAndRolesEvent('deleteUser', user);
-                            CairngormEventDispatcher.getInstance().dispatchEvent(dropEvent);
-                        }
-                    }, confirmicon, Alert.NO);
             }
             
             public function passValidate() : Boolean {
@@ -99,11 +94,14 @@ Redistribution and use in source and binary forms, with or without modification,
                 }
             }
             
+            public function user_change() : void {
+            }
+            
             public function closeWin() : void {
-                PopUpManager.removePopUp(this);
+                //PopUpManager.removePopUp(this);
             }
             
         ]]>
     </mx:Script>
     
-</mx:TitleWindow>
+</mx:Canvas>

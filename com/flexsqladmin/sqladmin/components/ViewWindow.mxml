@@ -21,6 +21,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
             import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
             
+            import mx.controls.Alert;
             import mx.core.Application;
             import mx.managers.PopUpManager;
             
@@ -34,11 +35,13 @@ Redistribution and use in source and binary forms, with or without modification,
             public function init2() : void {    
                 this.window_actions.removeAllChildren();
                 //this.tabresults_holder.removeAllChildren();
-                querytext.setStyle("top", "135");
+                querytext.setStyle("top", "115");
                 tabresults_holder.percentHeight = 30;
                 view_info.visible = true;
                 view_name.setFocus();
                 submitQuery();
+                if (editing)
+                    makeview_btn.label = 'Edit View';
             }
             
             public function guess_schema(guessed_schema:String) : void {
@@ -69,7 +72,24 @@ Redistribution and use in source and binary forms, with or without modification,
                 view_sql += 'VIEW "' + model.currentcatalogname + '"."'
                 + view_schema.text + '"."'
                 + view_name.text + '" DESCRIPTION \'' + view_desc.text + '\' AS ' + sql;
-                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(view_sql, "normal");
+                
+                var details:XML = <details></details>;
+                var col:XML = <column name="" datatype="" isNullable="" />;
+                    
+                
+                var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(view_sql, "special",
+                    function(querydata:XML):void {
+                    if (querydata.datamap == 'Error') {
+                        Alert.show(querydata.NewDataSet.Table.Error, 'Error');
+                    } else {
+                        var added:String = (editing) ? 'edited' : 'added';
+                        Alert.show('View successfully ' + added, 'Success');
+                        if (!editing) {
+                            editing = true;
+                            model.object_tree.addView(view_schema.text, view_name.text);
+                        }
+                    }
+                });
                 CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
             }
         ]]>

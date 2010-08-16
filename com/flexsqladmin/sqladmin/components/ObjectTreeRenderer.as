@@ -68,6 +68,7 @@ package com.flexsqladmin.sqladmin.components
                     disLabel = new Label();
                     iconsBox = new HBox();
 
+                    disBox.horizontalScrollPolicy = "off";
                     disBox.addChild(iconsBox);
                     disBox.addChild(disLabel);
                     this.addChild(disBox);

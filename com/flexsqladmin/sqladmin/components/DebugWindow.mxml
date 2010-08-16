@@ -17,7 +17,7 @@ Redistribution and use in source and binary forms, with or without modification,
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	layout="absolute" 
 	width="400" 
-	height="300" 
+    close="this.visible = false;"
 	title="Debug Window" creationComplete="init();">
 	
 	<mx:Script>
@@ -32,6 +32,7 @@ Redistribution and use in source and binary forms, with or without modification,
 				debug = this;
 				iscreated = true;
 				PopUpManager.centerPopUp(this);
+                this.showCloseButton = true;
 				this.move(600,200);
 			}
 		

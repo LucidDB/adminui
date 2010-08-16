@@ -24,9 +24,12 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.view.LoginWindow;
 	
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	
+	import mx.binding.utils.BindingUtils;
 	import mx.controls.Alert;
-    import mx.core.Application;
+	import mx.core.Application;
+	import mx.events.ListEvent;
 	
 	public class LoginCommand implements Command, Responder
 	{
@@ -77,8 +80,15 @@ package com.flexsqladmin.sqladmin.commands
 				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);
 				
 				// Automatic refresh:
-                var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                //var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
+                //CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
+                
+                // TODO: start migrating metadata out of everything, using the tree instead if necessary.
+                // Quick fix: bind metadata to the tree, commented out the MeataDataCommand on result
+                // that reassigns metadata.
+                BindingUtils.bindProperty(model, 'metadata', model.object_tree, 'tree_data');
+                model.object_tree.validateNow();
+                model.object_tree.expandItem(model.object_tree.tree_data..schemas[0], true, true);
     		}
 		}
 		public function onFault(event:*=null):void

@@ -43,7 +43,7 @@ Redistribution and use in source and binary forms, with or without modification,
             <mx:FormItem label="Schema">
                 <mx:HBox>
                 <mx:ComboBox id="table_schema" prompt="Select Schema" selectedIndex="-1"
-                             dataProvider="{new XMLList(model.metadata.children())}"
+                             dataProvider="{new XMLList(model.metadata.schemas.children())}"
                              labelField="@label" />
                 <mx:Button id="new_schema_btn" click="newSchema();" label="New Schema" 
                            icon="@Embed(source='/icons/database_add.png')" />

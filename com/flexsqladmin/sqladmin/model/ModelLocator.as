@@ -36,6 +36,7 @@ package com.flexsqladmin.sqladmin.model
         public var table_details : Dictionary = new Dictionary(); // contains TableDetailVO's
         public var users_windows : Dictionary = new Dictionary(); // contains UsersWindow's
         public var roles_windows : Dictionary = new Dictionary(); // contains RolesWindow's
+        public var sessions_windows : Dictionary = new Dictionary(); // contains SessionsWindow's
 		public var main_tabnav : SuperTabNavigator;
     	public var connectionVO:ConnectionVO;
     	public var tempConnectionVO:ConnectionVO;
@@ -71,6 +72,7 @@ package com.flexsqladmin.sqladmin.model
             table_details._len = 0;
             users_windows._len = 0;
             roles_windows._len = 0;
+            sessions_windows._len = 0;
 
 	 	  	if ( com.flexsqladmin.sqladmin.model.ModelLocator.modelLocator != null )
 	        	throw new Error( "Only one ModelLocator instance should be instantiated" );

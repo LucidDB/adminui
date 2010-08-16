@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2010 Dynamo Business Intelligence Corporation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+           xmlns:components="com.flexsqladmin.sqladmin.components.*"
+           xmlns:view="com.flexsqladmin.sqladmin.view.*"
+           width="100%" height="100%"
+           creationComplete="init();"
+           >
+    <mx:states>
+        <mx:State name="users">
+            <mx:AddChild relativeTo="{users_roles_half}" position="firstChild">
+                <components:UsersWindow id="uw" creationPolicy="all" />
+            </mx:AddChild>
+            <mx:SetProperty target="{perm_window}" name="title" value="Grant Permissions to Selected User (Currently Unsupported)" />
+        </mx:State>
+        <mx:State name="roles">
+            <mx:AddChild relativeTo="{users_roles_half}" position="firstChild">
+                <components:RolesWindow id="rw" creationPolicy="all" />
+            </mx:AddChild>
+            <mx:SetProperty target="{perm_window}" name="title" value="Grant Permissions to Selected Role" />
+        </mx:State>
+    </mx:states>
+    
+    <mx:VBox width="95%">
+        <mx:HBox id="users_roles_half" left="10" right="10" top="10" bottom="10" width="100%">
+        </mx:HBox>
+        
+        <!--<mx:ComboBox height="0%" valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />-->
+        
+        <view:PermissionsWindow enabled="{perms_enabled()}"
+                                grantee="{get_grantee()}"
+                                grantee_type="{get_grantee_type()}"
+                                id="perm_window" left="10" right="10" bottom="0"
+                                width="100%"  height="100%" minHeight="300" />
+        
+    </mx:VBox>
+
+    <mx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+           
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            public function debug() : void {
+                currentState = (currentState == 'roles') ? 'users' : 'roles';
+            }
+            
+            public function init() : void {
+                model.roles_windows[id] = this;
+                model.roles_windows._len += 1;
+            }
+            
+            public function set_user_mode(mode:String, name:String) : void {
+                if (uw == null) {
+                    callLater(set_user_mode, [mode, name]);
+                } else {
+                    uw.set_name(name);
+                    uw.currentState = mode;
+                    uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                    dispatchEvent(new Event("stateChange"));
+                }
+            }
+            
+            public function set_role_mode(mode:String, name:String) : void {
+                if (rw == null) {
+                    callLater(set_role_mode, [mode, name]);
+                } else {
+                    rw.role_name.text = name;
+                    rw.currentState = mode;
+                    rw.modding = (mode == 'edit');
+                    model.roles_info = null;
+                    var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                    CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
+                    rw.reloadUsers();
+                    rw.select_role(name);
+                    rw.edit_role_list.addEventListener(Event.CHANGE, reset_perms);
+                    dispatchEvent(new Event("stateChange"));
+                }
+            }
+            
+            [Bindable(event="stateChange")]
+            public function perms_enabled() : Boolean {
+                // users currently unsupported
+                return (currentState == 'users' && uw.currentState == 'edit' && 1 == 0) ||
+                    (currentState == 'roles' && rw.currentState == 'edit');
+            }
+            
+            [Bindable(event="stateChange")]
+            public function get_grantee() : String {
+                if (currentState == 'users')
+                    return uw.modify_user.user;
+                else if (currentState == 'roles')
+                    return rw.selected_role;
+                else
+                    return '';
+            }
+            [Bindable(event="stateChange")]
+            public function get_grantee_type() : String {
+                if (currentState == 'users')
+                    return 'user';
+                else if (currentState == 'roles')
+                    return 'role';
+                else
+                    return '';
+            }
+            
+            public function reset_perms(event:*=null) : void {
+                dispatchEvent(new Event("stateChange"));
+                perm_window.init();
+            }
+            
+        ]]>
+    </mx:Script>
+    
+</mx:Canvas>

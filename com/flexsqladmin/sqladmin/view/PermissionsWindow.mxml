@@ -18,7 +18,7 @@ Redistribution and use in source and binary forms, with or without modification,
     <mx:Style>
         .win {backgroundColor: #869ca7; backgroundGradientColors: #9bafb9, #68808c; }
     </mx:Style>
-    <mx:HBox top="10" left="10" right="10" bottom="10" width="100%" textAlign="center" styleName="win">        
+    <mx:HBox top="10" left="10" right="10" bottom="10" width="100%" height="100%" textAlign="center" styleName="win">        
         <!--<mx:Text selectable="true" link="selectClick(event);">
             <mx:htmlText>
                 <![CDATA[
@@ -38,9 +38,13 @@ Redistribution and use in source and binary forms, with or without modification,
                  folderClosedIcon="@Embed(source='/icons/database.png')" 
                  showRoot="false"
                  rowHeight="25"
+                 height="100%"
                  left="5" right="5" width="50%"
                  textAlign="left"
+                 doubleClickEnabled="true"
                  itemClick="tree_itemClick(event);"
+                 doubleClick="{items_tree.expandItem(items_tree.selectedItem, 
+                        !items_tree.isItemOpen(items_tree.selectedItem), true, true);}"
                  >
             <mx:itemRenderer>
                 <mx:Component>                        
@@ -71,6 +75,7 @@ Redistribution and use in source and binary forms, with or without modification,
                                         disBox = new HBox();
                                         disLabel = new Label();
                                         iconsBox = new HBox();
+                                        disBox.horizontalScrollPolicy = "off";
                                         iconsBox.percentWidth = 100;
                                         iconsBox.setStyle("paddingRight", "10");
                                         iconsBox.setStyle("horizontalAlign", "right");
@@ -203,7 +208,6 @@ Redistribution and use in source and binary forms, with or without modification,
             [Bindable]
             public var datacopy:XML;
             
-            
             [Bindable]
             [Embed("/icons/magnifier.png")]
             public var icon_select:Class;
@@ -225,7 +229,9 @@ Redistribution and use in source and binary forms, with or without modification,
             
             public var original_data:XML;
             
-            public var role_name:String;
+            //public var role_name:String;
+            public var grantee:String;
+            public var grantee_type:String;
             
             private function iconToImage(icon:Class, tooltip:String = '') : Image {
                 var img:Image = new Image();
@@ -246,10 +252,9 @@ Redistribution and use in source and binary forms, with or without modification,
 
             public function init() : void {
                 //PopUpManager.centerPopUp(this);
-
-                datacopy = new XML(model.metadata);
-                // remove cols from consideration
-                var cols:XMLList = datacopy.node.node.node.node.(@column);
+                datacopy = new XML(model.metadata.schemas);
+                // remove cols from consideration until luciddb supports it
+                var cols:XMLList = datacopy..column;
                 for (var i:Number = cols.length()-1; i >= 0; i--) {
                     delete cols[i];
                 }
@@ -263,22 +268,31 @@ Redistribution and use in source and binary forms, with or without modification,
                     checkbox.enabled = false;
                 }
                 
+                // Could use a y-combinator here! But no.
+                load_roles_info();
+            }
+            
+            private function load_roles_info() : void {
                 // Block until we have the info (supplied by the user of this view.)
-                CustomFuncs.when(model.roles_info, '!=', null, function():void {
-                    
-                for each (var role:XML in model.roles_info.children()) {
-                    if (role.@name == role_name) {
-                        for each (var perm:XML in role.permission) {
-                            var type:String = String(perm.@itemType).replace('Local', '') + 's';
-                            var node:XML = datacopy.schema.(@label == perm.@schemaName).node.(@label == type).node.(@label == perm.@itemName)[0];
-                            node.@actions = perm.@actions;
-                            node.@oldActions = perm.@actions;
-                            node.@schemaName = perm.@schemaName;
-                            node.@itemType = perm.@itemType;
+                if (model.roles_info == null) {
+                    callLater(load_roles_info);
+                } else {
+                    for each (var role:XML in model.roles_info.children()) {
+                        if (role.@name == grantee) {
+                            for each (var perm:XML in role.permission) {
+                                var type:String = String(perm.@itemType).replace('Local', '').toLowerCase();
+                                var type_label:String = String(perm.@itemType).replace('Local', '') + 's';
+                                var schema:XML = datacopy.schema.(@label == perm.@schemaName)[0];
+                                var category:XML = schema[type + 's'][0];
+                                var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
+                                node.@actions = perm.@actions;
+                                node.@oldActions = perm.@actions;
+                                node.@schemaName = perm.@schemaName;
+                                node.@itemType = perm.@itemType;
+                            }
                         }
                     }
                 }
-                });
             }
             
             public function closeWin() : void {
@@ -337,13 +351,18 @@ Redistribution and use in source and binary forms, with or without modification,
                         }
                     } else {
                         // gotta find individual tables and views with actions
+                        
+                        // note: no longer just tables or views
+                        
                         var tabs_and_views:XMLList = schema.children();
                         for each (var tab_or_view:XML in tabs_and_views) {
                             var type:String;
                             if (tab_or_view.@label == 'Tables')
                                 type = 'table';
-                            else
+                            else if (tab_or_view.@label == 'Views')
                                 type = 'view';
+                            else
+                                type = String(tab_or_view).toLowerCase().replace(' ', '_').substring(0, -1);
                             for each (var element:XML in tab_or_view.children()) {
                                 if (tab_or_view.hasOwnProperty('@actions') && tab_or_view.@actions != element.@actions) {
                                     grant_perms.push(new XML('<grant level="item" type="' + type +
@@ -385,10 +404,15 @@ Redistribution and use in source and binary forms, with or without modification,
                 
                 // will not have any revokes until functionality is added in LucidDB
                 
-                var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', role_name, '', '', grant_perms);
+                if (grantee_type == 'role') {
+                    var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', grantee, '', '', grant_perms);
+                    var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', grantee, '', '', revoke_perms);
+                } else if (grantee_type == 'user') {
+                    grantEvent = new UsersAndRolesEvent('grantPermissions', grantee, '', '', '', '', grant_perms);
+                    revokeEvent = new UsersAndRolesEvent('revokePermissions', grantee, '', '', '', '', revoke_perms);
+                }
                 CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
-                var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', role_name, '', '', revoke_perms);
-                //CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
+               // CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
             }
             
             // tree functions
