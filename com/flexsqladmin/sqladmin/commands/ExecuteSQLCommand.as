@@ -60,17 +60,14 @@ package com.flexsqladmin.sqladmin.commands
 			var querycols:Array = new Array();
            	var datagridcols:Array = new Array();
 			
-            var orig_selected:Number = model.main_tabnav.selectedIndex;
+            var result_info:QueryResultInfo;
             try {
-                model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
+                result_info = model.tabs[ VBox(model.main_tabnav.selectedChild).id.split('-')[0] ][VBox(model.main_tabnav.selectedChild).id].result_info;
             } catch(error:Error) {
                 // write to default window
-                model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
-                //if (sqlquerytype != 'special')
-                model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName(String(QueryWindow) + '-1'));
+                result_info = model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info;
             }
-            
-            var result_info:QueryResultInfo = model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info;
+            result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
             result_info.showplanwindow.clearWindow();
             
             var rows:Number = 0;
@@ -109,7 +106,6 @@ package com.flexsqladmin.sqladmin.commands
                     result_info.showplanwindow.drawPlan(queryxml);
                 }
             }
-            model.main_tabnav.selectedIndex = orig_selected;
             if (sqlquerytype == 'special')
                 return;
             

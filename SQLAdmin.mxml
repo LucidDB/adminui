@@ -91,6 +91,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 tab_icons[String(QueryWindow)] = QWimg;
                 tab_icons[String(CreateEditTableWindow)] = NTimg;
                 tab_icons[String(UsersAndRolesWindow)] = UsersImg;
+                tab_icons[String(ViewWindow)] = VWimg;
                 
 				//Regiser Some Things with the model
 				model.main_tabnav = tabnavigator;
@@ -250,7 +251,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 } else if (selected.action == 'roles') {
                     UsersAndRolesWindow(addTab('Roles', UsersAndRolesWindow, null)).currentState = 'roles';
                 } else if (selected.action == 'views') {
-                    addTab('New View', ViewWindow, null);
+                    addTab('New View', ViewWindow);
                 }
             }
             
