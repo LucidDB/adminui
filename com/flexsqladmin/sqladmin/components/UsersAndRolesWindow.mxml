@@ -59,8 +59,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             public function init() : void {
-                model.roles_windows[id] = this;
-                model.roles_windows._len += 1;
             }
             
             public function set_user_mode(mode:String, name:String) : void {

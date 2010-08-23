@@ -100,9 +100,6 @@ Redistribution and use in source and binary forms, with or without modification,
             public var selected_role:String;
             
             public function init() : void {
-                model.roles_windows[id] = this;
-                model.roles_windows._len += 1;
-                
                 if (!model.users_list) {
                     var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
                     CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);

@@ -83,8 +83,6 @@ Redistribution and use in source and binary forms, with or without modification,
             }
             
             public function init() : void {
-                model.users_windows[id] = this;
-                model.users_windows._len += 1;
                 currentState = 'create';
             }
             

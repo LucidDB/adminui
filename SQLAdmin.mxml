@@ -46,6 +46,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import flexlib.controls.tabBarClasses.SuperTab;
             import flexlib.events.SuperTabEvent;
             
+            import mx.collections.ArrayCollection;
             import mx.controls.Alert;
             import mx.controls.ComboBox;
             import mx.events.DropdownEvent;
@@ -67,12 +68,17 @@ Redistribution and use in source and binary forms, with or without modification,
             public var NTimg:Class;
             [Embed("/icons/group.png")]
             public var UsersImg:Class;
+            [Embed("/icons/script_add.png")]
+            public var VWimg:Class;
+
+            
+            private var tab_icons:Object = {};
 			
 			[Bindable]
 			private var model:ModelLocator = ModelLocator.getInstance();
 			
 			public function init():void{
-				
+                
 				DEBUG = true;
 				
 				if (DEBUG) {
@@ -82,10 +88,14 @@ Redistribution and use in source and binary forms, with or without modification,
 					debug_win.visible = false;
 				}
 				
+                tab_icons[String(QueryWindow)] = QWimg;
+                tab_icons[String(CreateEditTableWindow)] = NTimg;
+                tab_icons[String(UsersAndRolesWindow)] = UsersImg;
+                
 				//Regiser Some Things with the model
 				model.main_tabnav = tabnavigator;
 				// Initial tab:
-				callLater(addTab, ["Default Query Window", tabnavigator]);
+				callLater(addTab, ["Default Query Window", QueryWindow]);
 				
 				//Locate and load the wsdl page
 				var urlpattern:RegExp = /SQLAdmin.swf/i; 
@@ -152,86 +162,48 @@ Redistribution and use in source and binary forms, with or without modification,
 					debug_win.visible = (debug_win.visible) ? false : true;
 				}
 			}
-						
-            /* TODO: refactor this to use a passed Class obj. instead of string. */
-			public function addTab(lbl:String, navigator:SuperTabNavigator,
-								   child_obj:String = "", icon:Class=null) : Object {
-				
-				if(lbl=="")
-					lbl = "Query Window";// + (navigator.numChildren + 1);
-				var child:VBox = new VBox();
-				child.setStyle("closable", true);
-				child.label = lbl;
-				
-                var added_obj : DisplayObject = null;
-				if (child_obj == "") {
-					var qw:QueryWindow = new QueryWindow();
-					qw.id = "qw-" + (model.aryQueryWindows._len + 1).toString();
-                    added_obj = qw;
-                    child.id = qw.id;
-                    child.icon = QWimg;
-				} else if (child_obj == "createTable") {
-                    var ctw:CreateEditTableWindow = new CreateEditTableWindow();
-                    ctw.id = "ctw-" + (model.table_details._len + 1).toString();
-                    added_obj = ctw;
-                    child.id = ctw.id;
-                    child.icon = NTimg;
-                } else if (child_obj == "viewWindow") {
-                    var vw:ViewWindow = new ViewWindow();
-                    vw.id = "vw-" + (model.aryQueryWindows._len + 1).toString();
-                    added_obj = vw;
-                    child.id = vw.id;
-                } else if (child_obj == "usersWindow") {
-                    var uw:UsersWindow = new UsersWindow();
-                    uw.id = "uw-" + (model.users_windows._len + 1).toString();
-                    added_obj = uw;
-                    child.id = uw.id;
-                    child.icon = UsersImg;
-                } else if (child_obj == "rolesWindow") {
-                    var rw:RolesWindow = new RolesWindow();
-                    rw.id = "rw-" + (model.roles_windows._len + 1).toString();
-                    added_obj = rw;
-                    child.id = rw.id;
-                } else if (child_obj == 'usersandroles') {
-                    var uwrw:UsersAndRolesWindow = new UsersAndRolesWindow();
-                    uwrw.id = "uwrw-" + (model.roles_windows._len + 1).toString();
-                    added_obj = uwrw;
-                    child.id = uwrw.id;
-                } else if (child_obj == 'sessionsWindow') {
-                    var sw:SessionsWindow = new SessionsWindow();
-                    sw.id = "sw-" + (model.sessions_windows._len + 1).toString();
-                    added_obj = sw;
-                    child.id = sw.id;
-                } else {
-                    return null;
+					
+            public function addTab(lbl:String, window:Class, icon:Class=null,
+                                    navigator:SuperTabNavigator=null) : Object {
+                var win_name:String = window.toString();
+                if (!model.tabs.hasOwnProperty(win_name)) {
+                    model.tabs[win_name] = new Object();
+                    model.tabs[win_name]._length = 0;
                 }
-                if (icon != null) // override default
-                    child.icon = icon;
-                child.name = child.id;
-                child.addChild(added_obj);
-				navigator.addChild(child);
+                
+                var added_obj:Object = new window();
+                added_obj.id = win_name + '-' + (model.tabs[win_name]._length + 1).toString();
+                model.tabs[win_name][added_obj.id] = added_obj; 
+                model.tabs[win_name]._length += 1;
 
-				navigator.selectedIndex = navigator.numChildren - 1;
+                var child:VBox = new VBox();
+                child.percentWidth = 100;
+                child.percentHeight = 100;
+                child.setStyle("closable", true);
+                
+                child.label = lbl;
+                child.id = child.name = added_obj.id;
+                if (icon == null && arguments.length == 2)
+                    if (tab_icons.hasOwnProperty(win_name))
+                        icon = tab_icons[win_name];
+                child.icon = icon;
+                child.addChild(DisplayObject(added_obj));
+
+                if (navigator == null)
+                    navigator = model.main_tabnav;
+                navigator.addChild(child);
+                navigator.selectedIndex = navigator.numChildren - 1;
+
                 return added_obj;
-			}
-			
+            }
+            
 			private function destroyTab(e : SuperTabEvent) : void {
-                var id:String = VBox(tabnavigator.getChildAt(e.tabIndex)).id;
+                const id:String = VBox(tabnavigator.getChildAt(e.tabIndex)).id;
+                const name:String = id.split('-')[0];
 				DebugWindow.log("main.mxml:destroyTabButton() - " + id);
-                if (model.aryQueryWindows[id] != null)
-                    model.aryQueryWindows[id] = null;
-                if (model.query_results[id] != null)
-                    model.query_results[id] = null;
-                if (model.table_details[id] != null)
-                    model.query_results[id] = null;
-                if (model.roles_windows[id] != null)
-                    model.roles_windows[id] = null;
-                if (model.users_windows[id] != null)
-                    model.users_windows[id] = null;
-                if (model.sessions_windows[id] != null) {
-                    SessionsWindow(model.sessions_windows[id]).sessionTimer.stop();
-                    model.sessions_windows[id] = null;
-                }
+                if ('SessionsWindow' in name)
+                    SessionsWindow(model.tabs[name][id]).sessionTimer.stop();
+                delete model.tabs[name][id];
 			}
 			
 			private function showAboutWindow():void{
@@ -242,13 +214,13 @@ Redistribution and use in source and binary forms, with or without modification,
 			
 			private function handleShortCuts(e:KeyboardEvent):void{
 				if (e.ctrlKey && e.keyCode == 84) // ctrl+T
-					addTab("", tabnavigator);
+					addTab('Query Window', QueryWindow);
 				else if (e.ctrlKey && e.keyCode == 82) // ctrl+R
 					loadMetaData();
 				else if (e.ctrlKey && e.shiftKey && e.keyCode == 68) // ctrl+shift+D
 					toggleDebugWindow();
                 else if (e.ctrlKey && e.keyCode == 78) // ctrl+N
-                    addTab("", tabnavigator, 'createTable');
+                    addTab('Create Table', CreateEditTableWindow);
 			}
 			
 			private function changeHandler(event:Event):void {
@@ -270,15 +242,15 @@ Redistribution and use in source and binary forms, with or without modification,
                //trace(this.contentMouseX + ' ' + this.contentMouseY);
                 var selected:Object = add_item_list.selectedItem;
                 if (selected.action == 'query') {
-                    addTab('', tabnavigator);
+                    addTab('Query Window', QueryWindow);
                 } else if (selected.action == 'table') {
-                    addTab('New Table', tabnavigator, 'createTable');
+                    addTab('New Table', CreateEditTableWindow);
                 } else if (selected.action == 'users') {
-                    UsersAndRolesWindow(addTab('Users', tabnavigator, 'usersandroles', UsersImg)).currentState = 'users';
+                    UsersAndRolesWindow(addTab('Users', UsersAndRolesWindow)).currentState = 'users';
                 } else if (selected.action == 'roles') {
-                    UsersAndRolesWindow(addTab('New Role', tabnavigator, 'usersandroles')).currentState = 'roles';
+                    UsersAndRolesWindow(addTab('Roles', UsersAndRolesWindow, null)).currentState = 'roles';
                 } else if (selected.action == 'views') {
-                    addTab('New View', tabnavigator, 'viewWindow');
+                    addTab('New View', ViewWindow, null);
                 }
             }
             

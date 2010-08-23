@@ -37,9 +37,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             public var sessionTimer:Timer;
             
             public function init() : void {
-                model.sessions_windows[id] = this;
-                model.sessions_windows._len += 1;
-                
                 sessionTimer = new Timer(update_interval.value * 1000);
                 sessionTimer.addEventListener(TimerEvent.TIMER, sessionUpdate);
                 sessionTimer.start();

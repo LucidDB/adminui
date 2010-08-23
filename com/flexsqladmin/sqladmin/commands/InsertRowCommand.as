@@ -16,6 +16,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.components.QueryWindow;
 	import com.flexsqladmin.sqladmin.events.InsertRowEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.view.InsertRowWindow;
@@ -87,9 +88,9 @@ package com.flexsqladmin.sqladmin.commands
     			mx.controls.Alert.show(insertresult.NewDataSet.Table.Error, "Insert Error");
     		} else{
                 try {
-                    model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(insertsql, "");
+                    model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info.queryHistoryVO.writeHistory(insertsql, "");
                 } catch(error:Error) {
-                    model.query_results["qw-1"].queryHistoryVO.writeHistory(insertsql, "");
+                    model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info.queryHistoryVO.writeHistory(insertsql, "");
                 }
     			insertrowwindow.closeWin(new Event("CLOSED"));
     			insertrowwindow.getParentWindow().refreshData();

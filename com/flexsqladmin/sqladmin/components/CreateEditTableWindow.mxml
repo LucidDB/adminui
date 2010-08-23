@@ -117,9 +117,6 @@ Redistribution and use in source and binary forms, with or without modification,
                 TD = new TableDetailsVO();
                 TD.details.@createTime = table_create_time.text;
                 table_create_time.enabled = false;
-
-                model.table_details[id] = TD;
-                model.table_details._len += 1;
             }
             
             public function handleShortcuts(e:KeyboardEvent) : void {

@@ -16,6 +16,7 @@ package com.flexsqladmin.sqladmin.commands
     import com.adobe.cairngorm.control.CairngormEventDispatcher;
     import com.flexsqladmin.sqladmin.business.GeneralDelegate;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
+    import com.flexsqladmin.sqladmin.components.UsersAndRolesWindow;
     import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
     import com.flexsqladmin.sqladmin.utils.ActionEnum;
@@ -124,7 +125,7 @@ package com.flexsqladmin.sqladmin.commands
                         model.roles_list.push(el.@name);
                     }
                     try {
-                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].rw.select_role();
+                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].rw.select_role();
                     } catch (e:Error) {
                         //pass
                     }
@@ -132,7 +133,7 @@ package com.flexsqladmin.sqladmin.commands
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewUser");
                     response = event.result;
                     if (response == "") {
-                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user.toUpperCase());
+                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user.toUpperCase());
                         model.object_tree.addItem('user', user.toUpperCase(), 'security', 'users');
                         Alert.show("New User Created", "Success", 4, null, function():void {
                             var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
@@ -145,7 +146,7 @@ package com.flexsqladmin.sqladmin.commands
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewRole");
                     response = event.result;
                     if (response == "") {
-                        model.roles_windows[VBox(model.main_tabnav.selectedChild).id].set_role_mode('edit', role_name.toUpperCase());
+                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_role_mode('edit', role_name.toUpperCase());
                         model.object_tree.addItem('role', role_name.toUpperCase(), 'security', 'roles');
                         Alert.show("New Role Created", "Success", 4, null, function():void {
                             var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');

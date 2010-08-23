@@ -120,10 +120,6 @@ Redistribution and use in source and binary forms, with or without modification,
 				result_info.queryHistoryVO = new QueryHistoryVO();
 				result_info.showplanwindow = showplanwin;
 				result_info.querydatagrid = querydatagrid;
-				model.query_results[id] = result_info;
-				model.aryQueryWindows[id] = this;
-                model.query_results._len += 1;
-                model.aryQueryWindows._len += 1;
 
 			}
 						
@@ -236,7 +232,7 @@ Redistribution and use in source and binary forms, with or without modification,
             public function makeView():void {
                 var text:String = getQueryText();
                 if (text.substr(0, 6).toUpperCase() == "SELECT") {
-                    var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", model.main_tabnav, "viewWindow", VWimg));
+                    var vw:ViewWindow = ViewWindow(Application.application.addTab("Create View", ViewWindow));
                     vw.setText(getQueryText());
                     callLater(vw.guess_schema, [guessed_schema]);
                 } else {

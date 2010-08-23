@@ -71,7 +71,7 @@ package com.flexsqladmin.sqladmin.commands
                 var errormsg:String = r.NewDataSet.Table.Error;
                 DebugWindow.log("Error - " + errormsg);
             } else {
-                model.table_details[VBox(model.main_tabnav.selectedChild).id].details = new XML(XML(event.result['return']));
+                model.tabs[String(CreateEditTableWindow)][VBox(model.main_tabnav.selectedChild).id].details = new XML(XML(event.result['return']));
                 CreateEditTableWindow(VBox(model.main_tabnav.selectedChild).getChildAt(0)).addColumnsFromDetails();
             }            
         }

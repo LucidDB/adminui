@@ -17,6 +17,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
 	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.components.QueryWindow;
 	import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
@@ -61,14 +62,15 @@ package com.flexsqladmin.sqladmin.commands
 			
             var orig_selected:Number = model.main_tabnav.selectedIndex;
             try {
-                model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+                model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
             } catch(error:Error) {
-                // make it default query window if it failed above
-                model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName("qw-1"));
-                model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(sql, sqlquerytype);
+                // write to default window
+                model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
+                //if (sqlquerytype != 'special')
+                model.main_tabnav.selectedIndex = model.main_tabnav.getChildIndex(model.main_tabnav.getChildByName(String(QueryWindow) + '-1'));
             }
             
-            var result_info : QueryResultInfo = model.query_results[VBox(model.main_tabnav.selectedChild).id];
+            var result_info:QueryResultInfo = model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info;
             result_info.showplanwindow.clearWindow();
             
             var rows:Number = 0;

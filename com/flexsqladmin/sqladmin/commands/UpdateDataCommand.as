@@ -16,6 +16,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
+	import com.flexsqladmin.sqladmin.components.QueryWindow;
 	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
@@ -105,9 +106,9 @@ package com.flexsqladmin.sqladmin.commands
 	        	tablewindow.refreshData();
 	     	} else{
                 try {
-                    model.query_results[VBox(model.main_tabnav.selectedChild).id].queryHistoryVO.writeHistory(updatesql, "");
+                    model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id].result_info.queryHistoryVO.writeHistory(updatesql, "");
                 } catch(error:Error) {
-                    model.query_results["qw-1"].queryHistoryVO.writeHistory(updatesql, "");
+                    model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info.queryHistoryVO.writeHistory(updatesql, "");
                 }
         	}
 		}
