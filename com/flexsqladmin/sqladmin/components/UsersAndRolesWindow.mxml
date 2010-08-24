@@ -20,7 +20,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             <mx:AddChild relativeTo="{users_roles_half}" position="firstChild">
                 <components:UsersWindow id="uw" creationPolicy="all" />
             </mx:AddChild>
-            <mx:SetProperty target="{perm_window}" name="title" value="Grant Permissions to Selected User (Currently Unsupported)" />
+            <mx:SetProperty target="{perm_window}" name="title" value="Grant Permissions to Selected User" />
         </mx:State>
         <mx:State name="roles">
             <mx:AddChild relativeTo="{users_roles_half}" position="firstChild">
@@ -68,6 +68,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     uw.set_name(name);
                     uw.currentState = mode;
                     uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                    var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                    CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                     dispatchEvent(new Event("stateChange"));
                 }
             }
@@ -91,8 +93,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             
             [Bindable(event="stateChange")]
             public function perms_enabled() : Boolean {
-                // users currently unsupported
-                return (currentState == 'users' && uw.currentState == 'edit' && 1 == 0) ||
+                return (currentState == 'users' && uw.currentState == 'edit') ||
                     (currentState == 'roles' && rw.currentState == 'edit');
             }
             

@@ -95,6 +95,7 @@ Redistribution and use in source and binary forms, with or without modification,
             }
             
             public function user_change() : void {
+                user = users.selectedLabel;
             }
             
             public function closeWin() : void {

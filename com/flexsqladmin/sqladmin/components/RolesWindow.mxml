@@ -41,7 +41,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 </mx:FormItem>
             </mx:Form>
         </mx:Panel>
-        <mx:Panel title="Assign Users to Roles" width="100%" height="100%">
+        <mx:Panel title="Assign Users to Roles (Expected Functionality Not Currently Supported In LucidDB)" width="100%" height="100%">
         <mx:AdvancedDataGrid enabled="{modding}" id="role_users" dataProvider="{role_users_data_collection()}" width="100%">
             <mx:columns>
                 <mx:AdvancedDataGridColumn id="r_user" headerText="User" dataField="@user" />

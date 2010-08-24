@@ -65,28 +65,29 @@ package com.flexsqladmin.sqladmin.commands
             call_fails = [];
             
             var args:Object;
-            if (role_name == '') {
-                args = {user: user, password: pass};
-            } else if (added != '') {
-                args = {user: user, role: role_name, added: added, with_grant: with_grant};
-            } else if (perms_list != null) {
+            if (perms_list != null) {
                 //call = call.slice(0, -1);
+                var grantee:String = (role_name == '') ? user : role_name;
                 for each (var perm:XML in perms_list) {
                     var real_call:String = call;
                     var perms:String = String(perm.@perms).replace(' ', ',').replace('ALL', 'ALL PRIVILEGES');
                     if (perm.@level == 'schema') {
                         real_call += 'OnSchema';
                         args = {catalog: model.currentcatalogname, schema: perm.@name,
-                            permissions: perms, grantee: role_name};
+                            permissions: perms, grantee: grantee};
                     } else if (perm.@level == 'item') {
                         args = {catalog: model.currentcatalogname, schema: perm.@schemaName,
                             type: perm.@type, element: perm.@name, permissions: perms,
-                            grantee: role_name};
+                            grantee: grantee};
                     }
                     total_calls += 1;
                     delegate.serviceDelegate(real_call, args);
                 }
                 return;
+            } else if (role_name == '') {
+                args = {user: user, password: pass};
+            } else if (added != '') {
+                args = {user: user, role: role_name, added: added, with_grant: with_grant};
             } else {
                 args = {role: role_name};
             }
