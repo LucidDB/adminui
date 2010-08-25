@@ -33,7 +33,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
     <mx:VBox width="95%">
         <mx:HBox id="users_roles_half" left="10" right="10" top="10" bottom="10" width="100%">
         </mx:HBox>
-        
         <!--<mx:ComboBox height="0%" valueCommit="{reloadUsers();}" dataProvider="{model.users_list}" visible="false" />-->
         
         <view:PermissionsWindow enabled="{perms_enabled()}"
@@ -54,10 +53,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
-            public function debug() : void {
-                currentState = (currentState == 'roles') ? 'users' : 'roles';
-            }
-            
             public function init() : void {
             }
             
@@ -71,6 +66,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
                     CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                     dispatchEvent(new Event("stateChange"));
+                    reset_perms();
                 }
             }
             
@@ -88,6 +84,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     rw.select_role(name);
                     rw.edit_role_list.addEventListener(Event.CHANGE, reset_perms);
                     dispatchEvent(new Event("stateChange"));
+                    reset_perms();
                 }
             }
             
@@ -103,8 +100,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     return uw.modify_user.user;
                 else if (currentState == 'roles')
                     return rw.selected_role;
-                else
+                else {
+                    trace(currentState);
                     return '';
+                }
             }
             [Bindable(event="stateChange")]
             public function get_grantee_type() : String {

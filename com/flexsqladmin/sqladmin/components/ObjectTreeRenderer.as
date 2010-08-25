@@ -38,12 +38,22 @@ package com.flexsqladmin.sqladmin.components
         private var tables_icon:Class;
         [Embed(source="/icons/database.png")]
         private var table_icon:Class;
+        [Embed(source="/icons/scripts.png")]
+        private var views_icon:Class;
+        [Embed(source="/icons/script_select.png")]
+        private var view_icon:Class;
         [Embed(source="/icons/database_table.png")]
         private var column_icon:Class;
         [Embed(source="/icons/folder_user.png")]
         private var users_icon:Class;
         [Embed(source="/icons/group.png")]
         private var user_icon:Class;
+        [Embed(source="/icons/monitor.png")]
+        private var system_icon:Class;
+        [Embed(source="/icons/report.png")]
+        private var counters_icon:Class;
+        [Embed(source="/icons/report_user.png")]
+        private var sessions_icon:Class;
         
         
         [Bindable]
@@ -52,9 +62,14 @@ package com.flexsqladmin.sqladmin.components
             , 'schema' : schema_icon
             , 'tables' : tables_icon
             , 'table' : table_icon
+            , 'views' : views_icon
+            , 'view' : view_icon
             , 'column' : column_icon
             , 'users' : users_icon
             , 'user' : user_icon
+            , 'system' : system_icon
+            , 'counters' : counters_icon
+            , 'sessions' : sessions_icon
         }
             
         override protected function createChildren() : void {

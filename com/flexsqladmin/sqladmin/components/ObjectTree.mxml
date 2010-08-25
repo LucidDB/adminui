@@ -75,6 +75,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             private var add_icon:Class;
             [Embed(source="/icons/group_edit.png")]
             private var edit_user_icon:Class;
+            [Embed(source="/icons/report.png")]
+            private var counters_icon:Class;
+            [Embed(source="/icons/report_user.png")]
+            private var sessions_icon:Class;
             
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -84,7 +88,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             private var model:ModelLocator = ModelLocator.getInstance();
             
             [Bindable]
-            public var tree_data:XML;
+            public var tree_data:XML = new XML();
             
             private var object_menus:Object = new Object();
             
@@ -152,7 +156,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     <system label="System">
                         <counters label="Counters" />
                         <configuration label="Configuration" />
-                        <sessions label="Active Sessions" />
+                        <sessions label="Active User Sessions" />
                     </system>
                     <networks label="Networks">
                         <network label="network.dynamobi.com">
@@ -745,9 +749,9 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                         
                     }
                 );
-                register_context('counters', [con_row('Performance Monitor', null)],
+                register_context('counters', [con_row('Performance Monitor', counters_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        Application.application.addTab('Performance Monitor', PerformanceMonitor);
+                        Application.application.addTab('Performance Monitor', PerformanceMonitor, counters_icon);
                     }
                 );
                 register_context('configuration', [con_row('Edit', null)],
@@ -755,9 +759,9 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                             
                     }
                 );
-                register_context('sessions', [con_row('Active Sessions', null)],
+                register_context('sessions', [con_row('View Active Sessions', sessions_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        Application.application.addTab("Active Sessions", SessionsWindow);
+                        Application.application.addTab("Active Sessions", SessionsWindow, sessions_icon);
                     }
                 );
                     
