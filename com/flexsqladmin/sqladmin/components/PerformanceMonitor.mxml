@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2010 Dynamo Business Intelligence Corporation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<mx:HDividedBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+                paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"
+                liveDragging="true"
+                creationComplete="init();">
+
+    <mx:VBox height="100%">
+        <mx:Button label="add graph" click="addGraph('blah');" />
+        <mx:Button label="add datapoint" click="addPoint('blah');" />
+        <mx:ComboBox id="frequency" />
+        <mx:Tree height="100%">
+        
+        </mx:Tree>
+    </mx:VBox>
+    
+    <mx:VBox width="100%" height="100%" id="graphs">
+        <mx:ComboBox id="units" />
+    </mx:VBox>
+    
+    <mx:Script>
+        <![CDATA[
+            import mx.binding.utils.BindingUtils;
+            import mx.charts.CategoryAxis;
+            import mx.charts.Legend;
+            import mx.charts.LineChart;
+            import mx.charts.renderers.CircleItemRenderer;
+            import mx.charts.series.LineSeries;
+            import mx.collections.XMLListCollection;
+            import mx.containers.Panel;
+            
+            public var testdata:XMLListCollection = new XMLListCollection(new XMLList(<points>
+                <point units="" value="0" time="0" />
+                <point units="" value="1" time="2" />
+                <point units="" value="5" time="4" />
+                <point units="" value="6" time="6" />
+                </points>));
+            
+            public var times:XML = <times />;
+            public var time_axis:CategoryAxis;
+            
+            public function init() : void {
+                for (var i:Number = 1; i < 61; i++) {
+                    times.appendChild(<time value={i} />);
+                }
+                time_axis = new CategoryAxis();
+                time_axis.dataProvider = times.children();
+                time_axis.categoryField = '@value';
+            }
+            
+            public function addGraph(name:String) : void {
+                var series:LineSeries = new LineSeries();
+                series.setStyle('itemRenderer', new ClassFactory(mx.charts.renderers.CircleItemRenderer));
+                series.yField = '@value';
+                series.xField = '@time';
+                series.displayName = 'Test Data';
+                series.dataProvider = testdata.children();
+
+                var graph:LineChart = new LineChart();
+                graph.percentWidth = 100;
+                graph.horizontalAxis = time_axis;
+                graph.series = [series];
+                graph.showDataTips = true;
+                
+                var legend:Legend = new Legend();
+
+                var panel:Panel = new Panel();
+                panel.percentWidth = 100;
+                panel.name = name;
+                panel.title = 'Graph for ' + name;
+                panel.addChild(graph);
+                graphs.addChild(panel);
+            }
+            
+            public function removeGraph(name:String) : void {
+                graphs.removeChild(graphs.getChildByName(name));
+            }
+            
+            public var val:Number = 4;
+            public var tim:Number = 4; 
+            public function addPoint(name:String) : void {
+                tim++;
+                val++;
+                XMLList(testdata.getItemAt(0)).appendChild(<point units="" value={val} time={tim} />);
+                testdata = testdata;
+                trace();
+                trace();
+                trace(testdata.toXMLString());
+                trace();
+                trace(testdata.children().toXMLString());
+                trace();
+                trace(LineChart(Panel(graphs.getChildByName(name)).getChildAt(0)).series[0].dataProvider.toXMLString());
+            }
+            
+        ]]>
+    </mx:Script>
+</mx:HDividedBox>

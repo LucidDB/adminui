@@ -747,7 +747,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('counters', [con_row('Performance Monitor', null)],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        Application.application.addTab('Performance Monitor', PerformanceMonitor);
                     }
                 );
                 register_context('configuration', [con_row('Edit', null)],
