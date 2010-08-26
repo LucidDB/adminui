@@ -326,7 +326,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
              * TODO: abstract this into a generalized function like remove.
              */
             public function addSchema(name:String) : void {
-                var node:XML = <schema label={name}></schema>;
+                var node:XML = <schema label={name}><tables label="Tables" /><views label="Views" /><foreign_tables label="Foreign Tables" /><functions label="Functions" /><procedures label="Procedures" /></schema>;
                 for (var i:Number = 0; i < tree_data.schemas.children().length(); i++) {
                     if (tree_data.schemas.schema[i].@label < name)
                         continue;

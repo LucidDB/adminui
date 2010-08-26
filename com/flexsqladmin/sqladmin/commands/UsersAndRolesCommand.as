@@ -123,7 +123,8 @@ package com.flexsqladmin.sqladmin.commands
                     model.roles_info = new XML(XML(event.result).children());
                     model.roles_list = new Array();
                     for each (el in model.roles_info.children()) {
-                        model.roles_list.push(el.@name);
+                        if (XML(el).localName() == 'role')
+                            model.roles_list.push(el.@name);
                     }
                     try {
                         model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].rw.select_role();

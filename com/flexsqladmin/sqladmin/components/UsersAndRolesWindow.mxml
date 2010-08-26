@@ -100,10 +100,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     return uw.modify_user.user;
                 else if (currentState == 'roles')
                     return rw.selected_role;
-                else {
-                    trace(currentState);
+                else
                     return '';
-                }
             }
             [Bindable(event="stateChange")]
             public function get_grantee_type() : String {

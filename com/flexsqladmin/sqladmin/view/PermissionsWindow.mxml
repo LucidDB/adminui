@@ -277,8 +277,6 @@ Redistribution and use in source and binary forms, with or without modification,
                 if (model.roles_info == null) {
                     callLater(load_roles_info);
                 } else {
-                    trace(model.roles_info.toXMLString());
-                    trace(grantee);
                     for each (var role:XML in model.roles_info.children()) {
                         if (role.@name == grantee) {
                             for each (var perm:XML in role.permission) {

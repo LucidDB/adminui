@@ -15,8 +15,9 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 creationComplete="init();">
 
     <mx:VBox height="100%">
-        <mx:Button label="add graph" click="addGraph('blah');" />
-        <mx:Button label="add datapoint" click="addPoint('blah');" />
+        <mx:TextInput text="blah" id="add_name" />
+        <mx:Button label="add graph" click="addGraph(add_name.text);" />
+        <mx:Button label="add datapoint" click="addPoint(add_name.text);" />
         <mx:ComboBox id="frequency" />
         <mx:Tree height="100%">
         
@@ -33,37 +34,50 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import mx.charts.CategoryAxis;
             import mx.charts.Legend;
             import mx.charts.LineChart;
+            import mx.charts.LinearAxis;
             import mx.charts.renderers.CircleItemRenderer;
             import mx.charts.series.LineSeries;
-            import mx.collections.XMLListCollection;
+            import mx.collections.ArrayCollection;
             import mx.containers.Panel;
             
-            public var testdata:XMLListCollection = new XMLListCollection(new XMLList(<points>
-                <point units="" value="0" time="0" />
-                <point units="" value="1" time="2" />
-                <point units="" value="5" time="4" />
-                <point units="" value="6" time="6" />
-                </points>));
+            public var testdata:ArrayCollection = new ArrayCollection([
+                {time: 0, value: 0},
+                {time: 2, value: 1},
+                {time: 4, value: 5},
+                {time: 6, value: 6}
+                ]);
             
             public var times:XML = <times />;
-            public var time_axis:CategoryAxis;
+            public var time_axis_old:CategoryAxis;
+            
+            public var time_axis:LinearAxis;
+            
+            private var data_collections:Object = new Object();
             
             public function init() : void {
                 for (var i:Number = 1; i < 61; i++) {
                     times.appendChild(<time value={i} />);
                 }
-                time_axis = new CategoryAxis();
-                time_axis.dataProvider = times.children();
-                time_axis.categoryField = '@value';
+                time_axis_old = new CategoryAxis();
+                time_axis_old.dataProvider = times.children();
+                time_axis_old.categoryField = '@value';
+                
+                time_axis = new LinearAxis();
+                time_axis.minimum = 0;
+                time_axis.maximum = 60;
+               
             }
             
             public function addGraph(name:String) : void {
+                var data:ArrayCollection = new ArrayCollection([]);
+                data_collections[name] = data;
+                
                 var series:LineSeries = new LineSeries();
                 series.setStyle('itemRenderer', new ClassFactory(mx.charts.renderers.CircleItemRenderer));
-                series.yField = '@value';
-                series.xField = '@time';
-                series.displayName = 'Test Data';
-                series.dataProvider = testdata.children();
+                series.xField = 'time';
+                series.yField = 'value';
+                series.displayName = 'Data point for ' + name;
+                BindingUtils.bindProperty(series, 'dataProvider', this.data_collections, name);
 
                 var graph:LineChart = new LineChart();
                 graph.percentWidth = 100;
@@ -88,17 +102,12 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             public var val:Number = 4;
             public var tim:Number = 4; 
             public function addPoint(name:String) : void {
-                tim++;
-                val++;
-                XMLList(testdata.getItemAt(0)).appendChild(<point units="" value={val} time={tim} />);
-                testdata = testdata;
-                trace();
-                trace();
-                trace(testdata.toXMLString());
-                trace();
-                trace(testdata.children().toXMLString());
-                trace();
-                trace(LineChart(Panel(graphs.getChildByName(name)).getChildAt(0)).series[0].dataProvider.toXMLString());
+                tim += 1;
+                val = Math.random() * 100;
+                //testdata += new XMLList(<point units="" value={val} time={tim} />);
+                //XMLList(testdata.getItemAt(0)).appendChild(<point units="" value={val} time={tim} />);
+                //testdata.addItem({time: tim, value: val});
+                data_collections[name].addItem({time: tim, value: val});
             }
             
         ]]>

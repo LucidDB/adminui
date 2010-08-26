@@ -202,7 +202,7 @@ Redistribution and use in source and binary forms, with or without modification,
                 const id:String = VBox(tabnavigator.getChildAt(e.tabIndex)).id;
                 const name:String = id.split('-')[0];
 				DebugWindow.log("main.mxml:destroyTabButton() - " + id);
-                if ('SessionsWindow' in name)
+                if (name == String(SessionsWindow))
                     SessionsWindow(model.tabs[name][id]).sessionTimer.stop();
                 delete model.tabs[name][id];
 			}
