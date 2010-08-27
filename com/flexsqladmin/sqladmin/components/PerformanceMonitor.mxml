@@ -14,11 +14,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 liveDragging="true"
                 creationComplete="init();" xmlns:components="com.flexsqladmin.sqladmin.components.*">
 
-    <mx:VBox height="100%">
-        <mx:TextInput text="JvmMemoryUnused" id="add_name" />
-        <mx:Button label="add graph" click="addGraph(add_name.text);" />
+    <mx:VBox height="100%" width="50%">
         <mx:Label text="Update Frequency:" />
-        <mx:ComboBox id="frequency" change="freq_change();">
+        <mx:ComboBox id="frequency" change="freq_change();" selectedIndex="2">
+            <mx:Object label="0.1" />
             <mx:Object label="0.5" />
             <mx:Object label="1" />
             <mx:Object label="5" />
@@ -26,10 +25,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             <mx:Object label="30" />
             <mx:Object label="60" />
         </mx:ComboBox>
-        <mx:CheckBox labelPlacement="left" label="Get All?" id="fetch_all" />
                 
-        <mx:Tree id="counters" height="100%" dataProvider="{perf_counters}" creationComplete="load_tree();"
-                 showRoot="false" doubleClickEnabled="true">
+        <mx:Tree id="counters" height="100%" width="100%" rowHeight="25" indentation="3"
+                 dataProvider="{perf_counters}" creationComplete="load_tree();"
+                 showRoot="false" doubleClickEnabled="true" itemClick="tree_itemClick(event);">
             <mx:itemRenderer>
                 <mx:Component>                        
                     <components:ObjectTreeRenderer>
@@ -42,10 +41,9 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                                 
                                 override protected function createChildren() : void {
                                     super.createChildren();
-                                    disBox.removeChildAt(1);
                                     disCheck = new CheckBox();
-                                    disCheck.labelPlacement = 'left';
-                                    disCheck.addEventListener(MouseEvent.CLICK, handle_click);
+                                    disCheck.width = 15;
+                                    disCheck.baseline = 0;
                                     disBox.addChild(disCheck);
                                 }
                                 
@@ -54,17 +52,15 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                                     if (treeListData != null) {
                                         if (super.data) {
                                             var node:XML = treeListData.item as XML;
-                                            disCheck.label = node.@label;
-                                            //sdisCheck.percentWidth = 100;
+                                            if (!node.hasOwnProperty('@selected')) {
+                                                disCheck.visible = false;
+                                            } else {
+                                                disCheck.visible = true;
+                                                disCheck.selected = (node.@selected == 'true');
+                                            }
                                         }
                                     }
                                     super.updateDisplayList(unscaledWidth, unscaledHeight);
-                                }
-                                
-                                private function handle_click(event:MouseEvent) : void {
-                                    if (event.currentTarget.selected) {
-                                        outerDocument.addGraph(event.currentTarget.label);
-                                    }
                                 }
                                 
                             ]]>
@@ -91,6 +87,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
     
     <mx:Script>
         <![CDATA[
+            import mx.events.ListEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.events.PerformanceEvent;
             
@@ -157,14 +154,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             private function fetch_updates(event:TimerEvent=null) : void {
-                if (fetch_all.selected) {
-                    var perf_event:PerformanceEvent = new PerformanceEvent(this);
+                // TODO: batch this
+                for (var name:String in data_collections) {
+                    var perf_event:PerformanceEvent = new PerformanceEvent(this, name);
                     CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
-                } else {
-                    for (var name:String in data_collections) {
-                        perf_event = new PerformanceEvent(this, name);
-                        CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
-                    }
                 }
             }
             
@@ -211,6 +204,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 var panel:Panel = new Panel();
                 panel.percentWidth = 100;
                 panel.percentHeight = 100;
+                panel.minHeight = 225;
                 panel.name = name;
                 panel.title = 'Graph for ' + name;
                 panel.addChild(graph);
@@ -219,7 +213,11 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             public function removeGraph(name:String) : void {
-                graphs.removeChild(graphs.getChildByName(name));
+                if (graphs_left.getChildByName(name)) {
+                    graphs_left.removeChild(graphs_left.getChildByName(name));
+                } else {
+                    graphs_right.removeChild(graphs_right.getChildByName(name));
+                }
                 delete data_collections[name];
                 series_num--;
                 if (series_num == -1)
@@ -232,17 +230,26 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     perf_counters = <counters />;
                 }
                 for each (var el:XML in data['return']) {
-                    if (name == '') {
-                        var node:XML;
-                        if (el.counterSubcategory != '')
-                            node = <subcategory label={el.counterSubcategory}><counter label={el.counterName} /></subcategory>;
-                        else
-                            node = <counter label={el.counterName} />;
-                        
-                        if (perf_counters.category.(@label == el.counterCategory)[0])
-                            perf_counters.category.(@label == el.counterCategory)[0].appendChild(node);
-                        else
-                            perf_counters.appendChild(<category label={el.counterCategory}>{node}</category>);
+                    if (name == '') { // used for building the tree
+                        var node:XML = <counter label={el.counterName} selected="false" />;
+                        var possible_cat:XML = perf_counters.category.(@label == el.counterCategory)[0];
+                        if (possible_cat) {
+                            if (el.counterSubcategory != '') {
+                                var possible_subcat:XML = possible_cat.subcategory.(@label == el.counterSubcategory)[0];
+                                if (possible_subcat)
+                                    possible_subcat.appendChild(node);
+                                else
+                                    possible_cat.appendChild(<subcategory label={el.counterSubcategory}>{node}</subcategory>);
+                            } else {
+                                possible_cat.appendChild(node);
+                            }
+                        } else {
+                            if (el.counterSubcategory != '') {
+                                perf_counters.appendChild(<category label={el.counterCategory}><subcategory label={el.counterSubcategory}>{node}</subcategory></category>);
+                            } else {
+                                perf_counters.appendChild(<category label={el.counterCategory}>{node}</category>);
+                            }
+                        }
                     }
                     
                     if (!data_collections.hasOwnProperty(name))
@@ -284,9 +291,26 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     return val / 1024;
                 if (from_units == 'kilobytes' && to_units == 'bytes')
                     return val * 1024;
+                if (from_units == 'ns' && to_units == 'seconds')
+                    return val / 100000;
+                if (from_units == 'seconds' && to_units == 'ns')
+                    return val * 100000;
                 
                 return val;
             }
+            
+            // Tree functions
+            public function tree_itemClick(event:ListEvent) : void {
+                var item:XML = XML(event.currentTarget.selectedItem);
+                if (!item.hasOwnProperty('@selected')) return;
+                
+                item.@selected = (item.@selected == 'false') ? 'true' : 'false';
+                if (item.@selected == 'true')
+                    addGraph(item.@label);
+                else
+                    removeGraph(item.@label);
+            }
+
         ]]>
     </mx:Script>
 </mx:HDividedBox>
