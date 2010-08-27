@@ -26,7 +26,7 @@ package com.flexsqladmin.sqladmin.commands
 	import mx.containers.VBox;
 	import mx.controls.DataGrid;
 	import mx.controls.dataGridClasses.DataGridColumn;
-	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	public class ExecuteSQLCommand implements Command, Responder
 	{

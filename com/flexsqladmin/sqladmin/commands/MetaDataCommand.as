@@ -20,7 +20,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.flexsqladmin.sqladmin.model.ModelLocator;
 	import com.flexsqladmin.sqladmin.vo.ConnectionVO;
 	
-	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	public class MetaDataCommand implements Command, Responder
 	{

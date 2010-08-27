@@ -25,7 +25,7 @@ package com.flexsqladmin.sqladmin.commands
     
     import mx.containers.VBox;
     import mx.controls.Alert;
-    import mx.core.Application;
+    import mx.core.FlexGlobals;
 
     public class TableDetailsCommand implements Command, Responder {
 
@@ -71,7 +71,7 @@ package com.flexsqladmin.sqladmin.commands
                 var errormsg:String = r.NewDataSet.Table.Error;
                 DebugWindow.log("Error - " + errormsg);
             } else {
-                model.tabs[String(CreateEditTableWindow)][VBox(model.main_tabnav.selectedChild).id].details = new XML(XML(event.result['return']));
+                model.tabs[String(CreateEditTableWindow)][VBox(model.main_tabnav.selectedChild).id].TD.details = new XML(XML(event.result['return']));
                 CreateEditTableWindow(VBox(model.main_tabnav.selectedChild).getChildAt(0)).addColumnsFromDetails();
             }            
         }

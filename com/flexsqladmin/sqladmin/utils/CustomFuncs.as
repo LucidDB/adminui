@@ -10,7 +10,7 @@ Redistribution and use in source and binary forms, with or without modification,
 */
 package com.flexsqladmin.sqladmin.utils
 {
-    import mx.core.Application;
+    import mx.core.FlexGlobals;
 
     public final class CustomFuncs {
         
@@ -30,7 +30,7 @@ package com.flexsqladmin.sqladmin.utils
             else if (comparison == '||' && (what || with_what))
                 do_what();
             else
-                Application.application.callLater(when, [what, comparison, with_what, do_what]);
+                FlexGlobals.topLevelApplication.callLater(when, [what, comparison, with_what, do_what]);
         }
         
         public static function wordMult(word:String, times:Number) : String {

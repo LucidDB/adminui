@@ -22,7 +22,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
             
             import mx.controls.Alert;
-            import mx.core.Application;
+            import mx.core.FlexGlobals;
             import mx.managers.PopUpManager;
             
             [Bindable]

@@ -37,7 +37,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import mx.containers.VBox;
             import mx.controls.Alert;
             import mx.controls.Menu;
-            import mx.core.Application;
+            import mx.core.FlexGlobals;
             import mx.events.CloseEvent;
             import mx.events.ListEvent;
             import mx.events.MenuEvent;
@@ -452,7 +452,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 if (qw && qw.isEmpty()) {
                     qw.setText(query);
                 } else {
-                    qw = QueryWindow(Application.application.addTab("Query Window", QueryWindow));
+                    qw = QueryWindow(FlexGlobals.topLevelApplication.addTab("Query Window", QueryWindow));
                     qw.setText(query);
                 }
                 qw.guessed_schema = guessed_schema;
@@ -469,7 +469,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             private function query_dispatcher(query:String, warn_msg:String,
                                               special_func:Function=null) : void {
                 Alert.show(warn_msg, "Confirmation", Alert.YES|Alert.NO,
-                    Application.application as Application,
+                    FlexGlobals.topLevelApplication as Sprite,
                     function(event:CloseEvent):void { // confirm handler
                         if (event.detail == Alert.YES) {
                             if (special_func == null) {
@@ -513,7 +513,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context("tables", [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        Application.application.addTab('New Table', CreateEditTableWindow);
+                        FlexGlobals.topLevelApplication.addTab('New Table', CreateEditTableWindow);
                     }
                 );
                 register_context('table', [con_row('Script as Select', selecticon),
@@ -565,7 +565,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                                 'drop cascade this table?', 'Table Dropped Successfully', context,
                                 context.selectedItem as XML);
                         } else if (index == 7) {
-                            Application.application.addTab("Edit Table " + context.selectedItem.@label,
+                            FlexGlobals.topLevelApplication.addTab("Edit Table " + context.selectedItem.@label,
                                 CreateEditTableWindow, context.ETimg)
                             // Grab the table data.
                             var td_event:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname,
@@ -589,7 +589,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('views', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        var vw:ViewWindow = ViewWindow(Application.application.addTab('New View', ViewWindow));
+                        var vw:ViewWindow = ViewWindow(FlexGlobals.topLevelApplication.addTab('New View', ViewWindow));
                         callLater(vw.guess_schema, [context.getParentItem(context.selectedItem).@label]);
                     }
                 );
@@ -611,7 +611,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                                 var create_date:String = querydata.NewDataSet.Table.CREATION_TIMESTAMP;
                                 var text:String = querydata.NewDataSet.Table.ORIGINAL_TEXT;
                                 
-                                var vw:ViewWindow = ViewWindow(Application.application.addTab("Edit View " +
+                                var vw:ViewWindow = ViewWindow(FlexGlobals.topLevelApplication.addTab("Edit View " +
                                     view, ViewWindow, VWedImg));
                                 vw.setText(text);
                                 vw.editing = true;
@@ -668,7 +668,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 // None for security?
                 register_context('users', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        UsersAndRolesWindow(Application.application.addTab('Users',
+                        UsersAndRolesWindow(FlexGlobals.topLevelApplication.addTab('Users',
                                                             UsersAndRolesWindow)).currentState = 'users';
                     }
                 );
@@ -677,7 +677,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
                             var urw:UsersAndRolesWindow = UsersAndRolesWindow(
-                                Application.application.addTab('Users', UsersAndRolesWindow));
+                                FlexGlobals.topLevelApplication.addTab('Users', UsersAndRolesWindow));
                             urw.currentState = 'users';
                             urw.set_user_mode('edit', context.selectedItem.@label);
                         } else if (index == 1) {
@@ -690,7 +690,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('roles', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        UsersAndRolesWindow(Application.application.addTab(
+                        UsersAndRolesWindow(FlexGlobals.topLevelApplication.addTab(
                                             'Roles', UsersAndRolesWindow, null)).currentState = 'roles';
                     }
                 );
@@ -699,7 +699,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
                             var urwr:UsersAndRolesWindow = UsersAndRolesWindow(
-                                Application.application.addTab('Roles', UsersAndRolesWindow));
+                                FlexGlobals.topLevelApplication.addTab('Roles', UsersAndRolesWindow));
                             urwr.currentState = 'roles';
                             urwr.set_role_mode('edit', context.selectedItem.@label);
                         } else if (index == 1) {
@@ -751,7 +751,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('counters', [con_row('Performance Monitor', counters_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        Application.application.addTab('Performance Monitor', PerformanceMonitor, counters_icon);
+                        FlexGlobals.topLevelApplication.addTab('Performance Monitor', PerformanceMonitor, counters_icon);
                     }
                 );
                 register_context('configuration', [con_row('Edit', null)],
@@ -761,7 +761,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context('sessions', [con_row('View Active Sessions', sessions_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        Application.application.addTab("Active Sessions", SessionsWindow, sessions_icon);
+                        FlexGlobals.topLevelApplication.addTab("Active Sessions", SessionsWindow, sessions_icon);
                     }
                 );
                     

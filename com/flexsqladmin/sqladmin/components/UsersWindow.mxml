@@ -72,7 +72,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import flash.text.TextLineMetrics;
             
             import mx.controls.Alert;
-            import mx.core.Application;
+            import mx.core.FlexGlobals;
             import mx.managers.PopUpManager;
             
             [Bindable]

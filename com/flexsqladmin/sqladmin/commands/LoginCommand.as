@@ -28,7 +28,7 @@ package com.flexsqladmin.sqladmin.commands
 	
 	import mx.binding.utils.BindingUtils;
 	import mx.controls.Alert;
-	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.events.ListEvent;
 	
 	public class LoginCommand implements Command, Responder

@@ -12,7 +12,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
 <mx:HDividedBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
                 paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"
                 liveDragging="true"
-                creationComplete="init();">
+                creationComplete="init();" xmlns:components="com.flexsqladmin.sqladmin.components.*">
 
     <mx:VBox height="100%">
         <mx:TextInput text="JvmMemoryUnused" id="add_name" />
@@ -26,10 +26,52 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             <mx:Object label="30" />
             <mx:Object label="60" />
         </mx:ComboBox>
-        <mx:CheckBox label="Get All?" id="fetch_all" />
+        <mx:CheckBox labelPlacement="left" label="Get All?" id="fetch_all" />
                 
-        <mx:Tree height="100%">
-        
+        <mx:Tree id="counters" height="100%" dataProvider="{perf_counters}" creationComplete="load_tree();"
+                 showRoot="false" doubleClickEnabled="true">
+            <mx:itemRenderer>
+                <mx:Component>                        
+                    <components:ObjectTreeRenderer>
+                        <mx:Script>
+                            <![CDATA[
+                                import mx.controls.CheckBox;
+                                import mx.controls.treeClasses.TreeListData;
+                                
+                                public var disCheck:CheckBox;
+                                
+                                override protected function createChildren() : void {
+                                    super.createChildren();
+                                    disBox.removeChildAt(1);
+                                    disCheck = new CheckBox();
+                                    disCheck.labelPlacement = 'left';
+                                    disCheck.addEventListener(MouseEvent.CLICK, handle_click);
+                                    disBox.addChild(disCheck);
+                                }
+                                
+                                override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void {
+                                    treeListData = TreeListData(listData);
+                                    if (treeListData != null) {
+                                        if (super.data) {
+                                            var node:XML = treeListData.item as XML;
+                                            disCheck.label = node.@label;
+                                            //sdisCheck.percentWidth = 100;
+                                        }
+                                    }
+                                    super.updateDisplayList(unscaledWidth, unscaledHeight);
+                                }
+                                
+                                private function handle_click(event:MouseEvent) : void {
+                                    if (event.currentTarget.selected) {
+                                        outerDocument.addGraph(event.currentTarget.label);
+                                    }
+                                }
+                                
+                            ]]>
+                        </mx:Script>
+                    </components:ObjectTreeRenderer>
+                </mx:Component>
+            </mx:itemRenderer>
         </mx:Tree>
     </mx:VBox>
     
@@ -52,7 +94,6 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.events.PerformanceEvent;
             
-            import mx.automation.codec.RendererPropertyCodec;
             import mx.binding.utils.BindingUtils;
             import mx.charts.AxisRenderer;
             import mx.charts.CategoryAxis;
@@ -64,10 +105,9 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             import mx.charts.series.LineSeries;
             import mx.collections.ArrayCollection;
             import mx.containers.Panel;
-            import mx.graphics.Stroke;
+            import mx.graphics.SolidColorStroke;
 
             private var time_axis:LinearAxis;
-            private var displayed_time_axis:AxisRenderer;
             
             private var data_collections:Object = new Object();
             
@@ -89,27 +129,25 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             
             private var graph_side:VBox;
             
+            [Bindable]
+            private var perf_counters:XML;
+            
             public function init() : void {
                 time_axis = new LinearAxis();
                 time_axis.minimum = 0;
                 time_axis.maximum = 60;
-                
-                var reversed_axis:LinearAxis = new LinearAxis();
-                reversed_axis.minimum = -60;
-                reversed_axis.maximum = 0;
-                reversed_axis.parseFunction = function(val:Number) : Number { return val * -1; };
-                displayed_time_axis = new AxisRenderer();
-                displayed_time_axis.axis = reversed_axis;
-                displayed_time_axis.labelFunction = function(axisRenderer:IAxisRenderer,
-                                                             label:String) : String {
-                    return (Number(label) * -1).toString();
-                };
+                time_axis.direction = 'inverted';
                 
                 graph_side = graphs_left;
                 
                 update_timer = new Timer(Number(frequency.selectedLabel) * 1000);
                 update_timer.addEventListener(TimerEvent.TIMER, fetch_updates);
                 update_timer.start();
+            }
+            
+            private function load_tree() : void {
+                var perf_event:PerformanceEvent = new PerformanceEvent(this);
+                CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
             }
             
             private function freq_change() : void {
@@ -141,7 +179,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 series.displayName = 'Data point for ' + name;
                 BindingUtils.bindProperty(series, 'dataProvider', this.data_collections, name);
                 
-                var stroke:Stroke = new Stroke();
+                var stroke:SolidColorStroke = new SolidColorStroke();
                 if (series_num == stroke_colors.length)
                     series_num = 0;
                 stroke.color = stroke_colors[series_num];
@@ -162,8 +200,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 var graph:LineChart = new LineChart();
                 graph.percentWidth = 100;
                 graph.percentHeight = 100;
-                //graph.horizontalAxis = time_axis;
-                graph.horizontalAxisRenderers = [displayed_time_axis];
+                graph.horizontalAxis = time_axis;
                 graph.series = [series];
                 graph.invalidateSeriesStyles();
                 graph.showDataTips = true;
@@ -190,7 +227,26 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             public function addData(data:XML, name:String) : void {
+                if (name == '') {
+                    //trace(data.toXMLString());
+                    perf_counters = <counters />;
+                }
                 for each (var el:XML in data['return']) {
+                    if (name == '') {
+                        var node:XML;
+                        if (el.counterSubcategory != '')
+                            node = <subcategory label={el.counterSubcategory}><counter label={el.counterName} /></subcategory>;
+                        else
+                            node = <counter label={el.counterName} />;
+                        
+                        if (perf_counters.category.(@label == el.counterCategory)[0])
+                            perf_counters.category.(@label == el.counterCategory)[0].appendChild(node);
+                        else
+                            perf_counters.appendChild(<category label={el.counterCategory}>{node}</category>);
+                    }
+                    
+                    if (!data_collections.hasOwnProperty(name))
+                        continue;
                     var val:Number = convert_amount(Number(el.counterValue), el.counterUnits);
                     var item:Object = {time: 0, value: val, units: units.selectedLabel}
                     for (var i:Number = 0; i < data_collections[name].length; i++) {

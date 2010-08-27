@@ -25,7 +25,7 @@ package com.flexsqladmin.sqladmin.commands
     
     import mx.containers.VBox;
     import mx.controls.Alert;
-    import mx.core.Application;
+    import mx.core.FlexGlobals;
     import mx.managers.CursorManager;
 
     public class UsersAndRolesCommand implements Command, Responder {
