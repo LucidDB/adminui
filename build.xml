@@ -6,8 +6,7 @@
 
   <property name="DEPLOY_DIR" value="${basedir}/deploy" />
   <property name="LIBS" value="${basedir}/com/flexlib/,${basedir}/com/adobe/Cairngorm,${basedir}/com/as3corelib,${FLEX_HOME}/frameworks/libs/,${FLEX_HOME}/frameworks/projects/framework/bundles/en_US/,${FLEX_HOME}/frameworks/locale/en_US/" />
-  <property name="COMPILER_VERSION" value="3.5" />
-  <property name="THEMES" value="${FLEX_HOME}/frameworks/themes/Halo/halo.swc,${FLEX_HOME}/frameworks/themes/Spark/spark.css" />
+  <property name="THEMES" value="${FLEX_HOME}/frameworks/themes/Halo/halo.swc" />
 
   <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
 
@@ -21,7 +20,7 @@
 
   <target name="compile" depends="init">
     <exec executable="${FLEX_HOME}/bin/mxmlc" failonerror="true">
-      <arg line="-theme=${THEMES} -compiler.library-path=${LIBS} -compiler.incremental -compiler.mxml.compatibility-version=${COMPILER_VERSION} -compiler.show-deprecation-warnings=false -static-link-runtime-shared-libraries -locale=en_US -output=${DEPLOY_DIR}/SQLAdmin.swf SQLAdmin.mxml" />
+      <arg line="-theme=${THEMES} -compiler.library-path=${LIBS} -compiler.incremental -static-link-runtime-shared-libraries -locale=en_US -output=${DEPLOY_DIR}/SQLAdmin.swf SQLAdmin.mxml" />
     </exec>
   </target>
 
