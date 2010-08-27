@@ -32,6 +32,7 @@ package com.flexsqladmin.sqladmin.control
             addCommand(TableDetailsEvent.TABLEDETAILS, TableDetailsCommand);
             addCommand(UsersAndRolesEvent.USERSANDROLES, UsersAndRolesCommand);
             addCommand(ObjectTreeLoaderEvent.OBJECT_TREE_LOADER, ObjectTreeLoaderCommand);
+            addCommand(PerformanceEvent.PERFORMANCE, PerformanceCommand);
 		}
 	}
 }

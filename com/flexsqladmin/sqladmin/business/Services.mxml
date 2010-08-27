@@ -173,5 +173,23 @@ Redistribution and use in source and binary forms, with or without modification,
             </mx:request>
         </mx:operation>
     </mx:WebService>
+    
+    <mx:WebService
+        id="PerformanceCountersService" 
+        service='PerformanceCountersService'
+        useProxy="false" 
+        makeObjectsBindable="false"
+        showBusyCursor="false"
+        fault="mx.controls.Alert.show('Error loading WSDL', 'PerformanceCountersService Error');" >
+        <mx:operation name="findPerformanceCounterByName" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <counterName></counterName>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="getAllPerformanceCounters" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+            </mx:request>
+        </mx:operation>
+    </mx:WebService>
 	
 </cairngorm:ServiceLocator>

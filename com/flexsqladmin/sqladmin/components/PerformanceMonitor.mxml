@@ -15,57 +15,119 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 creationComplete="init();">
 
     <mx:VBox height="100%">
-        <mx:TextInput text="blah" id="add_name" />
+        <mx:TextInput text="JvmMemoryUnused" id="add_name" />
         <mx:Button label="add graph" click="addGraph(add_name.text);" />
-        <mx:Button label="add datapoint" click="addPoint(add_name.text);" />
-        <mx:ComboBox id="frequency" />
+        <mx:Label text="Update Frequency:" />
+        <mx:ComboBox id="frequency" change="freq_change();">
+            <mx:Object label="0.5" />
+            <mx:Object label="1" />
+            <mx:Object label="5" />
+            <mx:Object label="10" />
+            <mx:Object label="30" />
+            <mx:Object label="60" />
+        </mx:ComboBox>
+        <mx:CheckBox label="Get All?" id="fetch_all" />
+                
         <mx:Tree height="100%">
         
         </mx:Tree>
     </mx:VBox>
     
     <mx:VBox width="100%" height="100%" id="graphs">
-        <mx:ComboBox id="units" />
+        <mx:Label text="Convert Units..." />
+        <mx:ComboBox id="units">
+            <mx:Object label="megabytes" />
+            <mx:Object label="kilobytes" />
+            <mx:Object label="bytes" />
+            <mx:Object label="seconds" />
+        </mx:ComboBox>
+        <mx:HBox width="100%" height="100%">
+            <mx:VBox width="50%" height="100%" id="graphs_left" />
+            <mx:VBox width="50%" height="100%" id="graphs_right" />
+        </mx:HBox>
     </mx:VBox>
     
     <mx:Script>
         <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.events.PerformanceEvent;
+            
+            import mx.automation.codec.RendererPropertyCodec;
             import mx.binding.utils.BindingUtils;
+            import mx.charts.AxisRenderer;
             import mx.charts.CategoryAxis;
             import mx.charts.Legend;
             import mx.charts.LineChart;
             import mx.charts.LinearAxis;
+            import mx.charts.chartClasses.IAxisRenderer;
             import mx.charts.renderers.CircleItemRenderer;
             import mx.charts.series.LineSeries;
             import mx.collections.ArrayCollection;
             import mx.containers.Panel;
-            
-            public var testdata:ArrayCollection = new ArrayCollection([
-                {time: 0, value: 0},
-                {time: 2, value: 1},
-                {time: 4, value: 5},
-                {time: 6, value: 6}
-                ]);
-            
-            public var times:XML = <times />;
-            public var time_axis_old:CategoryAxis;
-            
-            public var time_axis:LinearAxis;
+            import mx.graphics.Stroke;
+
+            private var time_axis:LinearAxis;
+            private var displayed_time_axis:AxisRenderer;
             
             private var data_collections:Object = new Object();
             
+            public var update_timer:Timer;
+            
+            private var series_num:Number = 0;
+            private var stroke_colors:Array = [
+                0xecd078,
+                0xd95b43,
+                0x542437,
+                0xc02942,
+                0x53777a,
+                0x4ecdc4,
+                0x556270,
+                0xc7f464,
+                0xff6b6b,
+                0xc44d58
+            ];
+            
+            private var graph_side:VBox;
+            
             public function init() : void {
-                for (var i:Number = 1; i < 61; i++) {
-                    times.appendChild(<time value={i} />);
-                }
-                time_axis_old = new CategoryAxis();
-                time_axis_old.dataProvider = times.children();
-                time_axis_old.categoryField = '@value';
-                
                 time_axis = new LinearAxis();
                 time_axis.minimum = 0;
                 time_axis.maximum = 60;
-               
+                
+                var reversed_axis:LinearAxis = new LinearAxis();
+                reversed_axis.minimum = -60;
+                reversed_axis.maximum = 0;
+                reversed_axis.parseFunction = function(val:Number) : Number { return val * -1; };
+                displayed_time_axis = new AxisRenderer();
+                displayed_time_axis.axis = reversed_axis;
+                displayed_time_axis.labelFunction = function(axisRenderer:IAxisRenderer,
+                                                             label:String) : String {
+                    return (Number(label) * -1).toString();
+                };
+                
+                graph_side = graphs_left;
+                
+                update_timer = new Timer(Number(frequency.selectedLabel) * 1000);
+                update_timer.addEventListener(TimerEvent.TIMER, fetch_updates);
+                update_timer.start();
+            }
+            
+            private function freq_change() : void {
+                update_timer.stop();
+                update_timer.delay = Number(frequency.selectedLabel) * 1000;
+                update_timer.start();
+            }
+            
+            private function fetch_updates(event:TimerEvent=null) : void {
+                if (fetch_all.selected) {
+                    var perf_event:PerformanceEvent = new PerformanceEvent(this);
+                    CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
+                } else {
+                    for (var name:String in data_collections) {
+                        perf_event = new PerformanceEvent(this, name);
+                        CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
+                    }
+                }
             }
             
             public function addGraph(name:String) : void {
@@ -73,43 +135,102 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 data_collections[name] = data;
                 
                 var series:LineSeries = new LineSeries();
-                series.setStyle('itemRenderer', new ClassFactory(mx.charts.renderers.CircleItemRenderer));
+                //series.setStyle('itemRenderer', new ClassFactory(mx.charts.renderers.CircleItemRenderer));
                 series.xField = 'time';
                 series.yField = 'value';
                 series.displayName = 'Data point for ' + name;
                 BindingUtils.bindProperty(series, 'dataProvider', this.data_collections, name);
+                
+                var stroke:Stroke = new Stroke();
+                if (series_num == stroke_colors.length)
+                    series_num = 0;
+                stroke.color = stroke_colors[series_num];
+                stroke.weight = 5;
+                stroke.alpha = 0.8;
+                series_num++;
+                
+                series.setStyle('lineStroke', stroke);
+
+                /*if (add_to.selected) {
+                    // we have to assign for flex to update (just use += []
+                    var tmp:Array = LineChart(Panel(graph_side.getChildAt(0)).getChildAt(0)).series;
+                    tmp.push(series);
+                    LineChart(Panel(graph_side.getChildAt(0)).getChildAt(0)).series = tmp;
+                    return;
+                }*/
 
                 var graph:LineChart = new LineChart();
                 graph.percentWidth = 100;
-                graph.horizontalAxis = time_axis;
+                graph.percentHeight = 100;
+                //graph.horizontalAxis = time_axis;
+                graph.horizontalAxisRenderers = [displayed_time_axis];
                 graph.series = [series];
+                graph.invalidateSeriesStyles();
                 graph.showDataTips = true;
                 
                 var legend:Legend = new Legend();
+                
 
                 var panel:Panel = new Panel();
                 panel.percentWidth = 100;
+                panel.percentHeight = 100;
                 panel.name = name;
                 panel.title = 'Graph for ' + name;
                 panel.addChild(graph);
-                graphs.addChild(panel);
+                graph_side.addChild(panel);
+                graph_side = (graph_side == graphs_left) ? graphs_right : graphs_left;
             }
             
             public function removeGraph(name:String) : void {
                 graphs.removeChild(graphs.getChildByName(name));
+                delete data_collections[name];
+                series_num--;
+                if (series_num == -1)
+                    series_num = stroke_colors.length - 1;
             }
             
-            public var val:Number = 4;
-            public var tim:Number = 4; 
-            public function addPoint(name:String) : void {
-                tim += 1;
-                val = Math.random() * 100;
-                //testdata += new XMLList(<point units="" value={val} time={tim} />);
-                //XMLList(testdata.getItemAt(0)).appendChild(<point units="" value={val} time={tim} />);
-                //testdata.addItem({time: tim, value: val});
-                data_collections[name].addItem({time: tim, value: val});
+            public function addData(data:XML, name:String) : void {
+                for each (var el:XML in data['return']) {
+                    var val:Number = convert_amount(Number(el.counterValue), el.counterUnits);
+                    var item:Object = {time: 0, value: val, units: units.selectedLabel}
+                    for (var i:Number = 0; i < data_collections[name].length; i++) {
+                        data_collections[name][i]['time'] += Number(frequency.selectedLabel);
+                        if (data_collections[name][i]['time'] > time_axis.maximum)
+                            data_collections[name].removeItemAt(i);
+                        if (data_collections[name][i]['units'] != units.selectedLabel) {
+                            data_collections[name][i]['value'] = convert_amount(
+                                Number(data_collections[name][i]['value']),
+                                data_collections[name][i]['units']
+                            );
+                            data_collections[name][i]['units'] = units.selectedLabel;
+                        }
+                    }
+                    data_collections[name].addItem(item);
+                    //data_collections[name].refresh();
+                }
             }
             
+            private function convert_amount(val:Number, from_units:String, to_units:String='') : Number {
+                if (to_units == '')
+                    to_units = units.selectedLabel;
+                // Should we just outsource this to Google or something?
+                if (from_units == to_units)
+                    return val;
+                if (from_units == 'bytes' && to_units == 'megabytes')
+                    return val / 1048576;
+                if (from_units == 'bytes' && to_units == 'kilobytes')
+                    return val / 1024;
+                if (from_units == 'megabytes' && to_units == 'kilobytes')
+                    return val * 1024;
+                if (from_units == 'megabytes' && to_units == 'bytes')
+                    return val * 1048576;
+                if (from_units == 'kilobytes' && to_units == 'megabytes')
+                    return val / 1024;
+                if (from_units == 'kilobytes' && to_units == 'bytes')
+                    return val * 1024;
+                
+                return val;
+            }
         ]]>
     </mx:Script>
 </mx:HDividedBox>

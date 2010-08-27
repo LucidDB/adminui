@@ -26,6 +26,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.components.PerformanceMonitor;
             import com.flexsqladmin.sqladmin.components.QueryWindow;
             import com.flexsqladmin.sqladmin.components.RolesWindow;
             import com.flexsqladmin.sqladmin.components.SessionsWindow;
@@ -112,6 +113,7 @@ Redistribution and use in source and binary forms, with or without modification,
                     var services:Array = ['sqlWebService'
                         , 'TableDetailsService'
                         , 'UsersAndRolesService'
+                        , 'PerformanceCountersService'
                         ];
                     for each (var name:String in services) {
                         var s:WebService = ServiceLocator.getInstance().getService(name) as WebService;
@@ -204,6 +206,8 @@ Redistribution and use in source and binary forms, with or without modification,
 				DebugWindow.log("main.mxml:destroyTabButton() - " + id);
                 if (name == String(SessionsWindow))
                     SessionsWindow(model.tabs[name][id]).sessionTimer.stop();
+                if (name == String(PerformanceMonitor))
+                    PerformanceMonitor(model.tabs[name][id]).update_timer.stop();
                 delete model.tabs[name][id];
 			}
 			
