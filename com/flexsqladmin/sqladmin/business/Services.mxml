@@ -190,6 +190,11 @@ Redistribution and use in source and binary forms, with or without modification,
             <mx:request>
             </mx:request>
         </mx:operation>
+        <mx:operation name="getCountersByNames" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <names></names>
+            </mx:request>
+        </mx:operation>
     </mx:WebService>
 	
 </cairngorm:ServiceLocator>

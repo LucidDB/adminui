@@ -154,9 +154,13 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             }
             
             private function fetch_updates(event:TimerEvent=null) : void {
-                // TODO: batch this
+                var names:Array = [];
                 for (var name:String in data_collections) {
-                    var perf_event:PerformanceEvent = new PerformanceEvent(this, name);
+                    names.push(name);
+                }
+                
+                if (names.length > 0) {
+                    var perf_event:PerformanceEvent = new PerformanceEvent(this, names.join(','));
                     CairngormEventDispatcher.getInstance().dispatchEvent(perf_event);
                 }
             }
@@ -224,13 +228,12 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     series_num = stroke_colors.length - 1;
             }
             
-            public function addData(data:XML, name:String) : void {
+            public function addData(data:XML, names:String) : void {
+                for each (var name:String in names.split(',')) {
                 if (name == '') {
                     //trace(data.toXMLString());
                     perf_counters = <counters />;
-                }
-                for each (var el:XML in data['return']) {
-                    if (name == '') { // used for building the tree
+                    for each (var el:XML in data['return']) {
                         var node:XML = <counter label={el.counterName} selected="false" />;
                         var possible_cat:XML = perf_counters.category.(@label == el.counterCategory)[0];
                         if (possible_cat) {
@@ -251,25 +254,29 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                             }
                         }
                     }
-                    
-                    if (!data_collections.hasOwnProperty(name))
-                        continue;
-                    var val:Number = convert_amount(Number(el.counterValue), el.counterUnits);
-                    var item:Object = {time: 0, value: val, units: units.selectedLabel}
-                    for (var i:Number = 0; i < data_collections[name].length; i++) {
-                        data_collections[name][i]['time'] += Number(frequency.selectedLabel);
-                        if (data_collections[name][i]['time'] > time_axis.maximum)
-                            data_collections[name].removeItemAt(i);
-                        if (data_collections[name][i]['units'] != units.selectedLabel) {
-                            data_collections[name][i]['value'] = convert_amount(
-                                Number(data_collections[name][i]['value']),
-                                data_collections[name][i]['units']
-                            );
-                            data_collections[name][i]['units'] = units.selectedLabel;
-                        }
+                }
+                
+                if (!data_collections.hasOwnProperty(name))
+                    continue;
+                for each (el in data['return'])
+                    if (el.counterName == name)
+                        break;
+                var val:Number = convert_amount(Number(el.counterValue), el.counterUnits);
+                var item:Object = {time: 0, value: val, units: units.selectedLabel}
+                for (var i:Number = 0; i < data_collections[name].length; i++) {
+                    data_collections[name][i]['time'] += Number(frequency.selectedLabel);
+                    if (data_collections[name][i]['time'] > time_axis.maximum)
+                        data_collections[name].removeItemAt(i);
+                    if (data_collections[name][i]['units'] != units.selectedLabel) {
+                        data_collections[name][i]['value'] = convert_amount(
+                            Number(data_collections[name][i]['value']),
+                            data_collections[name][i]['units']
+                        );
+                        data_collections[name][i]['units'] = units.selectedLabel;
                     }
-                    data_collections[name].addItem(item);
-                    //data_collections[name].refresh();
+                }
+                data_collections[name].addItem(item);
+                //data_collections[name].refresh();
                 }
             }
             

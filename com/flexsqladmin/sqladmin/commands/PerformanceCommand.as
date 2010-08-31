@@ -19,6 +19,8 @@ package com.flexsqladmin.sqladmin.commands
     import com.flexsqladmin.sqladmin.events.PerformanceEvent;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
     
+    import mx.managers.CursorManager;
+    
     public class PerformanceCommand implements Command, Responder {
         private var model:ModelLocator = ModelLocator.getInstance();
         
@@ -32,15 +34,20 @@ package com.flexsqladmin.sqladmin.commands
 
             var delegate:GeneralDelegate = new GeneralDelegate(this, 'PerformanceCountersService');
             
-            if (counter_name == '')
+            if (counter_name == '') {
+                CursorManager.setBusyCursor();
                 delegate.serviceDelegate('getAllPerformanceCounters');
-            else
+            } else if (counter_name.search(',') != -1) {
+                delegate.serviceDelegate('getCountersByNames', {names: counter_name});
+            } else {
                 delegate.serviceDelegate('findPerformanceCounterByName', {counterName: counter_name});
+            }
         }
         
         public function onResult(event:*=null) : void {
             var r:XML = new XML(event.result);
             monitor.addData(r, counter_name);
+            CursorManager.removeBusyCursor();
         }
         
         public function onFault(event:*=null) : void {
