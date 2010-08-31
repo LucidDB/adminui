@@ -9,22 +9,32 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<mx:HDividedBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+<mx:HDividedBox xmlns:mx="http://www.adobe.com/2006/mxml"
+                width="100%" height="100%"
                 paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"
                 liveDragging="true"
                 creationComplete="init();" xmlns:components="com.flexsqladmin.sqladmin.components.*">
 
     <mx:VBox height="100%" width="50%">
-        <mx:Label text="Update Frequency:" />
-        <mx:ComboBox id="frequency" change="freq_change();" selectedIndex="2">
-            <mx:Object label="0.1" />
-            <mx:Object label="0.5" />
-            <mx:Object label="1" />
-            <mx:Object label="5" />
-            <mx:Object label="10" />
-            <mx:Object label="30" />
-            <mx:Object label="60" />
-        </mx:ComboBox>
+        <mx:HBox>
+            <mx:Label text="Update Frequency (seconds):" />
+            <mx:ComboBox id="frequency" change="freq_change();" selectedIndex="2">
+                <mx:Object label="0.1" />
+                <mx:Object label="0.5" />
+                <mx:Object label="1" />
+                <mx:Object label="5" />
+                <mx:Object label="10" />
+                <mx:Object label="30" />
+                <mx:Object label="60" />
+            </mx:ComboBox>
+        </mx:HBox>
+        <mx:HBox>
+            <mx:Label text="Graph Layout:" />
+            <mx:ComboBox id="layout" change="change_layout();">
+                <mx:Object label="Two Column" cols="2" />
+                <mx:Object label="One Column" cols="1" />
+            </mx:ComboBox>
+        </mx:HBox>
                 
         <mx:Tree id="counters" height="100%" width="100%" rowHeight="25" indentation="3"
                  dataProvider="{perf_counters}" creationComplete="load_tree();"
@@ -72,14 +82,14 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
     </mx:VBox>
     
     <mx:VBox width="100%" height="100%" id="graphs">
-        <mx:Label text="Convert Units..." />
-        <mx:ComboBox id="units">
-            <mx:Object label="megabytes" />
-            <mx:Object label="kilobytes" />
-            <mx:Object label="bytes" />
-            <mx:Object label="seconds" />
-        </mx:ComboBox>
+        <mx:Label text="Select items in the tree to add line charts" />
+        <mx:HBox enabled="false">
+            <mx:Label text="Coming soon..." />
+            <mx:Button label="Define Pie Chart" click="make_pie();" />
+            <mx:Button label="Define Bar Chart" click="make_bar();" />
+        </mx:HBox>
         <mx:HBox width="100%" height="100%">
+            <mx:VBox width="0" height="100%" id="graphs_single" />
             <mx:VBox width="50%" height="100%" id="graphs_left" />
             <mx:VBox width="50%" height="100%" id="graphs_right" />
         </mx:HBox>
@@ -87,6 +97,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
     
     <mx:Script>
         <![CDATA[
+            import mx.charts.series.PieSeries;
+            import mx.charts.PieChart;
             import mx.events.ListEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.events.PerformanceEvent;
@@ -107,6 +119,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             private var time_axis:LinearAxis;
             
             private var data_collections:Object = new Object();
+            private var units_collections:Object = new Object();
             
             public var update_timer:Timer;
             
@@ -153,6 +166,62 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 update_timer.start();
             }
             
+            private function change_layout() : void {
+                if (layout.selectedItem.cols == '1') {
+                    for each (var obj:Panel in graphs_left.getChildren()) {
+                        graphs_left.removeChild(obj);
+                        graphs_single.addChild(obj);
+                    }
+                    for each (obj in graphs_right.getChildren()) {
+                        graphs_right.removeChild(obj);
+                        graphs_single.addChild(obj);
+                    }
+                    graphs_left.percentWidth = 0;
+                    graphs_right.percentWidth = 0;
+                    graphs_single.percentWidth = 100;
+                } else {
+                    var side:String = 'left';
+                    for each (obj in graphs_single.getChildren()) {
+                        graphs_single.removeChild(obj);
+                        if (side == 'left')
+                            graphs_left.addChild(obj);
+                        else
+                            graphs_right.addChild(obj);
+                        side = (side == 'left') ? 'right' : 'left';
+                    }
+                    graphs_left.percentWidth = 50;
+                    graphs_right.percentWidth = 50;
+                    graphs_single.percentWidth = 0;
+                }
+            }
+            
+            private function make_pie() : void {
+                var pie:PieChart = new PieChart();
+                var data:Array = [
+                    {name: 'JvmMemoryUnused', value: 50 },
+                    {name: 'JvmMemoryAllocated', value: 100},
+                ];
+                pie.dataProvider = data;
+                pie.percentWidth = 100;
+                pie.percentHeight = 100;
+                pie.showDataTips = true;
+                
+                var pie_series:PieSeries = new PieSeries();
+                pie_series.field = 'value';
+                pie_series.nameField = 'name';
+                pie_series.setStyle('labelPosition', 'outside');
+                pie_series.labelFunction = function(... args) : String {
+                    return args[0].name + ": " + String(args[0].value);
+                };
+                
+                pie.series = [pie_series];
+                graphs_single.addChild(pie);
+            }
+            
+            private function make_bar() : void {
+                
+            }
+            
             private function fetch_updates(event:TimerEvent=null) : void {
                 var names:Array = [];
                 for (var name:String in data_collections) {
@@ -165,7 +234,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 }
             }
             
-            public function addGraph(name:String) : void {
+            public function addGraph(name:String, units:String) : void {
                 var data:ArrayCollection = new ArrayCollection([]);
                 data_collections[name] = data;
                 
@@ -195,16 +264,19 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 }*/
 
                 var graph:LineChart = new LineChart();
+                graph.dataTipMode = "single";
+                graph.id = 'graph-' + name;
                 graph.percentWidth = 100;
                 graph.percentHeight = 100;
                 graph.horizontalAxis = time_axis;
+                var vert_axis:LinearAxis = new LinearAxis();
+                vert_axis.autoAdjust = true;
+                vert_axis.baseAtZero = false;
+                graph.verticalAxis = vert_axis;
                 graph.series = [series];
                 graph.invalidateSeriesStyles();
                 graph.showDataTips = true;
                 
-                var legend:Legend = new Legend();
-                
-
                 var panel:Panel = new Panel();
                 panel.percentWidth = 100;
                 panel.percentHeight = 100;
@@ -212,15 +284,38 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 panel.name = name;
                 panel.title = 'Graph for ' + name;
                 panel.addChild(graph);
-                graph_side.addChild(panel);
-                graph_side = (graph_side == graphs_left) ? graphs_right : graphs_left;
+                if (layout.selectedItem.cols == '2') {
+                    graph_side.addChild(panel);
+                    graph_side = (graph_side == graphs_left) ? graphs_right : graphs_left;
+                } else {
+                    graphs_single.addChild(panel);
+                }
+                
+                var units_box:HBox = new HBox();
+                var lab:Label = new Label();
+                lab.text = "Convert Units...";
+                var units_menu:ComboBox = new ComboBox();
+                units_menu.dataProvider = [{label: 'scalar'}, {label: "bytes"}, {label: "kilobytes"},
+                    {label: "pages"},
+                    {label: "megabytes"},
+                    {label: "ns"}, {label: "seconds"}, {label: "minutes"}, {label: "hours"},
+                    {label: "days"}, {label: "years"}];
+                units_menu.id = 'units-' + name;
+                units_collections[name] = units_menu;
+                units_box.addChild(lab);
+                units_box.addChild(units_menu);
+                panel.addChild(units_box);
             }
             
             public function removeGraph(name:String) : void {
                 if (graphs_left.getChildByName(name)) {
                     graphs_left.removeChild(graphs_left.getChildByName(name));
-                } else {
+                    graph_side = graphs_left;
+                } else if (graphs_right.getChildByName(name)) {
                     graphs_right.removeChild(graphs_right.getChildByName(name));
+                    graph_side = graphs_right;
+                } else {
+                    graphs_single.removeChild(graphs_single.getChildByName(name));
                 }
                 delete data_collections[name];
                 series_num--;
@@ -261,18 +356,30 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 for each (el in data['return'])
                     if (el.counterName == name)
                         break;
-                var val:Number = convert_amount(Number(el.counterValue), el.counterUnits);
-                var item:Object = {time: 0, value: val, units: units.selectedLabel}
+                if (!el.hasOwnProperty('counterUnits') || el.counterUnits == 'null')
+                    el.counterUnits = 'scalar';
+                var val:Number = convert_amount(Number(el.counterValue),
+                    el.counterUnits, units_collections[name].selectedLabel
+                );
+                if (val == Number(el.counterValue) &&
+                        el.counterUnits != units_collections[name].selectedLabel)
+                    for (var idx:Number = 0; idx < units_collections[name].dataProvider.length; idx++) {
+                        if (units_collections[name].dataProvider[idx].label == el.counterUnits)
+                            units_collections[name].selectedIndex = idx;
+                    }
+                    //units_collections[name].selectedLabel = el.counterUnits;
+                var item:Object = {time: 0, value: val, units: units_collections[name].selectedLabel}
                 for (var i:Number = 0; i < data_collections[name].length; i++) {
                     data_collections[name][i]['time'] += Number(frequency.selectedLabel);
                     if (data_collections[name][i]['time'] > time_axis.maximum)
                         data_collections[name].removeItemAt(i);
-                    if (data_collections[name][i]['units'] != units.selectedLabel) {
+                    if (data_collections[name][i]['units'] != units_collections[name].selectedLabel) {
                         data_collections[name][i]['value'] = convert_amount(
                             Number(data_collections[name][i]['value']),
-                            data_collections[name][i]['units']
+                            data_collections[name][i]['units'],
+                            units_collections[name].selectedLabel
                         );
-                        data_collections[name][i]['units'] = units.selectedLabel;
+                        data_collections[name][i]['units'] = units_collections[name].selectedLabel;
                     }
                 }
                 data_collections[name].addItem(item);
@@ -280,28 +387,62 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 }
             }
             
-            private function convert_amount(val:Number, from_units:String, to_units:String='') : Number {
-                if (to_units == '')
-                    to_units = units.selectedLabel;
-                // Should we just outsource this to Google or something?
+            private function convert_amount(val:Number, from_units:String, to_units:String,
+                                                        reverse:Boolean = false) : Number {
+                
+                // prolly a better way to do this
                 if (from_units == to_units)
                     return val;
+                
+                var factor:Function;
+                if (reverse)
+                    factor = function(a:Number, b:Number) : Number { return a * b };
+                else
+                    factor = function(a:Number, b:Number) : Number { return a / b };
+                
                 if (from_units == 'bytes' && to_units == 'megabytes')
-                    return val / 1048576;
+                    return factor(val, 1048576.0);
                 if (from_units == 'bytes' && to_units == 'kilobytes')
-                    return val / 1024;
-                if (from_units == 'megabytes' && to_units == 'kilobytes')
-                    return val * 1024;
-                if (from_units == 'megabytes' && to_units == 'bytes')
-                    return val * 1048576;
+                    return factor(val, 1024.0);
                 if (from_units == 'kilobytes' && to_units == 'megabytes')
-                    return val / 1024;
-                if (from_units == 'kilobytes' && to_units == 'bytes')
-                    return val * 1024;
+                    return factor(val, 1024.0);
+                if (from_units == 'kilobytes' && to_units == 'pages')
+                    return factor(val, 32000.0);
+                if (from_units == 'bytes' && to_units == 'pages')
+                    return factor(convert_amount(val, 'bytes', 'kilobytes', reverse), 32000.0);
+                if (from_units == 'megabytes' && to_units == 'pages')
+                    return factor(val, 32000.0 / 1024.0);
+
                 if (from_units == 'ns' && to_units == 'seconds')
-                    return val / 100000;
-                if (from_units == 'seconds' && to_units == 'ns')
-                    return val * 100000;
+                    return factor(val, 1000000000.0);
+
+                for each (var from:String in ['ns', 'seconds']) {
+                if (from_units == from) {
+                    if (to_units == 'minutes')
+                        return factor(convert_amount(val, from, 'seconds', reverse), 60.0);
+                    if (to_units == 'hours')
+                        return factor(convert_amount(val, from, 'minutes', reverse), 60.0);
+                    if (to_units == 'days')
+                        return factor(convert_amount(val, from, 'hours', reverse), 24.0);
+                    if (to_units == 'years')
+                        return factor(convert_amount(val, from, 'days', reverse), 365.25);
+                }
+                }
+                if (from_units == 'minutes' && to_units == 'hours')
+                    return factor(val, 60.0);
+                if (from_units == 'minutes' && to_units == 'days')
+                    return factor(convert_amount(val, from_units, 'hours', reverse), 24.0);
+                if (from_units == 'minutes' && to_units == 'years')
+                    return factor(convert_amount(val, from_units, 'days', reverse), 365.25);
+                if (from_units == 'hours' && to_units == 'days')
+                    return factor(val, 24.0);
+                if (from_units == 'hours' && to_units == 'years')
+                    return factor(convert_amount(val, from_units, 'days', reverse), 365.25);
+                if (from_units == 'days' && to_units == 'years')
+                    return factor(val, 365.25);
+                
+                if (!reverse)
+                    return convert_amount(val, to_units, from_units, true);
                 
                 return val;
             }
@@ -313,7 +454,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 
                 item.@selected = (item.@selected == 'false') ? 'true' : 'false';
                 if (item.@selected == 'true')
-                    addGraph(item.@label);
+                    addGraph(item.@label, item.@units);
                 else
                     removeGraph(item.@label);
             }
