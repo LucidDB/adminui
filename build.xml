@@ -1,8 +1,8 @@
 <project name="FlexSQLAdmin" default="deploy">
 
-  <property name="webapp.dir" value="/var/lib/jetty/webapps"/>
-  <!-- Change this to your SDK location. -->
-  <property name="FLEX_HOME" value="/home/kevin/Desktop/flex_sdk_4" />
+  <property name="webapp.dir" value="/Users/ngoodman/pentaho/biserver-ce-3.6.0/biserver-ce/tomcat/webapps"/>
+  <!-- FLEX_HOME must be defined as a -D property for ant. -->
+  <!-- <property name="FLEX_HOME" value="/Users/ngoodman/dev/flex/4.1.0" /> -->
 
   <property name="DEPLOY_DIR" value="${basedir}/deploy" />
   <property name="LIBS" value="${basedir}/com/flexlib/,${basedir}/com/adobe/Cairngorm,${basedir}/com/as3corelib,${FLEX_HOME}/frameworks/libs/,${FLEX_HOME}/frameworks/projects/framework/bundles/en_US/,${FLEX_HOME}/frameworks/locale/en_US/" />
