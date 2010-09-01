@@ -79,10 +79,6 @@ package com.flexsqladmin.sqladmin.commands
 				var listcatalogsevent :ListCatalogsEvent= new ListCatalogsEvent();	
 				CairngormEventDispatcher.getInstance().dispatchEvent(listcatalogsevent);
 				
-				// Automatic refresh:
-                //var metadataevent : MetaDataEvent = new MetaDataEvent(model.currentcatalogname);
-                //CairngormEventDispatcher.getInstance().dispatchEvent(metadataevent);
-                
                 // TODO: start migrating metadata out of everything, using the tree instead if necessary.
                 // Quick fix: bind metadata to the tree, commented out the MeataDataCommand on result
                 // that reassigns metadata.

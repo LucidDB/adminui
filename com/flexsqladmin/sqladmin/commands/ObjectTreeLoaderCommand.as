@@ -16,14 +16,14 @@ package com.flexsqladmin.sqladmin.commands
     import com.flexsqladmin.sqladmin.business.GeneralDelegate;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.events.ObjectTreeLoaderEvent;
+    import com.flexsqladmin.sqladmin.model.ModelLocator;
 
     public class ObjectTreeLoaderCommand implements Command, Responder {
         public function ObjectTreeLoaderCommand() {
             
         }
         
-        //private var model:ModelLocator = ModelLocator.getInstance();
-        //private var request_type:ActionEnum;
+        private var model:ModelLocator = ModelLocator.getInstance();
         
         private var loadInfo:Object;
         private var parent:XML;
@@ -41,10 +41,17 @@ package com.flexsqladmin.sqladmin.commands
             var children:XMLList = parent.children();
             var num:Number = children.length();
             parent.appendChild(new XML(event.result).children());
+            // Were any children even added?
+            if (XML(event.result).children().length() == 0)
+                parent.appendChild(<node label="Empty" />);
+
             // Delete after to prevent a second load during the brief period length becomes 0.
             for (var i:Number = 0; i < num; i++) {
                 delete children[i];
-            }       
+            }
+            if (loadInfo.hasOwnProperty('tree_callback')) {
+                model.object_tree[loadInfo.tree_callback]();
+            }
         }
         
         public function onFault(event:*=null) : void {

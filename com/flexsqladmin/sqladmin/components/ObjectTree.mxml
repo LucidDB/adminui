@@ -121,8 +121,10 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 model.object_tree = this;
                 var schemas_load:String = JSON.encode(
                     {'service': 'sqlWebService', 'operation': 'getDBMetaData',
-                     'arguments': {'connection': '', 'catalog': model.currentcatalogname} }
-                    );
+                     'arguments': {'connection': '', 'catalog': model.currentcatalogname},
+                     'tree_callback': 'addSchemaElementLoaders'
+                    }
+                );
                 var users_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getUsers',
                     'arguments': {}});
                 var roles_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getRoles',
@@ -183,6 +185,23 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 // This is the meat of our tree and is an incredibly long function
                 // mostly due to the amount of configuration for all of the context menus.
                 register_contexts_and_handlers();
+            }
+            
+            public function addSchemaElementLoaders() : void {
+                for each (var schema:XML in tree_data.schemas.children()) {
+                    var foreign_tables_load:String = JSON.encode({'service': 'sqlWebService',
+                        'operation': 'getForeignTables',
+                        'arguments': {schema: String(schema.@label)}});
+                    schema.foreign_tables.@loadInfo = foreign_tables_load;
+                    var functions_load:String = JSON.encode({'service': 'sqlWebService',
+                        'operation': 'getFunctions',
+                        'arguments': {schema: String(schema.@label)}});
+                    schema.functions.@loadInfo = functions_load;
+                    var procedures_load:String = JSON.encode({'service': 'sqlWebService',
+                        'operation': 'getProcedures',
+                        'arguments': {schema: String(schema.@label)}});
+                    schema.procedures.@loadInfo = procedures_load;
+                }
             }
             
             // These three functions do all our mouse click event handling.
