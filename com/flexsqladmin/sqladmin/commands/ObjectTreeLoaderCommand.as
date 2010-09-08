@@ -38,6 +38,7 @@ package com.flexsqladmin.sqladmin.commands
         }
         
         public function onResult(event:*=null) : void {
+            //trace(String(event.result));
             var children:XMLList = parent.children();
             var num:Number = children.length();
             parent.appendChild(new XML(event.result).children());

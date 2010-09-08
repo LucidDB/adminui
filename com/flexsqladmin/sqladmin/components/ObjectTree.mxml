@@ -129,6 +129,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                     'arguments': {}});
                 var roles_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getRoles',
                     'arguments': {}});
+                var remote_data_load:String = JSON.encode({'service': 'sqlWebService',
+                    'operation': 'getRemoteData', 'arguments': {}});
                 var skeleton:XML = <tree>
                     <schemas label="Schemas" loadInfo={schemas_load}>
                     </schemas>
@@ -138,18 +140,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                         <roles label="Roles" loadInfo={roles_load}>
                         </roles>
                     </security>
-                    <remote_data label="Remote Data">
-                        <wrapper label="Wrapper 1">
-                            <servers label="Servers">
-                                <server label="SFDC_WRAPPER" />
-                            </servers>
-                        </wrapper>
-                        <wrapper label="Wrapper 2">
-                            <servers label="Servers">
-                                <server label="MYSQL_SRV1" />
-                                <server label="ORACLE_SRV2" />
-                            </servers>
-                        </wrapper>
+                    <remote_data label="Remote Data" loadInfo={remote_data_load}>
                     </remote_data>
                     <jars label="Jars">
                         <jar label="Jar1" />
@@ -407,8 +398,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 var cols:String = '';
                 var col_nodes:XMLList = new XMLList();
                 for (var i:Number = 0; i < details.children().length(); i++) {
-                    cols += "&quot;" + details.column[i].@name + "&quot;";
-                    var label:String = details.column[i].@name + ' (' + details.column[i].@datatype + ',';
+                    cols += "&quot;" + String(details.column[i].@name).toUpperCase() + "&quot;";
+                    var label:String = String(details.column[i].@name).toUpperCase() + ' (' + details.column[i].@datatype + ',';
                     label += (details.column[i].@isNullable == 'true') ? 'NULL' : 'NOT NULL';
                     label += ')';
                     col_nodes += <column column={details.column[i].@name} label={label} />;
@@ -532,7 +523,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 );
                 register_context("tables", [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        FlexGlobals.topLevelApplication.addTab('New Table', CreateEditTableWindow);
+                        FlexGlobals.topLevelApplication.addTab('New Table', CreateEditTableWindow).select_schema(context.getParentItem(context.selectedItem).@label);
                     }
                 );
                 register_context('table', [con_row('Script as Select', selecticon),
@@ -734,19 +725,16 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                         
                     }
                 );
-                register_context('wrapper', [gen_add],
-                    function (index:Number, context:ObjectTree) : void {
-                        
-                    }
-                );
-                register_context('wrapper', [con_row('View Details', null)],
+                register_context('wrapper', [gen_add,
+                    con_row('View Details', null)],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
                 register_context('servers', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        var wiz:ForeignDataWizard = FlexGlobals.topLevelApplication.addTab('New Foreign Data Server', ForeignDataWizard); 
+                        callLater(wiz.set_wrapper, [context.getParentItem(context.selectedItem).@label]);
                     }
                 );
                 register_context('server', [gen_drop,

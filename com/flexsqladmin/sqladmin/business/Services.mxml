@@ -65,6 +65,9 @@ Redistribution and use in source and binary forms, with or without modification,
         <mx:operation name="getProcedures" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
+        <mx:operation name="getRemoteData" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request></mx:request>
+        </mx:operation>
     </mx:WebService>
     
     <mx:WebService

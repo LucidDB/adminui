@@ -26,6 +26,7 @@ Redistribution and use in source and binary forms, with or without modification,
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.components.ForeignDataWizard;
             import com.flexsqladmin.sqladmin.components.PerformanceMonitor;
             import com.flexsqladmin.sqladmin.components.QueryWindow;
             import com.flexsqladmin.sqladmin.components.RolesWindow;
@@ -238,7 +239,7 @@ Redistribution and use in source and binary forms, with or without modification,
             private function add_item_click(event:DropdownEvent) : void {
                 // Hack to only continue if they clicked inside the items box.
                 if (event.triggerEvent != null || !(573 > this.contentMouseX && this.contentMouseX > 360 &&
-                    35 < this.contentMouseY && this.contentMouseY < 145))
+                    35 < this.contentMouseY && this.contentMouseY < 35 + 25*5))
                     return;
                 add_item_change(event as ListEvent);
             }
@@ -256,6 +257,8 @@ Redistribution and use in source and binary forms, with or without modification,
                     UsersAndRolesWindow(addTab('Roles', UsersAndRolesWindow, null)).currentState = 'roles';
                 } else if (selected.action == 'views') {
                     addTab('New View', ViewWindow);
+                } else if (selected.action == 'foreign_data') {
+                    addTab('New Foreign Data Server', ForeignDataWizard);
                 }
             }
             
@@ -315,12 +318,13 @@ Redistribution and use in source and binary forms, with or without modification,
 			
 			<mx:Box width="100%" height="50%">
 				<mx:HBox width="100%">
-          <mx:ComboBox id="add_item_list" close="add_item_click(event);">
+          <mx:ComboBox id="add_item_list" close="add_item_click(event);" height="25">
             <mx:Object label="Launch Query Tab" action="query" />
             <mx:Object label="New Table" action="table" />
             <mx:Object label="New User" action="users" />
             <mx:Object label="New Role" action="roles" />
             <mx:Object label="New View" action="views" />
+            <mx:Object label="New Foreign Data Server" action="foreign_data" />
           </mx:ComboBox>
 					<mx:Spacer width="100%"/>
                     <mx:Button label="Debug Window" click="toggleDebugWindow();" visible="{DEBUG}" />

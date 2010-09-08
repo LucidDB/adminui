@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2010 Dynamo Business Intelligence Corporation. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Dynamo Business Intelligence Corporation OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                   xmlns:s="library://ns.adobe.com/flex/spark" 
+                   xmlns:mx="library://ns.adobe.com/flex/mx"
+                   creationComplete="init();"
+                   width="100%" height="100%"
+                   >
+    <s:layout>
+        <s:VerticalLayout/>
+    </s:layout>
+    <fx:Declarations>
+    </fx:Declarations>
+    <s:states>
+        <s:State name="define_wrapper" />
+        <s:State name="define_options" />
+        <s:State name="load_foreign_objects" />
+    </s:states>
+    
+    <s:HGroup includeIn="define_wrapper">
+        <s:Label text="Select Wrapper: " />
+        <mx:ComboBox id="wrappers_list"
+                     dataProvider="{new XMLList(model.object_tree.tree_data.remote_data.children())}"
+                     labelField="@label"
+                     />
+        <s:Button click="currentState = 'define_options';" label="Next" />
+    </s:HGroup>
+    
+    <s:HGroup includeIn="define_options">
+        <s:Label text="Server Name: " />
+        <s:TextInput id="server_name" />
+        <s:Button label="Next" click="currentState = 'load_foreign_objects';" />
+    </s:HGroup>
+    <s:VGroup includeIn="define_options" itemCreationPolicy="immediate" width="100%" height="100%">
+        <s:Label text="Double click to add more options" />
+        <mx:AdvancedDataGrid id="options_grid" rowCount="5" dataProvider="{wrapper_options}"
+                             itemDoubleClick="add_option();" width="50%" height="100%">
+            <mx:columns>
+                <mx:AdvancedDataGridColumn id="key" headerText="Option Name" dataField="key"
+                                           rendererIsEditor="true" itemRenderer="mx.controls.TextInput" />
+                <mx:AdvancedDataGridColumn id="value" headerText="Option Value" dataField="value"
+                                           rendererIsEditor="true" itemRenderer="mx.controls.TextInput" />
+            </mx:columns>
+        </mx:AdvancedDataGrid>
+    </s:VGroup>
+    
+    <fx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.events.PerformanceEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            [Bindable]
+            private var wrapper_options:Array = [];
+            
+            public function init() : void {
+                for (var i:Number = 0; i < options_grid.rowCount; i++)
+                    add_option();
+            }
+            
+            private function add_option() : void {
+                trace('adding option');
+                wrapper_options.push({'key': '', 'value': ''});
+            }
+            
+            public function set_wrapper(name:String) : void {
+                for (var i:Number = 0; i < wrappers_list.dataProvider.length; i++) {
+                    if (wrappers_list.dataProvider[i].@label == name) {
+                        wrappers_list.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        ]]>
+    </fx:Script>
+</s:Group>
