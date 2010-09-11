@@ -48,7 +48,7 @@ package com.flexsqladmin.sqladmin.model
     	public var catalogdata:XMLListCollection;
     	public var currentcatalogname:String = 'LOCALDB';
         
-        public var object_tree:ObjectTree;
+        public var object_tree:ObjectTree; // shut up compiler
     	
         public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
         {

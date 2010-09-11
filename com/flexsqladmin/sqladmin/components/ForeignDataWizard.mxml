@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
     <s:HGroup includeIn="define_wrapper">
         <s:Label text="Select Wrapper: " />
         <mx:ComboBox id="wrappers_list"
-                     dataProvider="{new XMLList(model.object_tree.tree_data.remote_data.children())}"
+                     dataProvider="{ObjectTree(model.object_tree).tree_data.remote_data.children()}"
                      labelField="@label"
                      />
         <s:Button click="currentState = 'define_options';" label="Next" />
@@ -65,9 +65,23 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             [Bindable]
             private var wrapper_options:Array = [];
             
+            [Bindable]
+            private var wrappers:XMLList = new XMLList();
+            
             public function init() : void {
                 for (var i:Number = 0; i < options_grid.rowCount; i++)
                     add_option();
+                
+                if (ObjectTree(model.object_tree).tree_data.remote_data.children().length() == 0) {
+                    ObjectTree(model.object_tree).expandItem(model.object_tree.tree_data..remote_data[0], true, false);
+                    ObjectTree(model.object_tree).expandItem(model.object_tree.tree_data..remote_data[0], false, false);
+
+                    //bjectTree(model.object_tree).expandItem(model.object_tree.tree_data.remote_data, false, false);
+
+                    //var data_event:ForeignDataEvent = new ForeignDataEvent('getRemoteData');
+                    //CairngormEventDispatcher.getInstance().dispatchEvent(data_event);
+                }
+                 //{new XMLList(model.object_tree.tree_data.remote_data.children())}
             }
             
             private function add_option() : void {
