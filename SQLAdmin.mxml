@@ -115,6 +115,7 @@ Redistribution and use in source and binary forms, with or without modification,
                         , 'TableDetailsService'
                         , 'UsersAndRolesService'
                         , 'PerformanceCountersService'
+                        , 'ForeignDataService'
                         ];
                     for each (var name:String in services) {
                         var s:WebService = ServiceLocator.getInstance().getService(name) as WebService;
@@ -307,7 +308,7 @@ Redistribution and use in source and binary forms, with or without modification,
 		<mx:VBox height="100%" width="35%" >
 			<mx:HBox width="100%">
 				<!--<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>-->
-				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" change="changeHandler(event)"/>
+				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="changeHandler(event)"/>
 				
 			</mx:HBox>
             <components:ObjectTree id="new_metadata_tree" />

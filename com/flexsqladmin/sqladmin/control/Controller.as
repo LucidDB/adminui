@@ -12,14 +12,24 @@ Redistribution and use in source and binary forms, with or without modification,
 package com.flexsqladmin.sqladmin.control
 {
 	import com.adobe.cairngorm.control.FrontController;
-
-    import com.flexsqladmin.sqladmin.commands.*;
-    import com.flexsqladmin.sqladmin.events.*;
+	import com.flexsqladmin.sqladmin.commands.*;
+	import com.flexsqladmin.sqladmin.events.*;
 	
 	public class Controller extends FrontController
 	{
+        private static var self:Controller;
+
+        public static function getInstance():Controller
+        {
+            if (self == null)
+                self = new Controller();
+            return self;
+        }
+        
 		public function Controller()
 		{
+            if (self == null)
+                self = this;
 			addCommand(LoginEvent.LOGIN, LoginCommand);
 			addCommand(MetaDataEvent.METADATA, MetaDataCommand);
 			addCommand(ExecuteSQLEvent.EXECUTESQL, ExecuteSQLCommand);
@@ -34,5 +44,6 @@ package com.flexsqladmin.sqladmin.control
             addCommand(ObjectTreeLoaderEvent.OBJECT_TREE_LOADER, ObjectTreeLoaderCommand);
             addCommand(PerformanceEvent.PERFORMANCE, PerformanceCommand);
 		}
+        
 	}
 }

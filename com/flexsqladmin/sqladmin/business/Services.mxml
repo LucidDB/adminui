@@ -208,5 +208,26 @@ Redistribution and use in source and binary forms, with or without modification,
             </mx:request>
         </mx:operation>
     </mx:WebService>
-	
+
+    <mx:WebService
+        id="ForeignDataService" 
+        service='ForeignDataService'
+        useProxy="false" 
+        makeObjectsBindable="false"
+        showBusyCursor="true"
+        fault="mx.controls.Alert.show('Error loading WSDL', 'ForeignDataService Error');" >
+        <mx:operation name="getWrapperOptions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <wrapper></wrapper>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="createServer" resultFormat="object" result="event.token.resultHandler(event);" fault="event.token.faultHandler(event);">
+            <mx:request>
+                <server_name></server_name>
+                <wrapper_name></wrapper_name>
+                <options></options>
+            </mx:request>
+        </mx:operation>
+    </mx:WebService>
+
 </cairngorm:ServiceLocator>

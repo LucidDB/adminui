@@ -44,6 +44,7 @@ package com.flexsqladmin.sqladmin.commands
 		public function onResult(event:*=null):void
 		{
 			DebugWindow.log("MetaDataCommand:onResult()");
+            trace(String(event.result));
             XML(model.object_tree.tree_data.schemas).setChildren(new XML(event.result).children());
             model.object_tree.addSchemaElementLoaders();
             //model.metadata = new XML(event.result);
