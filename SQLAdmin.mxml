@@ -309,7 +309,7 @@ Redistribution and use in source and binary forms, with or without modification,
 			<mx:HBox width="100%">
 				<!--<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>-->
 				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="changeHandler(event)"/>
-				
+                <mx:Button click="new_metadata_tree.init();" icon="@Embed(source='/icons/cog.png')" label="Reset Object Browser" />
 			</mx:HBox>
             <components:ObjectTree id="new_metadata_tree" />
 			<!--<components:ObjectBrowser id="metadata_tree" dataProvider="{model.metadata}"/>-->

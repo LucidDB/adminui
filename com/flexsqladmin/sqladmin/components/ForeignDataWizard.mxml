@@ -44,7 +44,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
         <mx:AdvancedDataGrid id="options_grid" rowCount="5" dataProvider="{wrapper_options}"
                              width="100%" height="100%"  bottom="10" left="10" right="10">
             <mx:columns>
-                <mx:AdvancedDataGridColumn id="op_name" headerText="Option Name" dataField="name" />
+                <mx:AdvancedDataGridColumn id="op_name" headerText="Option Name" dataField="shown_name" />
                                    <!--rendererIsEditor="true" itemRenderer="mx.controls.TextInput" />-->
                 <mx:AdvancedDataGridColumn id="op_value" headerText="Option Value" dataField="value"
                                            rendererIsEditor="true">
@@ -168,7 +168,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 var results:XML = XML(r);
                 for each (var el:XML in results.children()) {
                     wrapper_options.push({'name': '"' + el.@name + '"', 'default_value': el.@value,
-                        'value': el.@value,
+                        'value': el.@value, 'shown_name': el.@name,
                         'required': el.@required, 'desc': el.@desc, 'type': el.@type});
                 }
                 options_grid.dataProvider = wrapper_options;
@@ -188,6 +188,8 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
                 if (response == "") {
                     currentState = 'load_foreign_objects';
                     Alert.show("Foreign Server Created", "Success");
+                    model.object_tree.addItem('server', server_name.text.toUpperCase(),
+                        'remote_data', 'wrapper@', wrappers_list.selectedLabel, 'servers');
                 } else {
                     Alert.show("Could not create foreign server: " + response, "Error");
                 }

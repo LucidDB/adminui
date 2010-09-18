@@ -103,7 +103,7 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
   <column name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" defaultValue=""/>
 </details>);
                 } else if (e.keyCode == 68) { // D
-                    delete tree_data.schemas.schema[0].tables.table.(@label == 'Ough')[0];
+                   addItem('server', 'test', 'remote_data', 'wrapper@', 'SYS_FILE_WRAPPER', 'servers');
                 } else if (e.keyCode == 78) {// N
                     //for each (var el:XML in model.metadata.schema)
                     //    tree_data.schemas.appendChild(el);
@@ -349,12 +349,26 @@ THIS SOFTWARE IS PROVIDED BY Dynamo Business Intelligence Corporation ``AS IS'' 
             /**
             * This is to become our generic add loader; need to abstract
             * the other add functions as special cases of this one.
+            * 
+            * Example usage:
+            * model.object_tree.addItem('user', user.toUpperCase(), 'security', 'users');
+            * will descend to <security><users> and add <user label="{user.toUpperCase()}" />.
+            * 
+            * model.object_tree.addItem('server', server_name.text.toUpperCase(),
+            *            'remote_data', 'wrapper@', wrapper_list.selectedLabel, 'servers');
+            * the '@' at the end of 'wrapper' signifies that the next argument is a condition, so it
+            * will select the first 'wrapper' element where @label == the next argument.
             */
             public function addItem(tag:String, label:String, ... structure) : void {
                 var parent:XML = tree_data[structure[0]][0];
                 var node:XML = <{tag} label={label} />;
                 for (var i:Number = 1; i < structure.length; i++) {
-                    parent = parent[structure[i]][0];
+                    if (String(structure[i]).charAt(structure[i].length - 1) == '@') {
+                        parent = parent[String(structure[i]).slice(0, -1)].(@label == structure[i+1])[0];
+                        i++;
+                    } else {
+                        parent = parent[structure[i]][0];
+                    }
                 }
                 if (parent.children().length() == 0 && parent.hasOwnProperty('@loadInfo')) {
                     // should only call this on a successful post anyway, so whatever was added

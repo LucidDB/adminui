@@ -115,8 +115,8 @@ Redistribution and use in source and binary forms, with or without modification,
 			public function init() : void {
 				querytext.percentWidth = 100;
 				querytext.setFocus();
-								
-				result_info = new QueryResultInfo();
+
+                result_info = new QueryResultInfo();
 				result_info.queryHistoryVO = new QueryHistoryVO();
 				result_info.showplanwindow = showplanwin;
 				result_info.querydatagrid = querydatagrid;
