@@ -70,7 +70,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"quality", "high",
 			"bgcolor", "${bgcolor}",
 			"name", "${application}",
-			"flashvars",'resultlimit=500&server=&database=&username=&password=&webservice=http://localhost:8080/adminws/ns0.wsdl&historyUrl=history.htm%3F&lconid=' + lc_id + '',
+			"flashvars",'resultlimit=500&server=&database=&username=&password=&webservice=&historyUrl=history.htm%3F&lconid=' + lc_id + '',
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer"
@@ -87,7 +87,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="${application}" width="${width}" height="${height}"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="flashvars" value="resultlimit=500&server=&database=&username=&password=&webservice=http://localhost:8080/adminws/ns0.wsdl">
+			<param name="flashvars" value="resultlimit=500&server=&database=&username=&password=&webservice=">
 			<param name="movie" value="${swf}.swf" />
 			<param name="quality" value="high" />
 			<param name="bgcolor" value="${bgcolor}" />

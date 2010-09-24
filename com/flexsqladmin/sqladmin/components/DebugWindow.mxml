@@ -60,7 +60,7 @@ Redistribution and use in source and binary forms, with or without modification,
 		]]>
 	</mx:Script>
 	
-	<mx:TextArea id="debug_ta" width="100%" height="220" y="40"/>
+	<mx:TextArea id="debug_ta" width="100%" height="220" y="40" editable="false"/>
 	<mx:Button x="10" y="10" label="Clear" click="clear();"/>
 	
 </mx:TitleWindow>

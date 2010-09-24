@@ -105,7 +105,7 @@ Redistribution and use in source and binary forms, with or without modification,
 				var wsdl:String = "";
 				try {
                     if(parameters.webservice == undefined || parameters.webservice == '' ){
-                        wsdl = "http://localhost:8080/adminws/ns0.wsdl";
+                        wsdl = "/adminws/ns0.wsdl";
                     } else {
                         wsdl = parameters.webservice;
                     }

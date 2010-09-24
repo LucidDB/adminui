@@ -50,21 +50,21 @@
   -->
 
   <target name="package" depends="compile">
-    <generateHtmlWrapper file="SQLAdmin.html"
+    <generateHtmlWrapper file="SQLAdmin.html" application="SQLAdmin"
       height="100%" width="100%" swf="SQLAdmin" output="${DEPLOY_DIR}"
-      title="SQLAdmin" template="express-installation"
-      version-major="6" version-minor="0" version-revision="65"
+      title="SQLAdmin" template="express-installation" bgcolor="#869ca7"
+      version-major="10" version-minor="0" version-revision="0"
       />
   </target>
 
   <macrodef name="generateHtmlWrapper" description="Generates HTML Wrapper using custom template">
     <attribute name="file"/>
     <attribute name="title"/>
-    <!--<attribute name="application"/>-->
+    <attribute name="application"/>
     <attribute name="swf"/>
     <attribute name="width"/>
     <attribute name="height"/>
-    <!--<attribute name="bgcolor"/>-->
+    <attribute name="bgcolor"/>
     <attribute name="version-major"/>
     <attribute name="version-minor"/>
     <attribute name="version-revision"/>
@@ -81,6 +81,8 @@
       <copy file="html-template/AC_OETags.js" todir="@{output}"/>
       <copy file="html-template/playerProductInstall.swf" todir="@{output}" />
       <copy file="html-template/index.template.html" tofile="@{output}/@{file}" />
+      <copy file="html-template/index.redirect.html" tofile="@{output}/index.html" />
+      <replace file="@{output}/index.html" token="$${redirect}" value="@{file}" />
 
       <replace file="@{output}/@{file}" token="$${title}" value="@{title}"/>
       <replace file="@{output}/@{file}" token="$${swf}" value="@{swf}"/>
