@@ -67,7 +67,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			private var exectimer:Timer;
             
             [Bindable]
-			private var DEBUG:Boolean;
+			public var DEBUG:Boolean;
 			
 			[Embed("/icons/close_tab.png")]
 			public var closeTabImg : Class;
@@ -79,6 +79,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public var UsersImg:Class;
             [Embed("/icons/script_add.png")]
             public var VWimg:Class;
+            [Embed('/icons/lock.png')]
+            public var usersandrolesImg:Class;
+            [Embed('/icons/server_link.png')]
+            public var foreign_dataImg:Class;
 
             
             private var tab_icons:Object = {};
@@ -88,7 +92,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			
 			public function init():void{
                 
-				DEBUG = true;
+				DEBUG = false;
 				
 				if (DEBUG) {
 					//Popup Debug
@@ -99,8 +103,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 				
                 tab_icons[String(QueryWindow)] = QWimg;
                 tab_icons[String(CreateEditTableWindow)] = NTimg;
-                tab_icons[String(UsersAndRolesWindow)] = UsersImg;
+                tab_icons[String(UsersAndRolesWindow)] = usersandrolesImg;
                 tab_icons[String(ViewWindow)] = VWimg;
+                tab_icons[String(ForeignDataWizard)] = foreign_dataImg;
                 
 				//Regiser Some Things with the model
 				model.main_tabnav = tabnavigator;
@@ -262,7 +267,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 } else if (selected.action == 'users') {
                     UsersAndRolesWindow(addTab('Users', UsersAndRolesWindow)).currentState = 'users';
                 } else if (selected.action == 'roles') {
-                    UsersAndRolesWindow(addTab('Roles', UsersAndRolesWindow, null)).currentState = 'roles';
+                    UsersAndRolesWindow(addTab('Roles', UsersAndRolesWindow)).currentState = 'roles';
                 } else if (selected.action == 'views') {
                     addTab('New View', ViewWindow);
                 } else if (selected.action == 'foreign_data') {

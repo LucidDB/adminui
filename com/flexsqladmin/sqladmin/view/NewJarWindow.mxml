@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Dynamo Admin UI is a web service project for administering LucidDB
+Copyright (C) 2010 Dynamo Business Intelligence Corporation
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version approved by Dynamo Business Intelligence Corporation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+-->
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx" width="500" height="300"
+               creationComplete="init();"
+               close="closeWin();"
+               title="Add New Jar"
+               horizontalAlign="center"
+               >
+    <mx:Form>
+        <!--<mx:FormItem label="Upload Jar" direction="horizontal">
+            <s:TextInput id="jar_file" enabled="false" />
+            <s:Button label="Find File..." click="launchFileBrowser();" />
+        </mx:FormItem>-->
+        <mx:FormItem label="Select Schema" direction="horizontal">
+            <mx:ComboBox id="schema" dataProvider="{model.metadata.schemas.children()}"
+                         labelField="@label" />
+            <mx:Button click="newSchema();" label="New Schema"
+                       icon="@Embed(source='/icons/database_add.png')" />
+        </mx:FormItem>
+        <mx:FormItem label="Enter Jar URL" direction="horizontal">
+            <s:DropDownList selectedIndex="0">
+                <s:ArrayList>
+                <fx:Object label="Local File: " />
+                <fx:Object label="Remote URL: " />
+                </s:ArrayList>
+            </s:DropDownList>
+            <s:TextInput id="jar_url" />
+        </mx:FormItem>
+        <mx:FormItem label="Internal Jar Name">
+            <s:TextInput id="jar_name" />
+        </mx:FormItem>
+        <mx:FormItem label="Has Internal Deployment Descriptor?">
+            <s:CheckBox id="deployment_desc" />
+        </mx:FormItem>
+    </mx:Form>
+    <mx:Button label="Add Jar" icon="@Embed('/icons/cup_add.png')" click="submit_form();" />
+    
+    <fx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.commands.ExecuteSQLCommand;
+            import com.flexsqladmin.sqladmin.components.ObjectTree;
+            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            
+            public var browser:FileReference = null;
+            
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            public function init() : void {
+                PopUpManager.centerPopUp(this);
+                if (ObjectTree(model.object_tree).tree_data.jars.children().length() == 0) {
+                    ObjectTree(model.object_tree).expandItem(model.object_tree.tree_data..jars[0],true,false);
+                    ObjectTree(model.object_tree).expandItem(model.object_tree.tree_data..jars[0],false,false);
+                }
+            }
+            
+            public function closeWin() : void {
+                PopUpManager.removePopUp(this);
+            }
+            
+            public function submit_form() : void {
+                /*if (!CustomFuncs.XOR(jar_file.text == '' || browser == null, jar_url.text == '')) {*/
+                if (jar_url.text == '') {
+                    Alert.show("Please type in a Jar path.", "Error");
+                    return;
+                }
+
+                var deploy:Number = (deployment_desc.selected) ? 1 : 0;
+                var type:String = '';
+                var query:String = "call sqlj.install_jar('" +
+                    type + jar_url.text + "', '" + schema.text + '.' +
+                    jar_name.text + "', " + deploy + ")";
+                var jar_event:ExecuteSQLEvent = new ExecuteSQLEvent(query, 'special',
+                    function(querydata:XML):void {
+                        if (querydata.datamap == 'Error') {
+                            Alert.show(querydata.NewDataSet.Table.Error, 'Error');
+                        } else {
+                            Alert.show('Jar successfully added.', 'Success');
+                            model.object_tree.addItem('jar', jar_name.text.toUpperCase(), 'jars');
+                        }
+                    }
+                );
+                CairngormEventDispatcher.getInstance().dispatchEvent(jar_event);
+                
+                // Flex appears not to support file uploading via SOAP...
+                /*var request:URLRequest = new URLRequest('/jars/upload');
+                request.method = URLRequestMethod.POST;
+                try {
+                    browser.upload(request);
+                } catch (error:*) {
+                    Alert.show("Could not add jar.", "Error");
+                }*/
+                
+            }
+            
+            public function launchFileBrowser() : void {
+                browser = new FileReference();
+                browser.addEventListener(Event.SELECT, function (event:Event) : void {
+                    //jar_file.text = browser.name;
+                    jar_name.text = browser.name.replace('-', '_').replace('.jar', '');
+                });
+                browser.addEventListener(Event.COMPLETE, function (event:Event) : void {
+                    Alert.show("Jar added successfully.", "Success");
+                });
+                browser.browse([new FileFilter("Jar Files (*.jar)", "*.jar")]);
+            }
+            
+            public function newSchema() : void {
+                var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
+                sch_win.setStyle("borderAlpha", 0.8);
+                sch_win.showCloseButton = true;
+                sch_win.addEventListener(Event.CLOSE, function():void {
+                    schema.dataProvider = new XMLList(model.metadata.children());
+                });
+            }
+        ]]>
+    </fx:Script>
+</mx:TitleWindow>

@@ -266,6 +266,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 for (var i:Number = cols.length()-1; i >= 0; i--) {
                     delete cols[i];
                 }
+                // also remove functions, procedures, jars until we program it
+                var funcs:XMLList = datacopy..functions;
+                for (i = funcs.length()-1; i >= 0; i--)
+                    delete funcs[i];
+                var procs:XMLList = datacopy..procedures;
+                for (i = procs.length()-1; i >= 0; i--)
+                    delete procs[i];
+                var jars:XMLList = datacopy..jars;
+                for (i = jars.length()-1; i >= 0; i--)
+                    delete jars[i];
+                
                 original_data = new XML(datacopy);
                 // Add icons to form items and disable entry until they click something
                 for (var p:String in perms_key) {
@@ -276,7 +287,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     checkbox.enabled = false;
                 }
                 
-                // Could use a y-combinator here! But no.
                 load_roles_info();
             }
             
@@ -291,6 +301,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                 var type:String = String(perm.@itemType).replace('Local', '').toLowerCase();
                                 var type_label:String = String(perm.@itemType).replace('Local', '') + 's';
                                 var schema:XML = datacopy.schema.(@label == perm.@schemaName)[0];
+                                /* foreign table hack: */
+                                if (type == 'foreigntable') type = 'foreign_table';
+                                if (type_label == 'ForeignTables') type_label = 'Foreign Tables';
                                 var category:XML = schema[type + 's'][0];
                                 var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
                                 node.@actions = perm.@actions;

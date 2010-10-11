@@ -40,7 +40,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	<mx:Label x="68" y="22" text="Flex SQLAdmin for LucidDB" fontSize="15" fontWeight="bold" textAlign="left"/>
     <mx:Image width="100"  height="100" x="125" y="50" source="{logo}" />
     <mx:Label x="69.5" y="204" text="Copyright 2010 Dynamo BI Corporation" />
-	<mx:Label x="64.5" y="218" text="Copyright 2006-2010 Kevin Kazmierczak."/>
+	<!--<mx:Label x="64.5" y="218" text="Copyright 2006-2010 Kevin Kazmierczak."/>
+    He has waived his copyright rights to allow us to GPL it all. -->
     <mx:Label x="123.5" y="230" text="All Rights Reserved." />
 	<mx:Label x="89" y="246" text="Icons courtesy of" fontSize="10"/>
 	<mx:LinkButton x="114.5" y="188" label="www.dynamobi.com" click="navigateToURL(new URLRequest('http://www.dynamobi.com'), '_blank')"/>

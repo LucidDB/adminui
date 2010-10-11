@@ -32,13 +32,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.adobe.serialization.json.JSON;
+            import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.components.ObjectTreeRenderer;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
+            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
             import com.flexsqladmin.sqladmin.events.MetaDataEvent;
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.NewJarWindow;
             import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import com.flexsqladmin.sqladmin.view.OpenTableWindow;
             
@@ -87,6 +90,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             private var counters_icon:Class;
             [Embed(source="/icons/report_user.png")]
             private var sessions_icon:Class;
+            [Embed(source="/icons/server_connect.png")]
+            private var server_verify_icon:Class;
+            [Embed(source="/icons/server_edit.png")]
+            private var server_edit_icon:Class;
             
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -101,23 +108,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             private var object_menus:Object = new Object();
             
             public function debug(e:KeyboardEvent) : void {
-                if (e.keyCode == 84) { // T
-                    tree_data.schemas.schema[0].tables.appendChild(<node label="Ough" />);
-                    //this.validateNow();
-                    //trace(XML(dataProvider).toXMLString());
-                } else if (e.keyCode == 82) { // R
-                    addTable('CRAPPY', 'deck', <details createTime="2010-08-11" name="deck">
-  
-  <column name="NEWCOLUMN" isNullable="false" datatype="INTEGER" decDigits="" precision="" defaultValue=""/>
-</details>);
-                } else if (e.keyCode == 68) { // D
-                   addItem('server', 'test', 'remote_data', 'wrapper@', 'SYS_FILE_WRAPPER', 'servers');
-                } else if (e.keyCode == 78) {// N
-                    //for each (var el:XML in model.metadata.schema)
-                    //    tree_data.schemas.appendChild(el);
+                if (!FlexGlobals.topLevelApplication.DEBUG) { return; }
+                if (e.keyCode == 78) {// N
                     trace(tree_data.toXMLString());
-                    //real_dp.appendChild(model.metadata);
-                    //delete real_dp.schemas[0];
                 }
             }
 
@@ -139,6 +132,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     'arguments': {}});
                 var remote_data_load:String = JSON.encode({'service': 'sqlWebService',
                     'operation': 'getRemoteData', 'arguments': {}});
+                
                 var skeleton:XML = <tree>
                     <schemas label="Schemas" loadInfo={schemas_load}>
                     </schemas>
@@ -148,18 +142,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         <roles label="Roles" loadInfo={roles_load}>
                         </roles>
                     </security>
-                    <remote_data label="Remote Data" loadInfo={remote_data_load}>
+                    <remote_data label="Foreign Data Wrappers" loadInfo={remote_data_load}>
                     </remote_data>
-                    <jars label="Jars">
-                        <jar label="Jar1" />
-                        <jar label="Jar2" />
-                    </jars>
                     <system label="System">
                         <counters label="Counters" />
-                        <configuration label="Configuration" />
+                        <!--<configuration label="Configuration" />-->
                         <sessions label="Active User Sessions" />
                     </system>
-                    <networks label="Networks">
+                    </tree>;
+                    /*<networks label="Networks">
                         <network label="network.dynamobi.com">
                             <package label="SFDC package" />
                             <package label="Stats package" />
@@ -168,8 +159,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         </network>
                     </networks>
                     </tree>
-                    ;
-                //trace(skeleton.toXMLString());
+                    ;*/
                 tree_data = skeleton;
                 
                 var expandTree:Function = function():void {
@@ -202,6 +192,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         'operation': 'getProcedures',
                         'arguments': {schema: String(schema.@label)}});
                     schema.procedures.@loadInfo = procedures_load;
+                    var jars_load:String = JSON.encode({'service': 'sqlWebService', 'operation': 'getJars',
+                        'arguments': {schema: String(schema.@label)} });
+                    schema.jars.@loadInfo = jars_load;
                 }
             }
             
@@ -346,7 +339,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
              * TODO: abstract this into a generalized function like remove.
              */
             public function addSchema(name:String) : void {
-                var node:XML = <schema label={name}><tables label="Tables" /><views label="Views" /><foreign_tables label="Foreign Tables" /><functions label="Functions" /><procedures label="Procedures" /></schema>;
+                var node:XML = <schema label={name}><tables label="Tables" /><views label="Views" /><foreign_tables label="Foreign Tables" /><functions label="Functions" /><procedures label="Procedures" /><jars label="Jars" /></schema>;
                 for (var i:Number = 0; i < tree_data.schemas.children().length(); i++) {
                     if (tree_data.schemas.schema[i].@label < name)
                         continue;
@@ -521,6 +514,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             /**
             * Mega function that sets up all of our context menus with their
             * corresponding handlers.
+            * 
+            * TODO: Implement the commented out menu items.
             */
             public function register_contexts_and_handlers() : void {
                 var con_row:Function = function (label:String, icon:Class) : Object {
@@ -534,7 +529,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 );
                 register_context("schema", [gen_drop,
                     con_row('Drop Cascade', drop_icon),
-                    con_row('Analyze All Tables In Schema', null)],
+                    /*con_row('Analyze All Tables In Schema', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0 || index == 1) {
                             var casc:Boolean = (index == 1);
@@ -547,7 +542,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 );
                 register_context("tables", [gen_add],
                     function (index:Number, context:ObjectTree) : void {
-                        FlexGlobals.topLevelApplication.addTab('New Table', CreateEditTableWindow).select_schema(context.getParentItem(context.selectedItem).@label);
+                        var win:CreateEditTableWindow = FlexGlobals.topLevelApplication.addTab('New Table',
+                            CreateEditTableWindow);
+                        callLater(win.select_schema, [context.getParentItem(context.selectedItem).@label]);
                     }
                 );
                 register_context('table', [con_row('Script as Select', selecticon),
@@ -557,9 +554,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     {type: 'separator'},
                     con_row('Open', opentableicon),
                     gen_drop,
-                    con_row('Edit', updateicon),
-                    con_row('Storage Report', null),
-                    con_row('Analyze Table', null)
+                    con_row('Edit', updateicon)
+                    //con_row('Storage Report', null),
+                    //con_row('Analyze Table', null)
                     ],
                     function (index:Number, context:ObjectTree) : void {
                         var query:String = ''
@@ -616,7 +613,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         }
                     }
                 );
-                register_context('column', [con_row('Data Stats', null)],
+                register_context('column', [/*con_row('Data Stats', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
@@ -666,20 +663,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         }
                     }
                 );
-                register_context('foreign_tables', [con_row('Import', null)],
+                register_context('foreign_tables', [/*con_row('Import', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
                 register_context('foreign_table', [con_row('Select As', selecticon),
-                    con_row('Reimport', null),
+                    //con_row('Reimport', null),
                     gen_drop],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
                             script_as_query(context);
-                        } else if (index == 1) {
+                        } else if (0 == 1 && index == 1) {
                             
-                        } else if (index == 2) {
+                        } else if (index == 1) {
                             drop_remove_item('FOREIGN TABLE "' + context.model.currentcatalogname + '"."' +
                                 get_schema(context) + '"."' + context.selectedItem.@label + '" ', true,
                                 'Are you sure you want to\n' +
@@ -688,23 +685,23 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         }
                     }
                 );
-                register_context('functions', [gen_add],
+                register_context('functions', [/*gen_add*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
-                register_context('function', [gen_drop,
-                    con_row('View Details', null)],
+                register_context('function', [/*gen_drop,
+                    con_row('View Details', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
-                register_context('procedures', [gen_add],
+                register_context('procedures', [/*gen_add*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
-                register_context('procedure', [con_row('View Details', null)],
+                register_context('procedure', [/*con_row('View Details', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
@@ -735,7 +732,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 register_context('roles', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
                         UsersAndRolesWindow(FlexGlobals.topLevelApplication.addTab(
-                                            'Roles', UsersAndRolesWindow, null)).currentState = 'roles';
+                                            'Roles', UsersAndRolesWindow)).currentState = 'roles';
                     }
                 );
                 register_context('role', [con_row('Edit', edit_user_icon),
@@ -754,13 +751,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         }
                     }
                 );
-                register_context('remote_data', [gen_add],
+                // aka foreign data wrappers:
+                register_context('remote_data', [/*gen_add*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
                 );
-                register_context('wrapper', [gen_add,
-                    con_row('View Details', null)],
+                register_context('wrapper', [/*gen_add,
+                    con_row('View Details', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                         
                     }
@@ -772,22 +770,51 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     }
                 );
                 register_context('server', [gen_drop,
-                    con_row('Edit', null),
-                    con_row('Import Objects', null),
-                    con_row('Verify', null)],
+                    con_row('Edit', server_edit_icon),
+                    /*con_row('Import Objects', null),*/
+                    con_row('Verify Connection', server_verify_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        if (index == 0) {
+                            drop_remove_item('SERVER "' + context.selectedItem.@label + '" ', true,
+                                'Are you sure you want to\n' +
+                                'drop cascade this foreign server?', 'Server Dropped Successfully', context,
+                                context.selectedItem as XML);
+                        } else if (index == 1) {
+                            var wiz:ForeignDataWizard = FlexGlobals.topLevelApplication.addTab('Edit Foreign Data Server', ForeignDataWizard);
+                            callLater(function():void {
+                                wiz.set_wrapper(context.getParentItem(context.getParentItem(context.selectedItem)).@label);
+                                wiz.show_options();
+                                wiz.load_prior_values(context.selectedItem.@label);
+                            });
+                        } else if (0 == 1 && index == 2) { // change when import is done
+                            var importer:ForeignDataImporter = FlexGlobals.topLevelApplication.addTab('Import Foreign Objects', ForeignDataImporter);
+                            importer.foreign_server = context.selectedItem.@label;
+                            importer.init();
+                        } else if (index == 2) { // change to 3 when import is done
+                            var ver_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
+                                'testServer', {'server_name': context.selectedItem.@label},
+                                {'callback': function(r:*) : void {
+                                    if (String(r) == '')
+                                        Alert.show('Connection Made', 'Success');
+                                    else
+                                        Alert.show('Connection failed: ' + String(r), 'Failure');
+                                }}
+                            );
+                            CairngormEventDispatcher.getInstance().dispatchEvent(ver_event);
+                        }
                     }
                 );
-                register_context('jars', [gen_add],
-                    function (index:Number, context:ObjectTree) : void {
-                        
-                    }
+                register_context('jars', [/*gen_add*/],
+                    handler_wrapper(popup_new, [NewJarWindow])
                 );
-                register_context('jar', [gen_drop,
-                    con_row('Add', null)],
+                register_context('jar', [/*gen_drop*/],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        /* To implement: call remove_jar with our parent as the schema. */
+                        drop_remove_item('JAR "' + context.selectedItem.@label + '" ', true,
+                            'Are you sure you want to\n' +
+                            'drop this jar?', 'Jar dropped successfully. (Your LucidDB server may need' +
+                            'to be restarted.)', context,
+                            context.selectedItem as XML);
                     }
                 );
                 register_context('counters', [con_row('Performance Monitor', counters_icon)],
@@ -795,7 +822,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         FlexGlobals.topLevelApplication.addTab('Performance Monitor', PerformanceMonitor, counters_icon);
                     }
                 );
-                register_context('configuration', [con_row('Edit', null)],
+                register_context('configuration', [/*con_row('Edit', null)*/],
                     function (index:Number, context:ObjectTree) : void {
                             
                     }

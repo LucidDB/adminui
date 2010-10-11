@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     
     <mx:HBox width="100%" left="10" right="10">
         <mx:Button id="submit_btn" click="submitCreateTable();" 
-                   toolTip="Create your Table" label="Create your Table"
+                   toolTip="Create Table" label="Create your Table"
                    icon="@Embed(source='/icons/exec.gif')" />
     </mx:HBox>
 

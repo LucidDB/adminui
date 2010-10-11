@@ -30,8 +30,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         </mx:State>
         <mx:State name="edit">
             <mx:SetProperty target="{pan}" name="title" value="Edit User" />
-            <mx:AddChild relativeTo="{pan}" position="firstChild">
-                <view:ModifyUserWindow id="modify_user" user="{user_name.text}" />
+            <mx:AddChild relativeTo="{pan}" position="firstChild" creationPolicy="all">
+                <view:ModifyUserWindow id="modify_user" user="{user_name.text}" creationPolicy="all" />
             </mx:AddChild>
             <mx:RemoveChild target="{create_form}" />
         </mx:State>
@@ -85,10 +85,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
-            
-            public function debug() : void {
-                currentState = (currentState == 'edit') ? 'create' : 'edit';
-            }
             
             public function init() : void {
                 currentState = 'create';

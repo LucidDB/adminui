@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
       <mx:Button click="submitQuery();" toolTip="(F5) Submit Query" label="Submit Query" icon="@Embed(source='/icons/exec.gif')" id="btnQuery" />
       <mx:Button click="clearQuery();" icon="@Embed(source='/icons/clear.png')" toolTip="(F6) Clear Query" label="Clear Query" />
       <mx:Button click="submitShowPlanQuery();" icon="@Embed(source='/icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
-      <mx:CheckBox label="Include Execution Plan" id="spflag"/>
+      <!--<mx:CheckBox label="Include Execution Plan" id="spflag"/>-->
       <mx:Button click="makeView();" label="Make View From Query" toolTip="Make View From Query" icon="{VWimg}" />
   </mx:HBox>
 
@@ -66,6 +66,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	<mx:TextArea id="querytext" 
 		dragEnter="doDragEnter(event);" 
 		dragDrop="doDragDrop(event);"
+        keyDown="spaceCheck(event);"
 		keyUp="parseQuery(event);" height="40%" left="10" top="30" right="10" />
 		
 	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10" id="tabresults_holder">
@@ -186,8 +187,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			}
 			
 			public function parseQuery(e:KeyboardEvent):void{
-				if (e.keyCode != 116 && querytext.text != null){
-	                var pattern:RegExp = /\b(add|column|modify|truncate|create|schema|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
+				if (querytext.text != null){
+	                var pattern:RegExp = /\b(add|call|column|modify|truncate|create|schema|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
 	                var aggpattern:RegExp = /\b(count|avg|sum|max|min)\b/gi;
 	                var regexNewLine:RegExp = /\r/g;
 	                var lt:RegExp = /</g;
@@ -197,8 +198,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	                tempQueryString = tempQueryString.replace(aggpattern, "<FONT COLOR='#FF33FF'><B>$1</B></FONT>");
 	                tempQueryString = tempQueryString.replace(regexNewLine, "<br>");
 	                querytext.htmlText = tempQueryString;
+                    querytext.setFocus();
 	            }
 			}
+            
+            private function spaceCheck(e:KeyboardEvent) : void {
+                if (querytext.text != null && e.shiftKey && e.keyCode == 32) {
+                    // For some reason, shift+space doesn't do space...
+                    querytext.text = querytext.text.substring(0, querytext.selectionBeginIndex) + ' ' +
+                        querytext.text.substring(querytext.selectionBeginIndex);
+                    querytext.setSelection(querytext.selectionBeginIndex+1, querytext.selectionBeginIndex+1);
+                }
+            }
 			
 			private function doDragEnter(event:DragEvent):void {
             	var dropTarget:TextArea=TextArea(event.currentTarget);
@@ -221,8 +232,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             	DebugWindow.log("main.mxml:submitQuery()");
             	DebugWindow.log("main.mxml:Query text - " + getQueryText());
             	var sqt:String = "normal";
-            	if(spflag.selected)
-	                sqt = "spnormal";
+            	//if(spflag.selected)
+	            //    sqt = "spnormal";
             	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), sqt);
             	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
 				tabresults.selectedIndex = 0;

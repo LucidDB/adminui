@@ -41,6 +41,10 @@ package com.flexsqladmin.sqladmin.utils
                 FlexGlobals.topLevelApplication.callLater(when, [what, comparison, with_what, do_what]);
         }
         
+        public static function XOR(a:*, b:*) : Boolean {
+            return (a && !b) || (b && !a);
+        }
+        
         public static function wordMult(word:String, times:Number) : String {
             // 'hello' * 2 = 'hellohello'
             // Note: the make array, push, push, array.join('') idiom is much slower in flex,

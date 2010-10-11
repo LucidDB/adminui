@@ -23,6 +23,7 @@ package com.flexsqladmin.sqladmin.commands
 	import com.adobe.cairngorm.control.CairngormEvent;
 	import com.adobe.cairngorm.control.CairngormEventDispatcher;
 	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
+	import com.flexsqladmin.sqladmin.business.Services;
 	import com.flexsqladmin.sqladmin.components.DebugWindow;
 	import com.flexsqladmin.sqladmin.events.ListCatalogsEvent;
 	import com.flexsqladmin.sqladmin.events.LoginEvent;
@@ -37,6 +38,7 @@ package com.flexsqladmin.sqladmin.commands
 	import mx.controls.Alert;
 	import mx.core.FlexGlobals;
 	import mx.events.ListEvent;
+	import mx.managers.PopUpManager;
 	
 	public class LoginCommand implements Command, Responder
 	{
@@ -97,6 +99,7 @@ package com.flexsqladmin.sqladmin.commands
 		public function onFault(event:*=null):void
 		{
 			DebugWindow.log("LoginCommand:onFault()");
+            PopUpManager.removePopUp(Services.service_fault_alert);
 		    mx.controls.Alert.show("User is not available", "Login Error");
     		loginWindow.loginbtn.enabled = true;
 		}

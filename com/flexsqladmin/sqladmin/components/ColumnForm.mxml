@@ -64,7 +64,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public var loaded:Boolean = false;
             
             [Bindable]
-            public var types:Array = ["INTEGER", "VARCHAR", "BOOLEAN", "TIMESTAMP"];
+            public var types:Array = ["INTEGER", "VARCHAR", "BOOLEAN", "TIMESTAMP",
+                'DATE', 'TIME', 'CHARACTER', 'BINARY', 'VARBINARY', 'TINYINT',
+                'SMALLINT', 'BIGINT', 'DECIMAL', 'REAL', 'FLOAT', 'DOUBLE'
+            ];
             
             public function init() : void {
                 if (col_details.@isNullable != "true" && col_details.@isNullable != "false") {

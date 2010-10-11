@@ -57,6 +57,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            
+            import mx.events.FlexEvent;
            
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
@@ -70,14 +72,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 } else {
                     uw.set_name(name);
                     uw.currentState = mode;
-                    uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                    uw.modify_user.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
+                        uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                    });
                     var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
                     CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                     dispatchEvent(new Event("stateChange"));
                     reset_perms();
                 }
             }
-            
+
             public function set_role_mode(mode:String, name:String) : void {
                 if (rw == null) {
                     callLater(set_role_mode, [mode, name]);

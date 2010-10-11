@@ -56,13 +56,44 @@ package com.flexsqladmin.sqladmin.components
         private var users_icon:Class;
         [Embed(source="/icons/group.png")]
         private var user_icon:Class;
+        [Embed(source="/icons/folder_chart_organisation.png")]
+        private var roles_icon:Class;
+        [Embed(source="/icons/chart_organisation.png")]
+        private var role_icon:Class;
+        [Embed(source="/icons/lock.png")]
+        private var security_icon:Class;
         [Embed(source="/icons/monitor.png")]
         private var system_icon:Class;
         [Embed(source="/icons/report.png")]
         private var counters_icon:Class;
         [Embed(source="/icons/report_user.png")]
         private var sessions_icon:Class;
+        [Embed(source="/icons/cups.png")]
+        private var jars_icon:Class;
+        [Embed(source="/icons/cup.png")]
+        private var jar_icon:Class;
+        [Embed(source='/icons/package_link.png')]
+        private var remote_data_icon:Class;
+        [Embed(source="/icons/book_link.png")]
+        private var wrapper_icon:Class;
+        [Embed(source="/icons/folder_server.png")]
+        private var servers_icon:Class;
+        [Embed(source="/icons/server_link.png")]
+        private var server_icon:Class;
+        [Embed(source="/icons/folder_link.png")]
+        private var foreign_tables_icon:Class;
+        [Embed(source="/icons/table_link.png")]
+        private var foreign_table_icon:Class;
+        [Embed(source="/icons/folder_plugin.png")]
+        private var funcs_procs_icon:Class;
+        [Embed(source="/icons/plugin_go.png")]
+        private var func_proc_icon:Class;
+
         
+        [Embed(source="/icons/delete.png")]
+        private var dropped_warning:Class;
+        [Embed(source="/icons/confirm.png")]
+        private var changed_warning:Class;
         
         [Bindable]
         public var icons_list:Object = {
@@ -75,9 +106,27 @@ package com.flexsqladmin.sqladmin.components
             , 'column' : column_icon
             , 'users' : users_icon
             , 'user' : user_icon
+            , 'roles' : roles_icon
+            , 'role' : role_icon
+            , 'security' : security_icon
             , 'system' : system_icon
             , 'counters' : counters_icon
             , 'sessions' : sessions_icon
+            , 'jars' : jars_icon
+            , 'jar' : jar_icon
+            , 'remote_data' : remote_data_icon
+            , 'wrapper' : wrapper_icon
+            , 'servers' : servers_icon
+            , 'server' : server_icon
+            , 'foreign_tables' : foreign_tables_icon
+            , 'foreign_table' : foreign_table_icon
+            , 'function' : func_proc_icon
+            , 'procedure' : func_proc_icon
+            , 'functions' : funcs_procs_icon
+            , 'procedures' : funcs_procs_icon
+            
+            , 'dropped_warning' : dropped_warning
+            , 'changed_warning' : changed_warning
         }
             
         override protected function createChildren() : void {

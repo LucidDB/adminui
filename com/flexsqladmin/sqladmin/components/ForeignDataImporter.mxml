@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Dynamo Admin UI is a web service project for administering LucidDB
+Copyright (C) 2010 Dynamo Business Intelligence Corporation
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version approved by Dynamo Business Intelligence Corporation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+-->
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+         xmlns:s="library://ns.adobe.com/flex/spark" 
+         xmlns:mx="library://ns.adobe.com/flex/mx"
+         width="100%" height="100%" xmlns:components="com.flexsqladmin.sqladmin.components.*">
+    <s:layout>
+        <s:HorizontalLayout />
+    </s:layout>
+
+    <mx:VBox left="10" top="10" bottom="10" width="50%" height="100%">
+        <s:Label text="Foreign Objects:" />
+    <mx:Tree id="foreign_objects" height="100%" width="100%" rowHeight="25"
+             dataProvider="{foreign_objects_data}" labelField="label"
+             showRoot="false" doubleClickEnabled="true"
+             allowDragSelection="true" allowMultipleSelection="true"
+             dragMoveEnabled="true" dragEnabled="true" dropEnabled="true"
+             dragStart="check_draggability(event);"
+             dragDrop="drop_handler(event);"
+             >
+        <mx:itemRenderer><fx:Component><components:ObjectTreeRenderer /></fx:Component></mx:itemRenderer>
+    </mx:Tree>
+        <s:Button label="Verify Connection" click="verify_connection();" />
+    </mx:VBox>
+    <mx:Spacer width="5%" />
+    <mx:VBox right="10" top="10" bottom="10" width="50%" height="100%">
+        <s:Label text="Local Objects:" />
+    <mx:Tree id="local_objects" height="100%" width="100%" rowHeight="25"
+             dataProvider="{local_objects_data}" labelField="label"
+             showRoot="false" doubleClickEnabled="true"
+             allowDragSelection="true" allowMultipleSelection="true"
+             dragMoveEnabled="true" dragEnabled="true" dropEnabled="true"
+             dragStart="check_draggability(event);"
+             dragDrop="drop_handler(event);"
+             >
+        <mx:itemRenderer>
+            <fx:Component>                        
+                <components:ObjectTreeRenderer>
+                    <fx:Script>
+                        <![CDATA[
+                            import mx.containers.HBox;
+                            import mx.controls.Button;
+                            import mx.controls.CheckBox;
+                            import mx.controls.treeClasses.TreeListData;
+
+                            public var disIconButtons:HBox;
+                            
+                            override protected function createChildren() : void {
+                                super.createChildren();
+                                disIconButtons = new HBox();
+                                disBox.addChild(disIconButtons);
+                            }
+                            
+                            override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void {
+                                treeListData = TreeListData(listData);
+                                if (treeListData != null) {
+                                    if (super.data) {
+                                        var node:XML = treeListData.item as XML;
+                                        disIconButtons.removeAllChildren();
+                                        
+                                        if (node.hasOwnProperty('@dropped')) {
+                                            var button:Button = new Button();
+                                            button.setStyle("icon", icons_list['dropped_warning']);
+                                            button.toolTip = "Item was dropped from the foreign source!" +
+                                                " Click to drop locally.";
+                                            button.addEventListener(MouseEvent.CLICK, function(e:*) : void {
+                                                outerDocument.drop_item(node);
+                                            });
+                                            disIconButtons.addChild(button);
+                                        }
+                                        if (node.hasOwnProperty('@changed')) {
+                                            button = new Button();
+                                            button.setStyle("icon", icons_list['changed_warning']);
+                                            button.toolTip = "Item on the foreign source has changed!" +
+                                                " Click to attempt an update.";
+                                            button.addEventListener(MouseEvent.CLICK, function(e:*) : void {
+                                                outerDocument.update_item(node);
+                                            });
+                                            disIconButtons.addChild(button);
+                                        }
+                                    }
+                                }
+                                super.updateDisplayList(unscaledWidth, unscaledHeight);
+                            }
+                            
+                        ]]>
+                    </fx:Script>
+                </components:ObjectTreeRenderer>
+            </fx:Component>
+        </mx:itemRenderer>
+    </mx:Tree>
+        <s:Button label="Apply" click="import_data();" />
+    </mx:VBox>
+    
+    <fx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+            import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
+            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import mx.managers.DragManager;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import mx.events.DragEvent;
+            
+            [Bindable]
+            public var foreign_server:String;
+            
+            [Bindable]
+            public var foreign_objects_data:XML;
+            
+            [Bindable]
+            public var local_objects_data:XML;
+            
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            public function init() : void {
+                
+                /* You suuuuuck */
+
+                /* TODO:
+                fix drag drop so items can be placed inside schemas
+                potential option: on drag over, try to expand a schema and/or add an empty
+                'drop here' element
+                (even better: highlight schemas, underline tables. when dropped on schema,
+                insert)
+                */
+                
+                // Filter out everything but schemas and foreign tables.
+                local_objects_data = new XML(<schemas />);
+                for each (var el:XML in model.object_tree.tree_data.schemas[0].schema) {
+                    var node:XML = <schema label={el.@label}>{el.foreign_tables.children()}</schema>;
+                    local_objects_data.appendChild(node);
+                }
+                
+                // Fetch the remote objects for our foreign_server (will also return
+                // a list of already existing objects in our DB)
+                var get_remote_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
+                    'getForeignData', {'server_name': foreign_server},
+                    {'callback': load_foreign_data}
+                );
+                CairngormEventDispatcher.getInstance().dispatchEvent(get_remote_event);
+            }
+            
+            private function verify_connection() : void {
+                var ver_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
+                    'testServer', {'server_name': foreign_server},
+                    {'callback': function(r:*) : void {
+                      if (String(r) == '')
+                          Alert.show('Connection Made', 'Success');
+                      else
+                          Alert.show('Connection failed: ' + String(r), 'Failure');
+                    }}
+                );
+                CairngormEventDispatcher.getInstance().dispatchEvent(ver_event);
+            }
+            
+            private function import_data() : void {
+                // Send up all the stuff for importing / deleting...
+            }
+            
+            public function load_foreign_data(r:*) : void {
+                var results:XML = XML(r);
+                trace(results.toXMLString());
+                foreign_objects_data = new XML(<data />);
+                for each (var fs:String in results.foreign_schemas) {
+                    trace(fs);
+                    var node:XML = <foreign_schema label={fs} />;
+                    node.appendChild(XML(results.foreign_tables).(@schema == fs));
+                    foreign_objects_data.appendChild(node);
+                }
+            }
+            
+            /**
+             * Allow dropping items when they no longer exist on the server,
+             * otherwise just move them back and forth.
+             */
+            public function drop_item(node:XML) : void {
+                
+            }
+            
+            public function update_item(node:XML) : void {
+                
+            }
+            
+            // drag'n'drop stuff            
+            private function drop_handler(event:DragEvent) : void {
+                if (event.dragSource.hasFormat("treeItems")) {
+                    return;
+                    var dest:Tree = (event.currentTarget == local_objects) ? foreign_objects : local_objects;
+                    
+                    event.preventDefault();
+                    dest.hideDropFeedback(event);                
+
+                    try {
+                        var index:Number = dest.calculateDropIndex(event);
+                    } catch(e:Error) {
+                        DragManager.showFeedback(DragManager.NONE);
+                        return;
+                    }
+                    
+                    dest.selectedIndex = index;
+                    var dropped_item:XML = XML(dest.selectedItem);
+                    trace(dropped_item.toXMLString());
+                }
+            }
+            
+            /** We only want to allow dragging foreign tables,
+            * unless it's from the left side where a "foreign_schema"
+            * drag basically means take the same name of the foreign schema
+            * for our local schema creation and move the tables there.
+            */
+            private function check_draggability(event:DragEvent) : void {
+                for each (var item:Object in event.currentTarget.selectedItems) {
+                    if (! (XML(item).localName() == 'foreign_table' || XML(item).localName() == 'foreign_schema') ) {
+                        event.preventDefault();
+                        return;
+                    }
+                }
+            }
+
+            
+        ]]>
+    </fx:Script>
+</s:Group>

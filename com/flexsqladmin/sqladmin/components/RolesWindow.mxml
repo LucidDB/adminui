@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:states>
         <mx:State name="edit">
             <mx:SetProperty target="{r_pan}" name="title" value="Modify Role" />
-            <mx:AddChild relativeTo="{r_name_item}">
+            <mx:AddChild relativeTo="{r_name_item}" creationPolicy="all">
                 <mx:ComboBox id="edit_role_list" dataProvider="{model.roles_list}"
                              creationComplete="select_role(selected_role);"
                              change="role_change();" />
@@ -182,6 +182,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             public function select_role(role:String='') : void {
+                //if (edit_role_list == null)
                 if (role == '')
                     role = selected_role;
                 else
