@@ -22,10 +22,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
          xmlns:mx="library://ns.adobe.com/flex/mx"
          width="100%" height="100%" xmlns:components="com.flexsqladmin.sqladmin.components.*">
     <s:layout>
-        <s:HorizontalLayout />
+        <s:HorizontalLayout paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" />
     </s:layout>
 
-    <mx:VBox left="10" top="10" bottom="10" width="50%" height="100%">
+    <mx:VBox width="50%" height="100%">
         <s:Label text="Foreign Objects:" />
     <mx:Tree id="foreign_objects" height="100%" width="100%" rowHeight="25"
              dataProvider="{foreign_objects_data}" labelField="label"
@@ -39,9 +39,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     </mx:Tree>
         <s:Button label="Verify Connection" click="verify_connection();" />
     </mx:VBox>
-    <mx:Spacer width="5%" />
+    
+    <mx:VBox height="100%" width="10%" verticalAlign="middle">
+        <s:Button id="import_btn" width="100%"
+              creationComplete="import_btn.labelDisplay.maxDisplayedLines = 0;"
+              label="Add selected foreign tables into selected schema&#13;>>"
+              enabled="{local_objects.selectedItem != null &amp;&amp;
+                        foreign_objects.selectedItems.length > 0}"
+              click="move_across();" />
+    </mx:VBox>
+    
     <mx:VBox right="10" top="10" bottom="10" width="50%" height="100%">
-        <s:Label text="Local Objects:" />
+        <mx:HBox width="100%">
+        <s:Label text="Local Objects:" /><mx:Spacer width="100%" />
+        <mx:Button click="newSchema();" label="New Schema"
+                   icon="@Embed(source='/icons/database_add.png')" /></mx:HBox>
     <mx:Tree id="local_objects" height="100%" width="100%" rowHeight="25"
              dataProvider="{local_objects_data}" labelField="label"
              showRoot="false" doubleClickEnabled="true"
@@ -58,7 +70,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             import mx.containers.HBox;
                             import mx.controls.Button;
                             import mx.controls.CheckBox;
+                            import mx.controls.Image;
                             import mx.controls.treeClasses.TreeListData;
+                            import mx.rpc.events.HeaderEvent;
 
                             public var disIconButtons:HBox;
                             
@@ -77,6 +91,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                         
                                         if (node.hasOwnProperty('@dropped')) {
                                             var button:Button = new Button();
+                                            button.percentHeight = 100;
+                                            button.scaleX = 0.5;
+                                            button.scaleY = 0.5;
                                             button.setStyle("icon", icons_list['dropped_warning']);
                                             button.toolTip = "Item was dropped from the foreign source!" +
                                                 " Click to drop locally.";
@@ -87,6 +104,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                         }
                                         if (node.hasOwnProperty('@changed')) {
                                             button = new Button();
+                                            button.percentHeight = 100;
+                                            button.scaleX = 0.5;
+                                            button.scaleY = 0.5;
                                             button.setStyle("icon", icons_list['changed_warning']);
                                             button.toolTip = "Item on the foreign source has changed!" +
                                                 " Click to attempt an update.";
@@ -94,6 +114,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                                 outerDocument.update_item(node);
                                             });
                                             disIconButtons.addChild(button);
+                                        }
+                                        if (node.hasOwnProperty('@added')) {
+                                            var img:Image = new Image();
+                                            img.source = icons_list['added_warning'];
+                                            disIconButtons.addChild(img);
                                         }
                                     }
                                 }
@@ -111,6 +136,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     
     <fx:Script>
         <![CDATA[
+            import mx.managers.PopUpManager;
+            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import mx.controls.Alert;
             import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
             import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
@@ -133,14 +160,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             public function init() : void {
                 
-                /* You suuuuuck */
-
                 /* TODO:
                 fix drag drop so items can be placed inside schemas
                 potential option: on drag over, try to expand a schema and/or add an empty
                 'drop here' element
                 (even better: highlight schemas, underline tables. when dropped on schema,
                 insert)
+                on move over keep track of which tables are being imported into which local schemas
+                also add << undo or whatever...
+                test: does it actually get existing locals?
                 */
                 
                 // Filter out everything but schemas and foreign tables.
@@ -180,11 +208,37 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var results:XML = XML(r);
                 trace(results.toXMLString());
                 foreign_objects_data = new XML(<data />);
-                for each (var fs:String in results.foreign_schemas) {
-                    trace(fs);
-                    var node:XML = <foreign_schema label={fs} />;
-                    node.appendChild(XML(results.foreign_tables).(@schema == fs));
-                    foreign_objects_data.appendChild(node);
+                var schema_nodes:Object = {};
+                var tabs:XMLList = new XMLList(results..foreign_tables[0].children().toString());
+                for each (var fts:XML in tabs) {
+                    var schema:String = fts.@schema;
+                    if (schema == '')
+                        schema = 'Default';
+                    var node:XML;
+                    if (schema_nodes.hasOwnProperty(schema)) {
+                        node = schema_nodes[schema];
+                    } else {
+                        node = <foreign_schema label={schema} />;
+                        foreign_objects_data.appendChild(node);
+                        schema_nodes[schema] = node;
+                    }
+                    fts.@label = fts.@name;
+                    fts.@name = '"' + fts.@name + '"';
+                    node.appendChild(fts);
+                }
+            }
+            
+            public function move_across() : void {
+                for each (var local_schema:XML in local_objects.selectedItems) {
+                    if (local_schema.localName() != 'schema') continue;
+                    for each (var foreign_obj:XML in foreign_objects.selectedItems) {
+                        if (foreign_obj.localName() != 'foreign_schema') {
+                            if (!local_schema.children().contains(foreign_obj)) {
+                                foreign_obj.@added = true;
+                                local_schema.appendChild(foreign_obj);
+                            }
+                        }
+                    }
                 }
             }
             
@@ -234,6 +288,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         return;
                     }
                 }
+            }
+            
+            public function newSchema() : void {
+                var sch_win:NewSchemaWindow = NewSchemaWindow(PopUpManager.createPopUp(this, NewSchemaWindow, true));
+                sch_win.setStyle("borderAlpha", 0.8);
+                sch_win.showCloseButton = true;
+                sch_win.addEventListener(Event.CLOSE, function():void {
+                    local_objects_data = new XML(<schemas />);
+                    for each (var el:XML in model.object_tree.tree_data.schemas[0].schema) {
+                        var node:XML = <schema label={el.@label}>{el.foreign_tables.children()}</schema>;
+                        local_objects_data.appendChild(node);
+                    }
+                });
             }
 
             
