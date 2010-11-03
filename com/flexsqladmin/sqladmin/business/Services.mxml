@@ -265,6 +265,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <wrapper></wrapper>
             </mx:request>
         </mx:operation>
+        <mx:operation name="getExtendedWrapperOptions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <wrapper></wrapper>
+                <driver></driver>
+            </mx:request>
+        </mx:operation>
         <mx:operation name="getWrapperOptionsForServer" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server></server>
@@ -287,6 +293,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <server_name></server_name>
             </mx:request>
         </mx:operation>
+        <mx:operation name="importForeignSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <server></server>
+                <from_schema></from_schema>
+                <to_schema></to_schema>
+                <tables></tables>
+            </mx:request>
+        </mx:operation>
+
     </mx:WebService>
 
 </cairngorm:ServiceLocator>

@@ -142,7 +142,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         <roles label="Roles" loadInfo={roles_load}>
                         </roles>
                     </security>
-                    <remote_data label="Foreign Data Wrappers" loadInfo={remote_data_load}>
+                    <remote_data label="Foreign Data Wrappers and Servers" loadInfo={remote_data_load}>
                     </remote_data>
                     <system label="System">
                         <counters label="Counters" />
@@ -522,6 +522,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     return {'label': label, 'icon': icon};
                 };
                 var gen_add:Object = con_row('Add New', add_icon);
+                var gen_add_what:Function = function(what:String):Object { return con_row('Add New ' + what, add_icon); };
                 var gen_drop:Object = con_row('Drop', drop_icon);
                     
                 register_context("schemas", [con_row('Add New', add_schema_icon)],
@@ -757,21 +758,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         
                     }
                 );
-                register_context('wrapper', [/*gen_add,
+                register_context('wrapper', [gen_add_what('Server')/*
                     con_row('View Details', null)*/],
                     function (index:Number, context:ObjectTree) : void {
-                        
+                        if (index == 0) {
+                            var wiz:ForeignDataWizard = FlexGlobals.topLevelApplication.addTab('New Foreign Data Server', ForeignDataWizard); 
+                            callLater(wiz.set_wrapper, [context.selectedItem.@label]);
+                            callLater(wiz.show_options);
+                        }
                     }
                 );
                 register_context('servers', [gen_add],
                     function (index:Number, context:ObjectTree) : void {
                         var wiz:ForeignDataWizard = FlexGlobals.topLevelApplication.addTab('New Foreign Data Server', ForeignDataWizard); 
                         callLater(wiz.set_wrapper, [context.getParentItem(context.selectedItem).@label]);
+                        callLater(wiz.show_options);
                     }
                 );
                 register_context('server', [gen_drop,
                     con_row('Edit', server_edit_icon),
-                    /*con_row('Import Objects', null),*/
+                    con_row('Import Objects', null),
                     con_row('Verify Connection', server_verify_icon)],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
@@ -786,11 +792,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                 wiz.show_options();
                                 wiz.load_prior_values(context.selectedItem.@label);
                             });
-                        } else if (0 == 1 && index == 2) { // change when import is done
+                        } else if (index == 2) {
                             var importer:ForeignDataImporter = FlexGlobals.topLevelApplication.addTab('Import Foreign Objects', ForeignDataImporter);
                             importer.foreign_server = context.selectedItem.@label;
                             importer.init();
-                        } else if (index == 2) { // change to 3 when import is done
+                        } else if (index == 3) {
                             var ver_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
                                 'testServer', {'server_name': context.selectedItem.@label},
                                 {'callback': function(r:*) : void {

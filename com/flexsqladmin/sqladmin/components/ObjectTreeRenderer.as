@@ -96,6 +96,8 @@ package com.flexsqladmin.sqladmin.components
         private var changed_warning:Class;
         [Embed(source="/icons/add.png")]
         private var added_warning:Class;
+        [Embed(source="/icons/parse.png")]
+        private var copied_warning:Class;
         
         [Bindable]
         public var icons_list:Object = {
@@ -130,6 +132,7 @@ package com.flexsqladmin.sqladmin.components
             , 'dropped_warning' : dropped_warning
             , 'changed_warning' : changed_warning
             , 'added_warning' : added_warning
+            , 'copied_warning' : copied_warning
         }
             
         override protected function createChildren() : void {

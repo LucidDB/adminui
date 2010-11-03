@@ -31,11 +31,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
              dataProvider="{foreign_objects_data}" labelField="label"
              showRoot="false" doubleClickEnabled="true"
              allowDragSelection="true" allowMultipleSelection="true"
-             dragMoveEnabled="true" dragEnabled="true" dropEnabled="true"
+             dragMoveEnabled="true" dragEnabled="false" dropEnabled="true"
              dragStart="check_draggability(event);"
              dragDrop="drop_handler(event);"
              >
-        <mx:itemRenderer><fx:Component><components:ObjectTreeRenderer /></fx:Component></mx:itemRenderer>
+        <!--<mx:itemRenderer><fx:Component><components:ObjectTreeRenderer /></fx:Component></mx:itemRenderer>-->
     </mx:Tree>
         <s:Button label="Verify Connection" click="verify_connection();" />
     </mx:VBox>
@@ -43,10 +43,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:VBox height="100%" width="10%" verticalAlign="middle">
         <s:Button id="import_btn" width="100%"
               creationComplete="import_btn.labelDisplay.maxDisplayedLines = 0;"
-              label="Add selected foreign tables into selected schema&#13;>>"
+              label="Add selected foreign table(s) into selected schema(s)&#13;>>"
               enabled="{local_objects.selectedItem != null &amp;&amp;
+                        local_objects.selectedItem.localName() == 'schema' &amp;&amp;
                         foreign_objects.selectedItems.length > 0}"
               click="move_across();" />
+        <s:Button id="undo_btn" width="100%"
+                  creationComplete="undo_btn.labelDisplay.maxDisplayedLines = 0;"
+                  label="Cancel selected import(s) to local object(s)&#13;&lt;&lt;"
+                  enabled="{local_objects.selectedItem != null &amp;&amp;
+                            local_objects.selectedItem.hasOwnProperty('@added')}"
+                  click="undo_move_across();" />
     </mx:VBox>
     
     <mx:VBox right="10" top="10" bottom="10" width="50%" height="100%">
@@ -58,9 +65,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
              dataProvider="{local_objects_data}" labelField="label"
              showRoot="false" doubleClickEnabled="true"
              allowDragSelection="true" allowMultipleSelection="true"
-             dragMoveEnabled="true" dragEnabled="true" dropEnabled="true"
+             dragMoveEnabled="true" dragEnabled="false" dropEnabled="true"
              dragStart="check_draggability(event);"
              dragDrop="drop_handler(event);"
+             creationComplete="foreign_objects.itemRenderer = local_objects.itemRenderer;"
              >
         <mx:itemRenderer>
             <fx:Component>                        
@@ -120,6 +128,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                             img.source = icons_list['added_warning'];
                                             disIconButtons.addChild(img);
                                         }
+                                        if (node.hasOwnProperty('@copies') && Number(node.@copies) > 0) {
+                                            img = new Image();
+                                            img.source = icons_list['copied_warning'];
+                                            disIconButtons.addChild(img);
+                                        }
                                     }
                                 }
                                 super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -158,17 +171,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             [Bindable]
             private var model:ModelLocator = ModelLocator.getInstance();
             
+            private var import_calls:Number;
+            
             public function init() : void {
                 
                 /* TODO:
                 fix drag drop so items can be placed inside schemas
-                potential option: on drag over, try to expand a schema and/or add an empty
-                'drop here' element
-                (even better: highlight schemas, underline tables. when dropped on schema,
-                insert)
-                on move over keep track of which tables are being imported into which local schemas
-                also add << undo or whatever...
-                test: does it actually get existing locals?
                 */
                 
                 // Filter out everything but schemas and foreign tables.
@@ -201,7 +209,38 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             private function import_data() : void {
-                // Send up all the stuff for importing / deleting...
+                import_calls = 0;
+                for each (var to_schema:XML in local_objects_data.children()) {
+                    var from_schemas:Object = {};
+                    for each (var f_table:XML in to_schema.children()) {
+                        if (f_table.hasOwnProperty('@added')) {
+                            if (!from_schemas.hasOwnProperty(f_table.@schema))
+                                from_schemas[f_table.@schema] = [];
+                            from_schemas[f_table.@schema].push(f_table.@name);
+                        }
+                    }
+                    for (var f_schema:String in from_schemas) {
+                        if (f_schema == null || f_schema == '') var f_schema_n:String = ' ';
+                        var args:Object = {'server': foreign_server, 'from_schema': f_schema_n,
+                            'to_schema': to_schema.@label, 'tables': from_schemas[f_schema]};
+                        var import_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
+                            'importForeignSchema', args, {'callback': import_confirm});
+                        import_calls++;
+                        CairngormEventDispatcher.getInstance().dispatchEvent(import_event);
+                    }
+                }
+            }
+            
+            public function import_confirm(r:*) : void {
+                import_calls--;
+                var response:String = String(r);
+                if (response != "") {
+                    Alert.show("An error occured on one of the imports: " + response, "Error");
+                }
+                if (import_calls == 0) {
+                    Alert.show("Import has finished. If you received errors, please correct your" +
+                        " foreign server and try again.", "Action Completed");
+                }
             }
             
             public function load_foreign_data(r:*) : void {
@@ -223,7 +262,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         schema_nodes[schema] = node;
                     }
                     fts.@label = fts.@name;
-                    fts.@name = '"' + fts.@name + '"';
+                    fts.setLocalName('foreign_table');
                     node.appendChild(fts);
                 }
             }
@@ -231,13 +270,50 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public function move_across() : void {
                 for each (var local_schema:XML in local_objects.selectedItems) {
                     if (local_schema.localName() != 'schema') continue;
-                    for each (var foreign_obj:XML in foreign_objects.selectedItems) {
+                    for (var i:Number = 0; i < foreign_objects.selectedItems.length; i++) {
+                        var foreign_obj_ref:XML = foreign_objects.selectedItems[i];
+                        var foreign_obj:XML = new XML(foreign_obj_ref);
+                        if (foreign_obj.hasOwnProperty('@copies')) delete foreign_obj.@copies;
                         if (foreign_obj.localName() != 'foreign_schema') {
                             if (!local_schema.children().contains(foreign_obj)) {
                                 foreign_obj.@added = true;
                                 local_schema.appendChild(foreign_obj);
+                                if (foreign_obj_ref.hasOwnProperty('@copies'))
+                                    foreign_obj_ref.@copies = Number(foreign_obj_ref.@copies) + 1;
+                                else
+                                    foreign_obj_ref.@copies = 1;
+                            }
+                        } else { // assume they want to add all children
+                            foreign_objects.expandItem(foreign_obj_ref, true, true, true);
+                            var obj_children:XMLList = foreign_obj_ref.children();
+                            for (var k:Number = 0; k < obj_children.length(); k++) {
+                                var obj_child:XML = new XML(obj_children[k]);
+                                if (obj_child.hasOwnProperty('@copies')) delete obj_child.@copies;
+                                if (!local_schema.children().contains(obj_child)) {
+                                    obj_child.@added = true;
+                                    local_schema.appendChild(obj_child);
+                                    if (obj_children[k].hasOwnProperty('@copies'))
+                                        obj_children[k].@copies = Number(obj_children[k].@copies) + 1;
+                                    else
+                                        obj_children[k].@copies = 1;
+                                }
                             }
                         }
+                    }
+                }
+            }
+            
+            public function undo_move_across() : void {
+                for (var i:Number = 0; i < local_objects.selectedItems.length; i++) {
+                    if (local_objects.selectedItems[i].hasOwnProperty('@added')) {
+                        for each (var node:XML in foreign_objects_data..foreign_table) {
+                            if (node.@label == local_objects.selectedItems[i].@label &&
+                                node.hasOwnProperty('@copies') && Number(node.@copies) > 0) {
+                                node.@copies = Number(node.@copies) - 1;
+                                break;
+                            }
+                        }
+                        model.object_tree.deleteItem(local_objects.selectedItems[i]);
                     }
                 }
             }
@@ -257,9 +333,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             // drag'n'drop stuff            
             private function drop_handler(event:DragEvent) : void {
                 if (event.dragSource.hasFormat("treeItems")) {
-                    return;
                     var dest:Tree = (event.currentTarget == local_objects) ? foreign_objects : local_objects;
-                    
+                    if (dest == local_objects) {
+                        trace('local');
+                    } else {
+                        trace('foreign');
+                    }
                     event.preventDefault();
                     dest.hideDropFeedback(event);                
 
@@ -270,9 +349,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         return;
                     }
                     
-                    dest.selectedIndex = index;
-                    var dropped_item:XML = XML(dest.selectedItem);
-                    trace(dropped_item.toXMLString());
+                    var items:Array = [].concat(event.dragSource.dataForFormat("treeItems") as Array);
+                    
+                    //dest.selectedIndex = index;
+                    //var dropped_item:XML = XML(dest.selectedItem);
+                    //trace(dropped_item.toXMLString());
                 }
             }
             
