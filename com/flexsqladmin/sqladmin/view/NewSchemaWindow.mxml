@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 creationComplete="init();"
                 title="Creating New Schema"
                 close="closeWin();"
+                keyUp="keyHandler(event);" 
                 >
     <mx:Validator source="{new_name}" property="text" />
 
@@ -67,6 +68,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         
             public function closeWin() : void {
                 PopUpManager.removePopUp(this);
+            }
+            
+            private function keyHandler(e:KeyboardEvent):void{
+                // Submit form on enter
+                if(e.keyCode == 13)
+                    createSchema();
             }
             
         ]]>

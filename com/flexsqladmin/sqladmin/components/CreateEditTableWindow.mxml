@@ -228,9 +228,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             public function select_schema(name:String) : void {
-                for (var i:Number = 0; i < table_schema.dataProvider.children().length; i++) {
-                    if (table_schema.selectedLabel == name)
+                for (var i:Number = 0; i < table_schema.dataProvider.length; i++) {
+                    if (table_schema.dataProvider[i].@label == name) {
                         table_schema.selectedIndex = i;
+                        break;
+                    }
                 }
             }
             
