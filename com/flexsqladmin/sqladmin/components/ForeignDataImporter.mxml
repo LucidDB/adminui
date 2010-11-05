@@ -221,25 +221,41 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     }
                     for (var f_schema:String in from_schemas) {
                         if (f_schema == null || f_schema == '') var f_schema_n:String = ' ';
+                        else f_schema_n = f_schema;
                         var args:Object = {'server': foreign_server, 'from_schema': f_schema_n,
                             'to_schema': to_schema.@label, 'tables': from_schemas[f_schema]};
                         var import_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
-                            'importForeignSchema', args, {'callback': import_confirm});
+                            'importForeignSchema', args, {'callback': import_confirm,
+                                'callback_arg': args}
+                        );
                         import_calls++;
                         CairngormEventDispatcher.getInstance().dispatchEvent(import_event);
                     }
                 }
             }
             
-            public function import_confirm(r:*) : void {
-                import_calls--;
+            private var error_occurred:Boolean = false;
+            public function import_confirm(r:*, sent_args:Object) : void {
                 var response:String = String(r);
                 if (response != "") {
-                    Alert.show("An error occured on one of the imports: " + response, "Error");
+                    error_occurred = true;
+                    Alert.show("An error occured when trying to import from " +
+                        sent_args['from_schema'] + " into " + sent_args['to_schema'] + 
+                        ": " + response, "Error");
+                } else {
+                    for each (var ftn:String in sent_args['tables']) {
+                        model.object_tree.addItem('foreign_table', ftn, 'schemas', 'schema@',
+                            sent_args['to_schema'], 'foreign_tables');
+                    }
                 }
+                import_calls--;
                 if (import_calls == 0) {
-                    Alert.show("Import has finished. If you received errors, please correct your" +
-                        " foreign server and try again.", "Action Completed");
+                    var msg:String = "Import attempt has finished";
+                    if (error_occurred)
+                        msg += " but there were errors. Please correct the foreign server and try again.";
+                    else
+                        msg += " successfully.";
+                    Alert.show(msg, "Action Completed");
                 }
             }
             

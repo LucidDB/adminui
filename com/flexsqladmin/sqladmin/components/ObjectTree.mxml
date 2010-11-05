@@ -350,19 +350,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             /**
-            * This is to become our generic add loader; need to abstract
-            * the other add functions as special cases of this one.
+            * This is our generic add loader; need to abstract
+            * the other add functions as special cases of this one.<br /><br />
             * 
-            * Example usage:
+            * Example usage:<br />
             * model.object_tree.addItem('user', user.toUpperCase(), 'security', 'users');
-            * will descend to <security><users> and add <user label="{user.toUpperCase()}" />.
+            * will descend to &lt;security&gt;&lt;users&gt; and add
+            *  &lt;user label="{user.toUpperCase()}" /&gt;.
             * 
-            * model.object_tree.addItem('server', server_name.text.toUpperCase(),
-            *            'remote_data', 'wrapper@', wrapper_list.selectedLabel, 'servers');
-            * the '@' at the end of 'wrapper' signifies that the next argument is a condition, so it
-            * will select the first 'wrapper' element where @label == the next argument.
+            * <br /><br />
+            * Example usage:<br />
+            * model.object_tree.addItem('server', server_name.text.toUpperCase(),<br />
+            *            'remote_data', 'wrapper&#64;', wrapper_list.selectedLabel, 'servers');
+            * the '&#64;' at the end of 'wrapper' signifies that the next argument is a condition, so it
+            * will select the first 'wrapper' element where &#64;label == the next argument.
+            * 
+            * @return Returns the added item as XML in case you want to do more with it (like add extra
+            * attributes). Will return null when the parent can be expanded with a loadInfo call.
             */
-            public function addItem(tag:String, label:String, ... structure) : void {
+            // doc note, &#64; is the @
+            public function addItem(tag:String, label:String, ... structure) : XML {
                 var parent:XML = tree_data[structure[0]][0];
                 var node:XML = <{tag} label={label} />;
                 for (var i:Number = 1; i < structure.length; i++) {
@@ -377,15 +384,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     // should only call this on a successful post anyway, so whatever was added
                     // should be returned in the call.
                     expandItem(parent, true);
-                    return;
+                    return null;
                 }
                 for (i = 0; i < parent.children().length(); i++) {
                     if (parent.children()[i].@label < label)
                         continue;
                     parent.insertChildBefore(parent.children()[i], node);
-                    return;
+                    return node;
                 }
                 parent.appendChild(node);
+                return node;
             }
             
             /**
@@ -447,6 +455,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     if (x + 1 < this.selectedItem.children().length())
                         cols += ", \r";
                 }
+                if (cols == '') cols = '*';
                 return cols;
             }
             

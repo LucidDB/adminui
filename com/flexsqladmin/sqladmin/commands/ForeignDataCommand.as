@@ -28,8 +28,12 @@ package com.flexsqladmin.sqladmin.commands
         }
         
         public function onResult(event:*=null) : void {
-            if (extra_args && extra_args['callback']) {
-                extra_args['callback'](event.result);
+            if (extra_args && extra_args.hasOwnProperty('callback')) {
+                if (extra_args.hasOwnProperty('callback_arg')) {
+                    extra_args['callback'](event.result, extra_args['callback_arg']);
+                } else {
+                    extra_args['callback'](event.result);
+                }
                 return;
             }
         }
