@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
     <mx:Form>
         <mx:FormItem label="Editing User">
-            <mx:ComboBox id="users" dataProvider="{model.object_tree.tree_data.security.users.children()}"
+            <mx:ComboBox id="users" dataProvider="{ObjectTree(model.object_tree).tree_data.security.users.children()}"
                          labelField="@label"
                          change="user_change();"
                          creationComplete="select_user();" />
@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.components.ObjectTree;
             import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             
