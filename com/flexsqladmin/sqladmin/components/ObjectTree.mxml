@@ -437,6 +437,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 for (i = 0; i < schema_node.tables.children().length(); i++) {
                     if (schema_node.tables.table[i].@label < name)
                         continue;
+                    if (schema_node.tables.table[i].@label == name) {
+                        callLater(function():void { delete schema_node.tables.table[i+1]; });
+                    }
                     schema_node.tables.insertChildBefore(schema_node.tables.table[i], node);
                     return;
                 }
