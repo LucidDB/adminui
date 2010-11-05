@@ -75,11 +75,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 } else {
                     col_nullable.selected = (col_details.@isNullable == "true") ? true : false;
                 }
-                default_required = (!col_nullable.selected && num_existing_rows > 0);
-                defval_validator.validate();
-                if (default_required) {
-                    col_default.setFocus();
-                    col_default.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                if (editable) {
+                    default_required = (!col_nullable.selected && num_existing_rows > 0);
+                    defval_validator.validate();
+                    if (default_required) {
+                        col_default.setFocus();
+                        col_default.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_OVER));
+                    }
                 }
                  
                 col_digits.addEventListener(Event.CHANGE, function():void { col_details.@decDigits = col_digits.text; });

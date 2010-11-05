@@ -30,6 +30,7 @@ package com.flexsqladmin.sqladmin.vo
 		public var dateformatter:DateFormatter = new DateFormatter();
 		
 		public function writeHistory(s:String, sqt:String):void{
+            if (s == null) s = ''; // why is this null?
 			var pattern:RegExp = /[\r|\t]/gm;
 			var timeStamp:Date = new Date();
 			dateformatter.formatString = "LL:NN:SS A";

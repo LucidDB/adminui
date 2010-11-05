@@ -167,10 +167,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			}
 			
 			public function getQueryText():String{
-				if (querytext.selectionBeginIndex != querytext.selectionEndIndex)
+				/*if (querytext.selectionBeginIndex != querytext.selectionEndIndex)
                     return querytext.text.substring(querytext.selectionBeginIndex, querytext.selectionEndIndex);
                 else
-                    return querytext.text;
+                */
+                return querytext.text;
 			}
             
             public function isEmpty():Boolean {
@@ -187,7 +188,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			}
 			
 			public function parseQuery(e:KeyboardEvent):void{
-				if (querytext.text != null){
+				if (querytext.text != null && e.keyCode != 116){
 	                var pattern:RegExp = /\b(add|call|column|modify|truncate|create|schema|table|view|procedure|alter|drop|is|null|not|with|rollup|cube|as|union|all|top|on|like|cross|asc|desc|right|left|set|values|insert|into|update|delete|select|from|where|order|by|inner|outer|join|exec|group|having|and|or|execute)\b/gi;
 	                var aggpattern:RegExp = /\b(count|avg|sum|max|min)\b/gi;
 	                var regexNewLine:RegExp = /\r/g;

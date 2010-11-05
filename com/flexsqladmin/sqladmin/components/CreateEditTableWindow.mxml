@@ -205,7 +205,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     return;
                 }
                 for each (var col_form:ColumnForm in col_forms) {
-                    if (col_form.default_required && col_form.col_default.text == '') {
+                    if (col_form.editable && col_form.default_required && col_form.col_default.text == '') {
                         Alert.show("Please fill in the default value on your non-nullable column.", "Error");
                         return;
                     }
