@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import mx.events.ListEvent;
             import mx.events.MenuEvent;
             import mx.managers.PopUpManager;
+            import mx.utils.StringUtil;
 
             [Embed("/icons/table_edit.png")]
             public var ETimg:Class;
@@ -176,7 +177,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 register_contexts_and_handlers();
             }
             
-            public function addSchemaElementLoaders() : void {
+            public function addSchemaElementLoaders(schema_name:String=null) : void {
+                
                 for each (var schema:XML in tree_data.schemas.children()) {
                     /*
                     var foreign_tables_load:String = JSON.encode({'service': 'sqlWebService',
@@ -184,6 +186,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         'arguments': {schema: String(schema.@label)}});
                     schema.foreign_tables.@loadInfo = foreign_tables_load;
                     */
+                    if (schema_name != null && schema_name != String(schema.@label))
+                        continue;
                     var functions_load:String = JSON.encode({'service': 'sqlWebService',
                         'operation': 'getFunctions',
                         'arguments': {schema: String(schema.@label)}});
@@ -344,9 +348,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     if (tree_data.schemas.schema[i].@label < name)
                         continue;
                     tree_data.schemas.insertChildBefore(tree_data.schemas.schema[i], node);
+                    addSchemaElementLoaders(name);
                     return;
                 }
                 tree_data.schemas.appendChild(node);
+                addSchemaElementLoaders(name);
             }
             
             /**
@@ -399,10 +405,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             /**
             * New view..
             */
-            public function addView(schema:String, name:String) : void {
-                // todo: figure out cols and/or stick a loadinfo in here.
-                var sql:String = "SELECT * FROM &quot;" + schema + "&quot;.&quot;" + name + "&quot;";
+            public function addView(schema:String, name:String, cols:String) : void {
+                var sql:String = "SELECT " + cols + " FROM &quot;" + schema +
+                    "&quot;.&quot;" + name + "&quot;";
                 var node:XML = <view label={name} sqlquery={sql}></view>;
+                for each (var col:String in cols.split(',')) {
+                    col = StringUtil.trim(col);
+                    node.appendChild(<column column={col} label={col} />);
+                }
                 var schema_node:XML = tree_data.schemas.schema.(@label == schema)[0];
                 for (var i:Number = 0; i < schema_node.views.children().length(); i++) {
                     if (schema_node.views.view[i].@label < name)

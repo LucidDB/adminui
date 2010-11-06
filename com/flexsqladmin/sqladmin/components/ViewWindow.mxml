@@ -81,9 +81,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 + view_schema.text + '"."'
                 + view_name.text + '" DESCRIPTION \'' + view_desc.text + '\' AS ' + sql;
                 
-                var details:XML = <details></details>;
-                var col:XML = <column name="" datatype="" isNullable="" />;
-                    
+                // Grab selected columns.
+                var pattern:RegExp = /select(.*?)from/gis;
+                var cols:String = String(pattern.exec(view_sql)[1]).replace(new RegExp('"|\n|\r|&quot;', 'g'), '');
                 
                 var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(view_sql, "special",
                     function(querydata:XML):void {
@@ -94,7 +94,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         Alert.show('View successfully ' + added, 'Success');
                         if (!editing) {
                             editing = true;
-                            model.object_tree.addView(view_schema.text, view_name.text);
+                            model.object_tree.addView(view_schema.text, view_name.text, cols);
                         }
                     }
                 });
