@@ -41,36 +41,19 @@ package com.flexsqladmin.sqladmin.commands
 		private var datagrid:DataGrid;
 		private var tablewindow:OpenTableWindow;
 		
-		public function execute(event:CairngormEvent):void
-		{
+		public function execute(event:CairngormEvent) : void {
 			DebugWindow.log("DeleteRowCommand.as:execute()");
-			var deletestring:String = "";
-			var checksqlstring:String = "";
 			tablemetadata = DeleteRowEvent(event).tablemetadata;
 			datagrid = DeleteRowEvent(event).datagrid;
 			tablewindow = DeleteRowEvent(event).tablewindow;
 			
-			for (var x:int = 0; x < datagrid.selectedItem.children().length(); x++){
-            	deletestring += "\"" + datagrid.columns[x].dataField + "\"";
-            	if (datagrid.selectedItem.children()[x] == "<NULL>" || datagrid.selectedItem.children()[x].toString().toLowerCase() == 'null') {
-            		deletestring += " IS NULL";
-            	} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "MONEY" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "SMALLMONEY"){
-            		deletestring += " = " + datagrid.selectedItem.children()[x];
-            	}else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "INTEGER"|| tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "BOOLEAN"){
-            		deletestring += " = " + datagrid.selectedItem.children()[x]; 
-            	}else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "DATE"){
-            		deletestring += " = date'" + datagrid.selectedItem.children()[x] + "'"; 
-            	}else {
-            		deletestring += " = '" + datagrid.selectedItem.children()[x] + "'"; 
-            	}
-            	if (x + 1 < datagrid.selectedItem.children().length())
-        			deletestring += " AND ";
-            }
-			
+            var first_col:String = datagrid.columns[0].dataField;
+            var deletestring:String = "LCS_RID(\"" + first_col + "\") = " +
+                datagrid.selectedItem.children()[datagrid.selectedItem.children().length()-1];
 			var table:String = tablemetadata.getTable();
 			var tableParts:Array = table.split(".");
 			table = tableParts.join('"."');
-			checksqlstring = "SELECT * FROM \"" + table + "\" WHERE " + deletestring;
+			var checksqlstring:String = "SELECT * FROM \"" + table + "\" WHERE " + deletestring;
 			deletesql = "DELETE FROM \"" + table + "\" WHERE " + deletestring;
 			
 			DebugWindow.log("Delete String = " + deletesql);

@@ -610,8 +610,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             "\".\"" + context.selectedItem.@label + "\"" + "\rWHERE {SEARCH_CONDITIONS}";
                         // 4 is the separator
                         } else if (index == 5) {
-                            OpenTableWindow(popup_new(OpenTableWindow)).setTablename(schema +
-                                "." + context.selectedItem.@label);
+                            var otw:OpenTableWindow = OpenTableWindow(popup_new(OpenTableWindow));
+                            otw.col_list = get_column_names(context);
+                            otw.setTablename(schema + "." + context.selectedItem.@label);
                         } else if (index == 6) {
                             drop_remove_item('TABLE "' + context.model.currentcatalogname + '"."' +
                                 get_schema(context) + '"."' + context.selectedItem.@label + '" ', true,

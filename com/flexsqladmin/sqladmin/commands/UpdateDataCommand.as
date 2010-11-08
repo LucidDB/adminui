@@ -68,23 +68,9 @@ package com.flexsqladmin.sqladmin.commands
 				updatesql += " = '" + newdatafield.text + "'";
             updatesql += " WHERE ";
             DebugWindow.log("UpdateDataCommand.as:execute3()");
-            var whereclause:String = "";
-			for(var x:int = 0; x < datagrid.columnCount ; x++){
-				whereclause += "\"" + datagrid.columns[x].dataField + "\"";
-				if (itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField] == "<NULL>"  || datagrid.columns[x].dataField.toString().toLowerCase() == 'null') {
-					whereclause += " IS NULL";
-				} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "MONEY" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "SMALLMONEY"){
-					whereclause += " = " + itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField];
-				} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "INTEGER" || tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "BOOLEAN"){
-					whereclause += " = " + itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField];
-				} else if(tablemetadata.getMetaData()[datagrid.columns[x].dataField] == "DATE"){
-					whereclause += " = date'" + itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField] + "'";
-				} else {
-					whereclause += " = '" + itemevent.currentTarget.editedItemRenderer.data[datagrid.columns[x].dataField] + "'"; 
-				}
-				if (x + 1 != datagrid.columnCount)
-					whereclause += " AND ";
-			}
+            var first_col:String = datagrid.columns[0].dataField;
+            var whereclause:String = "LCS_RID(\"" + first_col + "\") = " +
+                datagrid.selectedItem.children()[datagrid.selectedItem.children().length()-1];
 			updatesql += whereclause;
 			var checksql:String = "SELECT * FROM \"" + table + "\" WHERE " + whereclause;
 			

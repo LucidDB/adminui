@@ -42,11 +42,14 @@ package com.flexsqladmin.sqladmin.commands
 			var tableParts:Array = table.split(".");
 			table = tableParts.join('"."');
 			tabledatagrid = OpenTableEvent(event).tabledatagrid;
+            var col_list:String = OpenTableEvent(event).col_list.replace(new RegExp('&quot;', 'g'), '"');
+            var first_col:String = col_list.split(',')[0];
             
             var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
             var args:Object = {connection: model.connectionVO.getConnectionString(),
                 sqlquerytype: "normal",
-                sql: "SELECT * FROM \"" + table + "\"",
+                sql: "SELECT " + col_list + ", LCS_RID(" + first_col + ") as UNIQUE_LCS_RID" +
+                    " FROM \"" + table + "\"",
                 toomany: model.connectionVO.toomany
             };
             delegate.serviceDelegate("execSQL", args);
@@ -71,6 +74,8 @@ package com.flexsqladmin.sqladmin.commands
                 	dgcolumn.editable = false;
                 dgcols.push(dgcolumn);
             }
+            // Set the LCS_RID to invisible
+            DataGridColumn(dgcols[dgcols.length-1]).visible = false;
             tabledatagrid.dataProvider = tabledata
             tabledatagrid.columns = dgcols;
 		}

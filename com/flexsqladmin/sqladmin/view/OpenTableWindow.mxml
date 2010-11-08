@@ -24,28 +24,30 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	close="closeWin(event);" creationComplete="init();">
 	<mx:Script>
 		<![CDATA[
-			import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
-			import com.flexsqladmin.sqladmin.view.InsertRowWindow;
-			import mx.events.DataGridEvent;
-			import mx.events.DataGridEventReason;
-			import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
-			import com.flexsqladmin.sqladmin.events.TableMetaDataEvent;
-			import com.flexsqladmin.sqladmin.events.OpenTableEvent;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import com.flexsqladmin.sqladmin.events.DeleteRowEvent;
+			import com.flexsqladmin.sqladmin.events.OpenTableEvent;
+			import com.flexsqladmin.sqladmin.events.TableMetaDataEvent;
+			import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
+			import com.flexsqladmin.sqladmin.view.InsertRowWindow;
 			import com.flexsqladmin.sqladmin.vo.OpenTableData;
-			import mx.managers.PopUpManager;
-			import mx.events.CloseEvent;
+			
 			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.DataGridEvent;
+			import mx.events.DataGridEventReason;
+			import mx.managers.PopUpManager;
 		
-			private var opentabledata:OpenTableData;	
+			private var opentabledata:OpenTableData;
+            public var col_list:String;
 		
 			public function init():void{
         		PopUpManager.centerPopUp(this);
         	}
         	
         	public function refreshData():void{
-        		var opentablevent:OpenTableEvent = new OpenTableEvent(opentabledata.getTable(), tabledatagrid);
+        		var opentablevent:OpenTableEvent = new OpenTableEvent(opentabledata.getTable(), tabledatagrid, col_list);
             	CairngormEventDispatcher.getInstance().dispatchEvent(opentablevent);
    				getTableMetaData();
         	} 
@@ -88,6 +90,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	           	insertForm.showCloseButton = true; 
 	           	insertForm.setMetaData(opentabledata);
 	           	insertForm.setParentWindow(this);
+                insertForm.addEventListener(CloseEvent.CLOSE, refreshData);
         	}
         	public function closeWin(e:Event):void{
         		PopUpManager.removePopUp(this);
