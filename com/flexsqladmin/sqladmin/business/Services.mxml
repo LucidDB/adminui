@@ -108,6 +108,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <mx:operation name="getJars" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
+        <mx:operation name="getSchemaDdl" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+            </mx:request>
+        </mx:operation>
     </mx:WebService>
     
     <mx:WebService

@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.adobe.serialization.json.JSON;
             import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
+            import com.flexsqladmin.sqladmin.commands.GenerateDdlCommand;
             import com.flexsqladmin.sqladmin.components.DebugWindow;
             import com.flexsqladmin.sqladmin.components.ObjectTreeRenderer;
             import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
@@ -494,9 +495,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             /**
-            * Inserts a script-as command into an empty query window.
+            * Inserts query text into an empty query window.
             */
-            private function script_query(query:String, guessed_schema:String='') : void {
+            public function script_query(query:String, guessed_schema:String='') : void {
                 var qw:QueryWindow = model.tabs[String(QueryWindow)][VBox(model.main_tabnav.selectedChild).id];
                 if (qw && qw.isEmpty()) {
                     qw.setText(query);
@@ -552,7 +553,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 );
                 register_context("schema", [gen_drop,
                     con_row('Drop Cascade', drop_icon),
-                    /*con_row('Analyze All Tables In Schema', null)*/],
+                    /*con_row('Analyze All Tables In Schema', null),*/
+                    con_row('Generate DDL Statement', null)],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0 || index == 1) {
                             var casc:Boolean = (index == 1);
@@ -560,6 +562,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                 context.selectedItem.@label + '"', casc, 'Are you sure you want to\n' +
                                 'drop this schema?', 'Schema sucessfully dropped.', context,
                                 context.selectedItem as XML);
+                        } else if (index == 2) { // change to 3 later
+                            var gen:GeneralServiceEvent = new GeneralServiceEvent(GenerateDdlCommand,
+                                'getSchemaDdl', {'catalog' : model.currentcatalogname, 
+                                    'schema': context.selectedItem.@label}); 
+                            CairngormEventDispatcher.getInstance().dispatchEvent(gen);
                         }
                     }
                 );
