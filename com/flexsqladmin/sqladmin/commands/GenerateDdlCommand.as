@@ -8,6 +8,8 @@ package com.flexsqladmin.sqladmin.commands
     import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
     
+    import mx.utils.ObjectUtil;
+    
     public class GenerateDdlCommand implements Command, Responder {
         private var model:ModelLocator = ModelLocator.getInstance();
         private var args:Object;
@@ -25,7 +27,7 @@ package com.flexsqladmin.sqladmin.commands
         }
         
         public function onResult(event:*=null) : void {
-            var stmt:String = String(XML(event.result));
+            var stmt:String = XML(XML(event.result)['return'].@result.toString());
             model.object_tree.script_query(stmt, args['schema']);
         }
         
