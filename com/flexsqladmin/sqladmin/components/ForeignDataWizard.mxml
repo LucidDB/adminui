@@ -55,7 +55,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <s:HGroup id="driver_suggestions" visible="false">
             <s:Label text="Driver Suggestions: " />
             <s:RadioButton label="MySQL" groupName="suggestions"
-                           click="suggest_driver('com.mysql.jdbc.Driver', 'jdbc:mysql://');" />
+                           click="suggest_driver('com.mysql.jdbc.Driver', 'jdbc:mysql://'); add_mysql();" />
             <s:RadioButton label="PostgreSQL" groupName="suggestions"
                            click="suggest_driver('org.postgresql.Driver', 'jdbc:postgressql://');" />
             <s:RadioButton label="Hypersonic" groupName="suggestions"
@@ -252,6 +252,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 if (extended_start != -1) { // need to reload ex ops
                     fetch_extended_options();
                 }
+            }
+            
+            public function add_mysql() : void {
+                load_prior_result(<vals><el name="SCHEMA_NAME" value=""
+desc="Lets importer know the database name of tables, strongly suggested." type="STRING" /></vals>);
             }
             
             public function load_prior_values(server:String) : void {

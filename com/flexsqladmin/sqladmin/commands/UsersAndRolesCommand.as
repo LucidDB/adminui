@@ -114,10 +114,11 @@ package com.flexsqladmin.sqladmin.commands
                 var response:String;
                 if (call == 'getCurrentSessions') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getCurrentSessions");
-                    /*if (model.session_info)
-                        model.session_info += new XMLList(XML(event.result).children());
-                    else*/
-                    model.session_info = new XMLList(XML(event.result).children());
+                    var scroll:Number = model.session_tab.session_info.verticalScrollPosition;
+                    model.session_tab.session_info_data = new XMLList(XML(event.result).children());
+                    model.session_tab.session_info.invalidateDisplayList();
+                    model.session_tab.session_info.validateNow();
+                    model.session_tab.session_info.verticalScrollPosition = scroll;
                 } else if (call == 'getUsersDetails') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getUsersDetails");
                     model.users_details = new XMLList(XML(event.result).children());

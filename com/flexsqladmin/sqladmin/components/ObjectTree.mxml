@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import mx.controls.Alert;
             import mx.controls.Menu;
             import mx.core.FlexGlobals;
+            import mx.core.INavigatorContent;
             import mx.events.CloseEvent;
             import mx.events.ListEvent;
             import mx.events.MenuEvent;
@@ -232,6 +233,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         var menu_info:Object = object_menus[XML(selectedItem).localName()];
                         var myMenu:Menu = Menu.createMenu(null, menu_info['info']);
                         myMenu.show(clickx + 25, clicky);
+                        if (clicky > 400)
+                            myMenu.y -= myMenu.height;
                         myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
                             menu_info['handler'](event.index, context);
                         });
@@ -869,7 +872,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 );
                 register_context('sessions', [con_row('View Active Sessions', sessions_icon)],
                     function (index:Number, context:ObjectTree) : void {
-                        FlexGlobals.topLevelApplication.addTab("Active Sessions", SessionsWindow, sessions_icon);
+                        if (model.session_tab == null) {
+                            FlexGlobals.topLevelApplication.addTab("Active Sessions", SessionsWindow, sessions_icon);
+                        } else {
+                            model.main_tabnav.selectedChild = INavigatorContent(model.session_tab.parent);
+                        }
                     }
                 );
                     

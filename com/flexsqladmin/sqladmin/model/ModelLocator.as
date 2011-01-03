@@ -20,6 +20,7 @@ package com.flexsqladmin.sqladmin.model
 {
     import com.adobe.cairngorm.model.ModelLocator;
     import com.flexsqladmin.sqladmin.components.ObjectTree;
+    import com.flexsqladmin.sqladmin.components.SessionsWindow;
     import com.flexsqladmin.sqladmin.vo.ConnectionVO;
     import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
     import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
@@ -46,7 +47,7 @@ package com.flexsqladmin.sqladmin.model
     	public var tempConnectionVO:ConnectionVO;
     	public var connectionText:String = "";
     	public var metadata:XML;
-        public var session_info:XMLList;
+        public var session_tab:SessionsWindow;
         public var users_list:Array;
         public var roles_list:Array;
         public var users_details:XMLList;
