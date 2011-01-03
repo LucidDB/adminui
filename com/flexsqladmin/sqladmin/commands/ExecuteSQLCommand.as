@@ -31,8 +31,8 @@ package com.flexsqladmin.sqladmin.commands
 	
 	import mx.collections.XMLListCollection;
 	import mx.containers.VBox;
-	import mx.controls.DataGrid;
-	import mx.controls.dataGridClasses.DataGridColumn;
+    import mx.controls.AdvancedDataGrid;
+    import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
 	import mx.core.FlexGlobals;
 	
 	public class ExecuteSQLCommand implements Command, Responder
@@ -75,11 +75,13 @@ package com.flexsqladmin.sqladmin.commands
                 result_info = model.tabs[String(QueryWindow)][String(QueryWindow) + '-1'].result_info;
             }
             result_info.queryHistoryVO.writeHistory(sql, sqlquerytype);
-            result_info.showplanwindow.clearWindow();
+            if (sqlquerytype == 'showplan')
+                result_info.showplanwindow.clearWindow();
             
             var rows:Number = 0;
             var executiontime:Number = 0;
-            result_info.querydata = new XMLListCollection();
+            if (sqlquerytype != 'showplan')
+                result_info.querydata = new XMLListCollection();
             
             var queries:XMLList = new XMLList(event.result);
             for each (var queryxml:XML in queries) {
@@ -88,7 +90,8 @@ package com.flexsqladmin.sqladmin.commands
                     continue;
                 }
                 
-                result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
+                if (sqlquerytype != 'showplan')
+                    result_info.querydata = new XMLListCollection(queryxml.NewDataSet.Table);
                 //result_info.querydata += new XMLListCollection(queryxml.NewDataSet.Table);
                 //result_info.querydata.addItem(new XML('<Table>' + queryxml.NewDataSet.Table.children() + '</Table>'));
                 
@@ -96,7 +99,7 @@ package com.flexsqladmin.sqladmin.commands
                     querycols = queryxml.datamap.split(",");
                 
                 for(var x:int = 0; x < querycols.length; x++){
-                    var querycolumn:DataGridColumn = new DataGridColumn(querycols[x]);
+                    var querycolumn:AdvancedDataGridColumn = new AdvancedDataGridColumn(querycols[x]);
                     querycolumn.dataTipField = querycols[x];
                     querycolumn.dataField = querycols[x];
                     querycolumn.editable = false;
@@ -121,7 +124,8 @@ package com.flexsqladmin.sqladmin.commands
             } else {
                 result_info.querymessages = "";
             }
-            result_info.querydatagrid.columns = datagridcols;
+            if (sqlquerytype != 'showplan')
+                result_info.querydatagrid.columns = datagridcols;
             //resetSelection();
 		}
 		public function onFault(event:*=null):void

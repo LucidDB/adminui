@@ -72,10 +72,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	<mx:Box width="100%" height="50%" left="10" right="10" bottom="10" id="tabresults_holder">
 		<mx:TabNavigator id="tabresults" width="100%" height="100%">
 			<mx:Canvas width="100%" height="100%" label="Result" icon="@Embed(source='/icons/result.png')">
-				<mx:DataGrid id="querydatagrid" dataProvider="{result_info.querydata}"
-                             width="100%" height="100%" horizontalScrollPolicy="auto" 
-                             x="0" y="0">
-                </mx:DataGrid>
+				<mx:AdvancedDataGrid id="querydatagrid" dataProvider="{result_info.querydata}"
+                             width="100%" height="100%" horizontalScrollPolicy="auto" editable="true"
+                             x="0" y="0" creationComplete="datagrid_norm();"
+                             rollOut="datagrid_switch(0);" itemClick="datagrid_switch(1);">
+                </mx:AdvancedDataGrid>
 			</mx:Canvas>
 			<mx:Canvas id="messages" label="Messages" icon="@Embed(source='/icons/messages.png')">
 				<mx:TextArea text="{result_info.querymessages}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false"/>
@@ -104,6 +105,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import mx.controls.TextInput;
             import mx.core.FlexGlobals;
             import mx.events.DragEvent;
+            import mx.events.ListEvent;
             import mx.managers.DragManager;
             import mx.managers.PopUpManager;
 
@@ -130,6 +132,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 				result_info.querydatagrid = querydatagrid;
 
 			}
+            
+            private var datagrid_renderer:IFactory;
+            private function datagrid_norm() : void {
+                datagrid_renderer = querydatagrid.itemRenderer;
+            }
+            private function datagrid_switch(i:Number) : void {
+                if (i == 1 && querydatagrid.itemRenderer == datagrid_renderer)
+                    querydatagrid.itemRenderer = new ClassFactory(TextInput);
+                else if (i == 0 && querydatagrid.itemRenderer != datagrid_renderer)
+                    querydatagrid.itemRenderer = datagrid_renderer;
+            }
 						
 			public function handleShortcuts(e:KeyboardEvent) : void {
 				if(e.keyCode == 116) // F5
@@ -243,6 +256,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             private function submitShowPlanQuery():void{
             	DebugWindow.log("main.mxml:submitShowPlanQuery()");
             	DebugWindow.log("main.mxml:Query text - " + getQueryText());
+                var text:ExecuteSQLEvent = new ExecuteSQLEvent("explain plan for " + getQueryText(), 'normal');
+                CairngormEventDispatcher.getInstance().dispatchEvent(text);
             	var sqlevent:ExecuteSQLEvent = new ExecuteSQLEvent(getQueryText(), "showplan");
             	CairngormEventDispatcher.getInstance().dispatchEvent(sqlevent);
 				tabresults.selectedIndex = 2;

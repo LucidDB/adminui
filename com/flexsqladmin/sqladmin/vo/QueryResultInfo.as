@@ -22,12 +22,12 @@ package com.flexsqladmin.sqladmin.vo
 	public class QueryResultInfo {
 		import mx.collections.XMLListCollection;
 		import com.flexsqladmin.sqladmin.components.ExecutionPlanWindow;
-		import mx.controls.DataGrid;
+		import mx.controls.AdvancedDataGrid;
 
 		public var querydata:XMLListCollection;
 		public var querymessages:String;
 		public var queryHistoryVO:QueryHistoryVO;
 		public var showplanwindow:ExecutionPlanWindow;
-		public var querydatagrid:DataGrid;
+		public var querydatagrid:AdvancedDataGrid;
 	}
 }
