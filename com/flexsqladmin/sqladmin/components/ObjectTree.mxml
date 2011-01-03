@@ -96,6 +96,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             private var server_verify_icon:Class;
             [Embed(source="/icons/server_edit.png")]
             private var server_edit_icon:Class;
+            [Embed(source="/icons/arrow_down.png")]
+            private var import_foreign_icon:Class;
+            [Embed(source="/icons/page_white_text.png")]
+            private var ddl_icon:Class;
             
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -554,7 +558,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 register_context("schema", [gen_drop,
                     con_row('Drop Cascade', drop_icon),
                     /*con_row('Analyze All Tables In Schema', null),*/
-                    con_row('Generate DDL Statement', null)],
+                    con_row('Generate DDL Statement', ddl_icon)],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0 || index == 1) {
                             var casc:Boolean = (index == 1);
@@ -807,7 +811,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 );
                 register_context('server', [gen_drop,
                     con_row('Edit', server_edit_icon),
-                    con_row('Import Objects', null),
+                    con_row('Import Objects', import_foreign_icon),
                     con_row('Verify Connection', server_verify_icon)],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
@@ -823,7 +827,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                 wiz.load_prior_values(context.selectedItem.@label);
                             });
                         } else if (index == 2) {
-                            var importer:ForeignDataImporter = FlexGlobals.topLevelApplication.addTab('Import Foreign Objects', ForeignDataImporter);
+                            var importer:ForeignDataImporter = FlexGlobals.topLevelApplication.addTab('Import Foreign Objects', ForeignDataImporter, import_foreign_icon);
                             importer.foreign_server = context.selectedItem.@label;
                             importer.init();
                         } else if (index == 3) {

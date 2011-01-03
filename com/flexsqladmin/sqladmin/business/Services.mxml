@@ -87,25 +87,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <toomany></toomany>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getUsers" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getUsers" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
-        <mx:operation name="getRoles" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getRoles" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
         <mx:operation name="getForeignTables" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getFunctions" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getFunctions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getProcedures" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getProcedures" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
         <mx:operation name="getRemoteData" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
-        <mx:operation name="getJars" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getJars" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
         <mx:operation name="getSchemaDdl" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">

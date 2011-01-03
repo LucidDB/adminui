@@ -46,12 +46,15 @@ package com.flexsqladmin.sqladmin.commands
         }
         
         public function onResult(event:*=null) : void {
-            //trace(String(event.result));
+            var data:XML = XML(XML(event.result)['return'].@result.toString());
+            if (!data || data.toXMLString() == "") {
+                data = XML(event.result);
+            }
             var children:XMLList = parent.children();
             var num:Number = children.length();
-            parent.appendChild(new XML(event.result).children());
+            parent.appendChild(data.children());
             // Were any children even added?
-            if (XML(event.result).children().length() == 0)
+            if (data.children().length() == 0)
                 parent.appendChild(<node label="Empty" />);
 
             // Delete after to prevent a second load during the brief period length becomes 0.
