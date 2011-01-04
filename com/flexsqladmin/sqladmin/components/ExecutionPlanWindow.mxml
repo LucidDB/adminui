@@ -25,6 +25,38 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			import mx.controls.Label;
 			import mx.core.UIComponent;  
 			import com.flexsqladmin.sqladmin.components.DebugWindow;
+            
+            private var icons:Object = {
+                  'FtrsIndexSearchRel' : 'search.gif'
+                , 'FennelCartesianProductRel' : ''
+                , 'FtrsTableModificationRel' : ''
+                , 'LcsIndexIntersectRel' : ''
+                , 'FennelReshapeRel' : ''
+                , 'LhxJoinRel' : ''
+                , 'FennelCalcRel' : 'calculator.png'
+                , 'IteratorToFennelConverter' : ''
+                , 'LcsIndexMergeRel' : ''
+                , 'LcsIndexBuilderRel' : ''
+                , 'FtrsIndexScanRel' : ''
+                , 'LhxAggRel' : ''
+                , 'LcsTableAppendRel' : ''
+                , 'FennelMergeRel' : ''
+                , 'FennelValuesRel' : ''
+                , 'FennelAggRel' : ''
+                , 'FennelPullUncollectRel' : ''
+                , 'FennelBufferRel' : ''
+                , 'LcsRowScanRel' : 'Clustered Index Scan.png'
+                , 'FennelSortRel' : 'Sort.png'
+                , 'LcsIndexMinusRel' : ''
+                , 'LcsIndexSearchRel' : 'Clustered Index Seek.png'
+                , 'FennelPullCollectRel' : ''
+                , 'IterCalcRel' : 'calculator.png'
+                , 'FennelToIteratorConverter' : ''
+                , 'ResultSetToFarragoIteratorConverter' : 'Table Scan.png'
+                , 'MedJdbcQueryRel' : ''
+                
+                , 'default' : 'confirm.png'
+            };
 		
 			public function clearWindow():void{
 				this.removeAllChildren();
@@ -112,9 +144,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 					
                     // Add Image
                     var i:Image = new Image();
-                    //i.load("/icons/" + imageicon + ".png");
-                    var spicon:showPlanIcon = new showPlanIcon(imageicon);
-                    i.load(spicon.getIcon());
+                    if (icons.hasOwnProperty(prop.PhysicalOp))
+                        i.load("../icons/" + icons[prop.PhysicalOp]);
+                    else {
+                        trace();
+                        trace(prop.PhysicalOp);
+                        trace();
+                        i.load('../icons/' + icons['default']); // default
+                    }
                     i.x = nodes[prop.NodeId].x;
                     i.y = nodes[prop.NodeId].y;
                     i.toolTip = nodetooltip;

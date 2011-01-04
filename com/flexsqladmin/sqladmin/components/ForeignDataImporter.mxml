@@ -393,7 +393,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 sch_win.showCloseButton = true;
                 sch_win.addEventListener(Event.CLOSE, function():void {
                     local_objects_data = new XML(<schemas />);
-                    for each (var el:XML in model.object_tree.tree_data.schemas[0].schema) {
+                    for each (var el:XML in ObjectTree(model.object_tree).tree_data.schemas[0].schema) {
                         var node:XML = <schema label={el.@label}>{el.foreign_tables.children()}</schema>;
                         local_objects_data.appendChild(node);
                     }
