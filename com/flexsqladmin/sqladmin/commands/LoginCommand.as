@@ -100,7 +100,8 @@ package com.flexsqladmin.sqladmin.commands
 		{
 			DebugWindow.log("LoginCommand:onFault()");
             PopUpManager.removePopUp(Services.service_fault_alert);
-		    mx.controls.Alert.show("User is not available", "Login Error");
+		    mx.controls.Alert.show("User is not available--" +
+                "try restarting LucidDB and/or the AdminUI Server", "Login Error");
     		loginWindow.loginbtn.enabled = true;
 		}
 	}

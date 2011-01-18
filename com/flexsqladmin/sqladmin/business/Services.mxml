@@ -64,7 +64,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 		makeObjectsBindable="false"
 		showBusyCursor="true"
         requestTimeout="-1"
-		fault="mx.controls.Alert.show('Error loading WSDL', 'Webservice Error');" >
+		fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'Webservice Error');" >
         <mx:operation name="execSQL" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <connection></connection>
@@ -123,7 +123,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="true"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL', 'DBService Error');" >
+        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'DBService Error');" >
         <mx:operation name="getTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
@@ -148,7 +148,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="false"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL', 'UsersAndRolesService Error');" >
+        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'UsersAndRolesService Error');" >
         <mx:operation name="getCurrentSessions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
@@ -241,7 +241,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="false"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL', 'PerformanceCountersService Error');" >
+        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'PerformanceCountersService Error');" >
         <mx:operation name="findPerformanceCounterByName" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <counterName></counterName>
@@ -265,7 +265,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="true"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL', 'ForeignDataService Error');" >
+        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'ForeignDataService Error');" >
         <mx:operation name="getWrapperOptions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <wrapper></wrapper>
