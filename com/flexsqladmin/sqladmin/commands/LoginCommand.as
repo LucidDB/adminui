@@ -53,7 +53,7 @@ package com.flexsqladmin.sqladmin.commands
 			var sqlquerytype:String = LoginEvent(event).sqlquerytype;
             
             var delegate:GeneralDelegate = new GeneralDelegate(this, "sqlWebService");
-            var args:Object = {connection: model.connectionVO.getConnectionString(),
+            var args:Object = {connection: model.tempConnectionVO.getConnectionString(),
                 sqlquerytype: sqlquerytype,
                 sql: sql,
                 toomany: model.connectionVO.toomany
@@ -71,8 +71,8 @@ package com.flexsqladmin.sqladmin.commands
     		if(r.datamap == "Error"){
     			var errormsg:String = r.NewDataSet.Table.Error;
     			DebugWindow.log("Error - " + errormsg.substr(23, errormsg.length));
-    			mx.controls.Alert.show(errormsg.substr(23, errormsg.length), "Login Error");
-    			loginWindow.loginbtn.enabled = true;
+    			mx.controls.Alert.show(errormsg.substr(23, errormsg.length), "Login Error").addEventListener(
+                    Event.REMOVED, function(event:*) : void { loginWindow.loginbtn.enabled = true; });;
     		} else {
     			DebugWindow.log("Connection Success");
     			loginWindow.closeWin(new Event(""));
@@ -100,9 +100,10 @@ package com.flexsqladmin.sqladmin.commands
 		{
 			DebugWindow.log("LoginCommand:onFault()");
             PopUpManager.removePopUp(Services.service_fault_alert);
-		    mx.controls.Alert.show("User is not available--" +
-                "try restarting LucidDB and/or the AdminUI Server", "Login Error");
-    		loginWindow.loginbtn.enabled = true;
+		    mx.controls.Alert.show("Incorrect username or password--" +
+                "if you believe you received this message in error, try restarting " +
+                "LucidDB and/or the AdminUI Server.", "Login Error").addEventListener(
+                    Event.REMOVED, function(event:*) : void { loginWindow.loginbtn.enabled = true; });
 		}
 	}
 }
