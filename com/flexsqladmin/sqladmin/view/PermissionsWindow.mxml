@@ -21,22 +21,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 xmlns:com="com.flexsqladmin.sqladmin.components.*"
                 title="Grant Permissions"
                 creationComplete="init();"
-                close="closeWin();" xmlns:treeClasses="mx.controls.treeClasses.*"
+                xmlns:treeClasses="mx.controls.treeClasses.*"
                 >
     <mx:Style>
         .win {backgroundColor: #869ca7; backgroundGradientColors: #9bafb9, #68808c; }
     </mx:Style>
-    <mx:HBox top="10" left="10" right="10" bottom="10" width="100%" height="100%" textAlign="center" styleName="win">        
-        <!--<mx:Text selectable="true" link="selectClick(event);">
-            <mx:htmlText>
-                <![CDATA[
-<font color="#0000ff"><b><a href="event:all">Select All</a>    <a href="event:none">Select None</a></b></font>]]>
-            </mx:htmlText>
-        </mx:Text>-->
-        <!--<mx:HBox>
-            <mx:CheckBox id="apply_all" click="selectClick(event);" />
-            <mx:Label text="Apply To All" />
-        </mx:HBox>-->
+    <mx:HBox top="10" left="10" right="10" bottom="10" width="100%" height="100%" textAlign="center"
+             styleName="win">
         <mx:Tree id="items_tree"
                  dataProvider="{datacopy}"
                  labelField="@label" 
@@ -209,7 +200,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             import mx.events.CloseEvent;
             import mx.events.ListEvent;
-            import mx.managers.PopUpManager;
             
             private var model:ModelLocator = ModelLocator.getInstance();
             
@@ -241,6 +231,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public var grantee:String;
             public var grantee_type:String;
             
+            private var nodes_to_update:Array = [];
+            
             private function iconToImage(icon:Class, tooltip:String = '') : Image {
                 var img:Image = new Image();
                 img.source = icon;
@@ -259,13 +251,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             };
 
             public function init() : void {
-                //PopUpManager.centerPopUp(this);
                 datacopy = new XML(model.metadata.schemas);
                 // remove cols from consideration until luciddb supports it
                 var cols:XMLList = datacopy..column;
                 for (var i:Number = cols.length()-1; i >= 0; i--) {
                     delete cols[i];
                 }
+                /*
                 // also remove functions, procedures, jars until we program it
                 var funcs:XMLList = datacopy..functions;
                 for (i = funcs.length()-1; i >= 0; i--)
@@ -276,6 +268,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var jars:XMLList = datacopy..jars;
                 for (i = jars.length()-1; i >= 0; i--)
                     delete jars[i];
+                */
                 
                 original_data = new XML(datacopy);
                 // Add icons to form items and disable entry until they click something
@@ -294,35 +287,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 // Block until we have the info (supplied by the user of this view.)
                 if (model.roles_info == null) {
                     callLater(load_roles_info);
-                } else {
-                    for each (var role:XML in model.roles_info.children()) {
-                        if (role.@name == grantee) {
-                            for each (var perm:XML in role.permission) {
-                                var type:String = String(perm.@itemType).replace('Local', '').toLowerCase();
-                                var type_label:String = String(perm.@itemType).replace('Local', '') + 's';
-                                var schema:XML = datacopy.schema.(@label == perm.@schemaName)[0];
-                                /* foreign table hack: */
-                                if (type == 'foreigntable') type = 'foreign_table';
-                                if (type_label == 'ForeignTables') type_label = 'Foreign Tables';
-                                var category:XML = schema[type + 's'][0];
-                                var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
-                                node.@actions = perm.@actions;
-                                node.@oldActions = perm.@actions;
-                                node.@schemaName = perm.@schemaName;
-                                node.@itemType = perm.@itemType;
-                            }
+                    return;
+                }
+                for each (var role:XML in model.roles_info.children()) {
+                    if (role.@name == grantee) {
+                        for each (var perm:XML in role.permission) {
+                            var type:String = String(perm.@itemType).replace('Local', '').toLowerCase();
+                            var type_label:String = String(perm.@itemType).replace('Local', '') + 's';
+                            var schema:XML = datacopy.schema.(@label == perm.@schemaName)[0];
+                            /* foreign table hack: */
+                            if (type == 'foreigntable') type = 'foreign_table';
+                            if (type_label == 'ForeignTables') type_label = 'Foreign Tables';
+                            var category:XML = schema[type + 's'][0];
+                            var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
+                            node.@actions = perm.@actions;
+                            node.@oldActions = perm.@actions;
+                            node.@schemaName = perm.@schemaName;
+                            node.@itemType = perm.@itemType;
                         }
                     }
                 }
-            }
-            
-            public function closeWin() : void {
-                PopUpManager.removePopUp(this);
-            }
-            
-            //public function selectClick(event:TextEvent) : void {
-            public function selectClick(event:Event) : void {
-
             }
             
             public function permClick(event:Event, other_item:XML=null) : void {
@@ -370,6 +354,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         } else {
                             grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + schema.@actions + '" />'));
                         }
+                        // make list of old actions so we don't get these again on successful send
+                        nodes_to_update.push(schema);
                     } else {
                         // gotta find individual tables and views with actions
                         
@@ -409,6 +395,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                             '" perms="' + element.@actions + '" />'));
                                     }
                                 }
+                                nodes_to_update.push(element);
                             }
                         }
                        
@@ -423,8 +410,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     trace(r.toXMLString());
                 */
                 
+                // (if nodes_to_update does not work, may need to make it nodes_to_skip )
+                
                 // will not have any revokes until functionality is added in LucidDB
                 
+                // PermissionGroup: grant_perms, grantee
+                // on success, freeze granted ones. (don't do the re-do query)
                 if (grantee_type == 'role') {
                     var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', grantee, '', '', grant_perms);
                     var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', grantee, '', '', revoke_perms);
@@ -434,6 +425,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 }
                 CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
                // CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
+                
+                // disable revoking on selected item:
+                var item:XML = XML(items_tree.selectedItem);
+                if (item.hasOwnProperty('@actions')) {
+                    for each (var perm:String in String(item.@actions).toLowerCase().split(' ')) {
+                        if (perm == '') continue;
+                        CheckBox(this['p_' + perm]).enabled = false;
+                    }
+                }
             }
             
             // tree functions

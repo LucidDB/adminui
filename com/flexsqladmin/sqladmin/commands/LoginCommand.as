@@ -72,7 +72,7 @@ package com.flexsqladmin.sqladmin.commands
     			var errormsg:String = r.NewDataSet.Table.Error;
     			DebugWindow.log("Error - " + errormsg.substr(23, errormsg.length));
     			mx.controls.Alert.show(errormsg.substr(23, errormsg.length), "Login Error").addEventListener(
-                    Event.REMOVED, function(event:*) : void { loginWindow.loginbtn.enabled = true; });;
+                    Event.REMOVED, function(event:*) : void { loginWindow.loginbtn.enabled = true; });
     		} else {
     			DebugWindow.log("Connection Success");
     			loginWindow.closeWin(new Event(""));

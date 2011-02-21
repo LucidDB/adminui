@@ -21,6 +21,7 @@ package com.flexsqladmin.sqladmin.events
     import com.adobe.cairngorm.control.CairngormEvent;
     import com.flexsqladmin.sqladmin.components.DebugWindow;
     import com.flexsqladmin.sqladmin.utils.ActionEnum;
+    import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
     
     public class TableDetailsEvent extends CairngormEvent {
         public static var TABLEDETAILS:String = "tabledetails";
@@ -30,8 +31,9 @@ package com.flexsqladmin.sqladmin.events
         public var table:String;
         public var action:ActionEnum;
         public var details:XML;
+        public var win_hack:NewSchemaWindow;
 
-        public function TableDetailsEvent(cat:String, sch:String, tab:String, act:ActionEnum, det:XML=null) {
+        public function TableDetailsEvent(cat:String, sch:String, tab:String, act:ActionEnum, det:XML=null, win_hack:NewSchemaWindow=null) {
             DebugWindow.log("TableDetailsEvent.as");
             super(TABLEDETAILS);
             
@@ -40,6 +42,7 @@ package com.flexsqladmin.sqladmin.events
             table = tab;
             action = act;
             details = det;
+            this.win_hack = win_hack;
         }
     }
 }

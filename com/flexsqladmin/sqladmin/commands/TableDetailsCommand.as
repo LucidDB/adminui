@@ -28,6 +28,7 @@ package com.flexsqladmin.sqladmin.commands
     import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
     import com.flexsqladmin.sqladmin.model.ModelLocator;
     import com.flexsqladmin.sqladmin.utils.ActionEnum;
+    import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
     
     import flash.events.Event;
     
@@ -44,6 +45,8 @@ package com.flexsqladmin.sqladmin.commands
         private var table:String;
         private var details:XML;
         
+        private var win_hack:NewSchemaWindow;
+        
         public function execute(event:CairngormEvent) : void {
             DebugWindow.log("TableDetails:execute()");
             var cat:String = TableDetailsEvent(event).catalog;
@@ -51,6 +54,7 @@ package com.flexsqladmin.sqladmin.commands
             table = TableDetailsEvent(event).table;
             var action:ActionEnum = TableDetailsEvent(event).action;
             details = TableDetailsEvent(event).details;
+            win_hack = TableDetailsEvent(event).win_hack;
             request_type = action;
             
             var delegate:tableDetailsDelegate = new tableDetailsDelegate(this);
@@ -111,10 +115,12 @@ package com.flexsqladmin.sqladmin.commands
             } else {
                 var response:String = event.result;
                 if (response.length == 0) {
-                    Alert.show("Schema created.", "Success");
+                    Alert.show("Schema created.", "Success").addEventListener(
+                        Event.REMOVED, function(event:*) : void { win_hack.create_btn.enabled = true; });
                     model.object_tree.addSchema(schema);
                 } else {
-                    Alert.show("Schema could not be created.", "Error");
+                    Alert.show("Schema could not be created.", "Error").addEventListener(
+                        Event.REMOVED, function(event:*) : void { win_hack.create_btn.enabled = true; });
                 }
             }
         }
