@@ -31,6 +31,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
             public static var service_fault_alert:Alert;
             
+            public function basic_result_handler(event:*) : void {
+                try {
+                    var r:XML = XML(event.result);
+                    if (r['return'] && r['return'].hasOwnProperty('@errorMsg')) {
+                        if (r['return'].@error == 'true') {
+                            Alert.show('Error: ' + r['return'].@errorMsg, 'Error');
+                        }
+                    }
+                } catch (e:Error) {
+                    // ignore
+                }
+                
+                event.token.resultHandler(event);
+            }
             public function basic_fault_handler(event:FaultEvent) : void {
                 CursorManager.removeBusyCursor();
                 
@@ -65,7 +79,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 		showBusyCursor="true"
         requestTimeout="-1"
 		fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'Webservice Error');" >
-        <mx:operation name="execSQL" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="execSQL" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <connection></connection>
                 <sqlquerytype></sqlquerytype>
@@ -73,13 +87,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <toomany></toomany>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getDBMetaData" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getDBMetaData" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
 			<mx:request>   
 			<connection></connection>
 			<catalog></catalog> 
 			</mx:request>    
         </mx:operation>
-        <mx:operation name="handleUpdate" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="handleUpdate" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <connection></connection>
                 <testsql></testsql>
@@ -87,28 +101,28 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <toomany></toomany>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getUsers" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getUsers" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
-        <mx:operation name="getRoles" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getRoles" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
-        <mx:operation name="getForeignTables" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getForeignTables" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getFunctions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getFunctions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getProcedures" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getProcedures" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getRemoteData" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getRemoteData" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request></mx:request>
         </mx:operation>
-        <mx:operation name="getJars" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getJars" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request><schema></schema></mx:request>
         </mx:operation>
-        <mx:operation name="getSchemaDdl" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getSchemaDdl" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -124,16 +138,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         showBusyCursor="true"
         requestTimeout="-1"
         fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'DBService Error');" >
-        <mx:operation name="getTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getTableDetails" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
                 <table></table>
             </mx:request>
         </mx:operation>
-        <mx:operation id="postTableDetails" name="postTableDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation id="postTableDetails" name="postTableDetails" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
         </mx:operation>
-        <mx:operation name="createSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="createSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -149,41 +163,41 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         showBusyCursor="false"
         requestTimeout="-1"
         fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'UsersAndRolesService Error');" >
-        <mx:operation name="getCurrentSessions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getCurrentSessions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getUsersDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getUsersDetails" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getRolesDetails" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getRolesDetails" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
         </mx:operation>
-        <mx:operation name="addNewUser" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="addNewUser" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <user></user>
                 <password></password>
             </mx:request>
         </mx:operation>
-        <mx:operation name="addNewRole" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="addNewRole" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <role></role>
             </mx:request>
         </mx:operation>
-        <mx:operation name="modifyUser" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="modifyUser" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <user></user>
                 <password></password>
             </mx:request>
         </mx:operation>
-        <mx:operation name="deleteUser" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="deleteUser" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <user></user>
             </mx:request>
         </mx:operation>
-        <mx:operation name="userToRole" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="userToRole" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <user></user>
                 <role></role>
@@ -191,12 +205,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <with_grant></with_grant>
             </mx:request>
         </mx:operation>
-        <mx:operation name="deleteRole" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="deleteRole" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <role></role>
             </mx:request>
         </mx:operation>
-        <mx:operation name="grantPermissionsOnSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="grantPermissionsOnSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -204,7 +218,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <grantee></grantee>
             </mx:request>
         </mx:operation>
-        <mx:operation name="grantPermissions" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="grantPermissions" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -214,7 +228,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <grantee></grantee>
             </mx:request>
         </mx:operation>
-        <mx:operation name="revokePermissionsOnSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="revokePermissionsOnSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -222,7 +236,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <grantee></grantee>
             </mx:request>
         </mx:operation>
-        <mx:operation name="revokePermissions" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="revokePermissions" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
                 <schema></schema>
@@ -242,16 +256,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         showBusyCursor="false"
         requestTimeout="-1"
         fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'PerformanceCountersService Error');" >
-        <mx:operation name="findPerformanceCounterByName" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="findPerformanceCounterByName" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <counterName></counterName>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getAllPerformanceCounters" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getAllPerformanceCounters" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getCountersByNames" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getCountersByNames" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <names></names>
             </mx:request>
@@ -266,40 +280,40 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         showBusyCursor="true"
         requestTimeout="-1"
         fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'ForeignDataService Error');" >
-        <mx:operation name="getWrapperOptions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getWrapperOptions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <wrapper></wrapper>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getExtendedWrapperOptions" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getExtendedWrapperOptions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <wrapper></wrapper>
                 <driver></driver>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getWrapperOptionsForServer" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getWrapperOptionsForServer" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server></server>
             </mx:request>
         </mx:operation>
-        <mx:operation name="createServer" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="createServer" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server_name></server_name>
                 <wrapper_name></wrapper_name>
                 <options></options>
             </mx:request>
         </mx:operation>
-        <mx:operation name="getForeignData" resultFormat="e4x" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="getForeignData" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server_name></server_name>
             </mx:request>
         </mx:operation>
-        <mx:operation name="testServer" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="testServer" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server_name></server_name>
             </mx:request>
         </mx:operation>
-        <mx:operation name="importForeignSchema" resultFormat="object" result="event.token.resultHandler(event);" fault="basic_fault_handler(event);">
+        <mx:operation name="importForeignSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <server></server>
                 <from_schema></from_schema>
