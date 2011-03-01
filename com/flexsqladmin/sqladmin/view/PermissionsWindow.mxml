@@ -450,11 +450,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 if (l_args.length == 0)
                     return;
                 
+                var cloj_this:PermissionsWindow = this;
                 var grant_event:GeneralServiceEvent = new GeneralServiceEvent(GeneralCommand,
                     'grantPermissionGroup', {'group': l_args}, {'callback': function(r:*):void {
-                        Alert.show('Permissions Applied', 'Success');
-                        for each (var node:XML in nodes_to_skip) {
-                            node.@oldActions = node.@actions;
+                        var msg:String = String(r);
+                        if (msg != '') {
+                            Alert.show(msg, 'Error');
+                        } else {
+                            Alert.show('Permissions Applied', 'Success');
+                            for each (var node:XML in nodes_to_skip) {
+                                node.@oldActions = node.@actions;
+                            }
+                            // disable revoking on selected item:
+                            var item:XML = XML(items_tree.selectedItem);
+                            if (item.hasOwnProperty('@actions')) {
+                                for each (var permm:String in String(item.@actions).toLowerCase().split(' ')) {
+                                    if (permm == '') continue;
+                                    CheckBox(cloj_this['p_' + permm]).enabled = false;
+                                }
+                            }
                         }
                     }}, 'UsersAndRolesService');
                 CairngormEventDispatcher.getInstance().dispatchEvent(grant_event);
@@ -462,14 +476,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 //CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
                // CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
                 
-                // disable revoking on selected item:
-                var item:XML = XML(items_tree.selectedItem);
-                if (item.hasOwnProperty('@actions')) {
-                    for each (var permm:String in String(item.@actions).toLowerCase().split(' ')) {
-                        if (permm == '') continue;
-                        CheckBox(this['p_' + permm]).enabled = false;
-                    }
-                }
+
             }
             
             // tree functions
