@@ -246,6 +246,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <grantee></grantee>
             </mx:request>
         </mx:operation>
+        <mx:operation name="grantPermissionGroup" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <group></group>
+            </mx:request>
+        </mx:operation>
     </mx:WebService>
     
     <mx:WebService

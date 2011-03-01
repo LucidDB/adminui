@@ -146,7 +146,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         </mx:Tree>
         <mx:VBox width="50%">
         <mx:Box />
-        <mx:HBox textAlign="center" width="100%">
+        <mx:HBox visible="false" textAlign="center" width="100%">
+            <!--Removed 'ALL' checkbox until we add code to distinguish.-->
             <mx:Spacer width="50%" />
             <mx:Label fontWeight="bold" text="All Applicable" />
             <mx:CheckBox id="p_all" />
@@ -188,6 +189,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
     <mx:Script>
         <![CDATA[
+            import mx.controls.Alert;
+            import com.flexsqladmin.sqladmin.commands.GeneralCommand;
+            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
             import mx.controls.Image;
             import com.flexsqladmin.sqladmin.utils.CustomFuncs;
             import mx.core.Container;
@@ -231,7 +235,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public var grantee:String;
             public var grantee_type:String;
             
-            private var nodes_to_update:Array = [];
+            private var nodes_to_skip:Array = [];
             
             private function iconToImage(icon:Class, tooltip:String = '') : Image {
                 var img:Image = new Image();
@@ -265,10 +269,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var procs:XMLList = datacopy..procedures;
                 for (i = procs.length()-1; i >= 0; i--)
                     delete procs[i];
+                */
+                // jars unsupported
                 var jars:XMLList = datacopy..jars;
                 for (i = jars.length()-1; i >= 0; i--)
                     delete jars[i];
-                */
+                // foreign tables unsupported
+                var ft:XMLList = datacopy..foreign_tables;
+                for (i = ft.length()-1; i >= 0; i--)
+                    delete ft[i];
                 
                 original_data = new XML(datacopy);
                 // Add icons to form items and disable entry until they click something
@@ -344,8 +353,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var grant_perms:Array = [];
                 var diff_schemas:XMLList = CustomFuncs.XMLdifference(datacopy.children(), original_data.children());
                 for each (var schema:XML in diff_schemas) {
-                    if (schema.hasOwnProperty('@actions')) {
+                    // skip this, no longer needed
+                    if (schema.hasOwnProperty('@actions') && false) {
                         // done, simply apply perms to whole schema
+                        var f:Boolean = false;
+                        for each (var skip_node:XML in nodes_to_skip) {
+                            if (skip_node == schema && skip_node.@oldActions == schema.@actions) {
+                                f = true; break;
+                            }
+                        }
+                        if (f) continue;
                         if (schema.hasOwnProperty('@oldActions')) {
                             var to_grant:String = CustomFuncs.ArrDiff(String(schema.@actions).split(' '), String(schema.@oldActions).split(' ')).join(' ');
                             var to_revoke:String = CustomFuncs.ArrDiff(String(schema.@oldActions).split(' '), String(schema.@actions).split(' ')).join(' ');
@@ -355,22 +372,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + schema.@actions + '" />'));
                         }
                         // make list of old actions so we don't get these again on successful send
-                        nodes_to_update.push(schema);
+                        nodes_to_skip.push(schema);
                     } else {
                         // gotta find individual tables and views with actions
                         
-                        // note: no longer just tables or views
-                        
                         var tabs_and_views:XMLList = schema.children();
                         for each (var tab_or_view:XML in tabs_and_views) {
-                            var type:String;
+                            var type:String = "";
                             if (tab_or_view.@label == 'Tables')
                                 type = 'table';
                             else if (tab_or_view.@label == 'Views')
                                 type = 'view';
-                            else
+                            else // foreign_table, function, procedure, jar
                                 type = String(tab_or_view).toLowerCase().replace(' ', '_').substring(0, -1);
                             for each (var element:XML in tab_or_view.children()) {
+                                f = false;
+                                for each (skip_node in nodes_to_skip) {
+                                    if (skip_node == element && skip_node.@oldActions == element.@actions) {
+                                        f = true; break;
+                                    }
+                                }
+                                if (f) continue;
                                 if (tab_or_view.hasOwnProperty('@actions') && tab_or_view.@actions != element.@actions) {
                                     grant_perms.push(new XML('<grant level="item" type="' + type +
                                         '" name="' + element.@label + '" schemaName="' + schema.@label +
@@ -395,43 +417,57 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                             '" perms="' + element.@actions + '" />'));
                                     }
                                 }
-                                nodes_to_update.push(element);
+                                nodes_to_skip.push(element);
                             }
                         }
                        
                     }
                 }
-               /* trace(diff_schemas.toXMLString());
-                trace('grants...');
-                for each (var g:XML in grant_perms)
-                    trace(g.toXMLString() + ',');
-                trace('now revs...');
-                for each (var r:XML in revoke_perms)
-                    trace(r.toXMLString());
-                */
-                
-                // (if nodes_to_update does not work, may need to make it nodes_to_skip )
-                
                 // will not have any revokes until functionality is added in LucidDB
                 
-                // PermissionGroup: grant_perms, grantee
-                // on success, freeze granted ones. (don't do the re-do query)
-                if (grantee_type == 'role') {
+                /*if (grantee_type == 'role') {
                     var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', grantee, '', '', grant_perms);
                     var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', grantee, '', '', revoke_perms);
                 } else if (grantee_type == 'user') {
                     grantEvent = new UsersAndRolesEvent('grantPermissions', grantee, '', '', '', '', grant_perms);
                     revokeEvent = new UsersAndRolesEvent('revokePermissions', grantee, '', '', '', '', revoke_perms);
+                }*/
+                
+                var args:Object = {};
+                var l_args:Array = [];
+                for each (var perm:XML in grant_perms) {
+                    var perms:Array = String(perm.@perms).replace(' ', ',').replace('ALL', 'ALL PRIVILEGES').split(',');
+                    if (perm.@level == 'schema') {
+                        args = {catalog: model.currentcatalogname, schema: perm.@name,
+                            permissions: perms, grantee: grantee};
+                    } else if (perm.@level == 'item') {
+                        args = {catalog: model.currentcatalogname, schema: perm.@schemaName,
+                            type: perm.@type, element: perm.@name, permissions: perms,
+                            grantee: grantee};
+                    }
+                    l_args.push(args);
                 }
-                CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
+                if (l_args.length == 0)
+                    return;
+                
+                var grant_event:GeneralServiceEvent = new GeneralServiceEvent(GeneralCommand,
+                    'grantPermissionGroup', {'group': l_args}, {'callback': function(r:*):void {
+                        Alert.show('Permissions Applied', 'Success');
+                        for each (var node:XML in nodes_to_skip) {
+                            node.@oldActions = node.@actions;
+                        }
+                    }}, 'UsersAndRolesService');
+                CairngormEventDispatcher.getInstance().dispatchEvent(grant_event);
+                
+                //CairngormEventDispatcher.getInstance().dispatchEvent(grantEvent);
                // CairngormEventDispatcher.getInstance().dispatchEvent(revokeEvent);
                 
                 // disable revoking on selected item:
                 var item:XML = XML(items_tree.selectedItem);
                 if (item.hasOwnProperty('@actions')) {
-                    for each (var perm:String in String(item.@actions).toLowerCase().split(' ')) {
-                        if (perm == '') continue;
-                        CheckBox(this['p_' + perm]).enabled = false;
+                    for each (var permm:String in String(item.@actions).toLowerCase().split(' ')) {
+                        if (permm == '') continue;
+                        CheckBox(this['p_' + permm]).enabled = false;
                     }
                 }
             }

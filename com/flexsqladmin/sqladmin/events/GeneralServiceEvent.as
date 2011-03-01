@@ -11,13 +11,13 @@ package com.flexsqladmin.sqladmin.events
         private static var command_calls:Array = [];
         
         /**
-        * @command_class - Some class in the commands directory.
-        * @service_call - The name of the service we want to call.
-        * @args - Arguments to the service.
-        * @extra_args - Extra args we want the command class to know about.
+        * @param command_class - Some class in the commands directory.
+        * @param service_call - The name of the service we want to call.
+        * @param args - Arguments to the service.
+        * @param extra_args - Extra args we want the command class to know about.
         */
         public function GeneralServiceEvent(command_class:Class, service_call:String,
-                                            args:Object, extra_args:Object = null) {
+                                            args:Object, extra_args:Object = null, service:String=null) {
             super(command_class.toString());
 
             for (var arg_name:String in args) {
@@ -29,6 +29,7 @@ package com.flexsqladmin.sqladmin.events
             this['service_call'] = service_call;
             this['args'] = args;
             this['extra_args'] = extra_args;
+            this['service'] = service;
        
             for (var i:Number = 0; i < command_calls.length; i++) {
                 if (command_calls[i] == command_class.toString())
