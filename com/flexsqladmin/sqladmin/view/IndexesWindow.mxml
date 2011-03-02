@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Dynamo Admin UI is a web service project for administering LucidDB
+Copyright (C) 2011 Dynamo Business Intelligence Corporation
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version approved by Dynamo Business Intelligence Corporation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+-->
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               creationComplete="init();"
+               close="close_win();"
+               width="800" height="600"
+               title="Create Table Indexes"
+               horizontalAlign="center"
+               >
+    
+    <!--<s:Panel></s:Panel>-->
+    <s:HGroup>
+        <s:Label text="Showing suggested indexes for table " />
+        <s:Label text="{table}" fontWeight="bold" />
+    </s:HGroup>
+    <s:Label text="Modify the threshold level to display columns which" />
+    <s:Label text="have a low unique ratio for better index performance." />
+    <s:HGroup>
+        <s:HSlider id="percent" liveDragging="true" dataTipPrecision="0" minimum="0" maximum="100"
+               value="50" thumbRelease="percent_change();" width="250" />
+        <s:Label text="{Math.round(percent.value)}%" />
+    </s:HGroup>
+    <mx:DataGrid id="candidates" width="350" height="400" horizontalCenter="0" dataProvider="{candidate_list}">
+        <mx:columns>
+            <mx:DataGridColumn headerText="Column Name" dataField="column_name" />
+        </mx:columns>
+    </mx:DataGrid>
+    <s:Button label="Create Shown Indexes" click="create_indexes();" />
+    
+    <fx:Script>
+        <![CDATA[
+            import mx.managers.PopUpManager;
+            
+            [Bindable]
+            public var table:String = "";
+            [Bindable]
+            private var candidate_list:XMLList;
+            
+            public function init() : void {
+                PopUpManager.centerPopUp(this);
+                
+                percent_change();
+            }
+            
+            public function close_win() : void {
+                PopUpManager.removePopUp(this);
+            }
+
+            // user changes percent, repopulate
+            public function percent_change() : void {
+              // service call, result: event.result.column;  
+            }
+            
+            public function create_indexes() : void {
+                
+            }
+        ]]>
+    </fx:Script>
+
+</mx:TitleWindow>

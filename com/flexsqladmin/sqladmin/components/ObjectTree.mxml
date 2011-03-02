@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.IndexesWindow;
             import com.flexsqladmin.sqladmin.view.NewJarWindow;
             import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
             import com.flexsqladmin.sqladmin.view.OpenTableWindow;
@@ -646,7 +647,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
                         // 8 is sep
                         } else if (index == 9) {
-                            popup_new(NewSchemaWindow);
+                           var iw:IndexesWindow = IndexesWindow(popup_new(IndexesWindow));
+                           iw.table = context.selectedItem.@label;
                         } else if (index == 10) {
                             
                         }
