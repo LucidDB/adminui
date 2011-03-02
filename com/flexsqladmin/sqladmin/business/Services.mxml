@@ -210,24 +210,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <role></role>
             </mx:request>
         </mx:operation>
-        <mx:operation name="grantPermissionsOnSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
-            <mx:request>
-                <catalog></catalog>
-                <schema></schema>
-                <permissions></permissions>
-                <grantee></grantee>
-            </mx:request>
-        </mx:operation>
-        <mx:operation name="grantPermissions" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
-            <mx:request>
-                <catalog></catalog>
-                <schema></schema>
-                <type></type>
-                <element></element>
-                <permissions></permissions>
-                <grantee></grantee>
-            </mx:request>
-        </mx:operation>
         <mx:operation name="revokePermissionsOnSchema" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>

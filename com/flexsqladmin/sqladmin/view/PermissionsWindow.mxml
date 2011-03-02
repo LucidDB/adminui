@@ -177,6 +177,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <com:FormItemWithImage label="Usage">
                     <mx:CheckBox id="p_usage" />
                 </com:FormItemWithImage>
+                <!--<com:FormItemWithImage label="References">
+                    <mx:CheckBox id="p_references" />
+                </com:FormItemWithImage>-->
             </mx:Form>
             <mx:Spacer width="50%" />
         </mx:HBox>
@@ -228,6 +231,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             [Bindable]
             [Embed("/icons/lock_open.png")]
             public var icon_usage:Class;
+            [Bindable]
+            [Embed("/icons/report_magnify.png")]
+            public var icon_references:Class;
             
             public var original_data:XML;
             
@@ -252,6 +258,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 'DELETE' : iconToImage(icon_delete, 'Delete'),
                 'EXECUTE' : iconToImage(icon_execute, 'Execute'),
                 'USAGE' : iconToImage(icon_usage, 'Usage')
+                //, 'REFERENCES' : iconToImage(icon_references, 'References')
             };
 
             public function init() : void {
@@ -262,7 +269,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     delete cols[i];
                 }
                 /*
-                // also remove functions, procedures, jars until we program it
                 var funcs:XMLList = datacopy..functions;
                 for (i = funcs.length()-1; i >= 0; i--)
                     delete funcs[i];
@@ -304,15 +310,31 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             var type:String = String(perm.@itemType).replace('Local', '').toLowerCase();
                             var type_label:String = String(perm.@itemType).replace('Local', '') + 's';
                             var schema:XML = datacopy.schema.(@label == perm.@schemaName)[0];
+                            
+                            var apply_stuff:Function = function(type:String, type_label:String):void {
+                                var category:XML = schema[type + 's'][0];
+                                var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
+                                if (node) {
+                                    node.@actions = perm.@actions;
+                                    node.@oldActions = perm.@actions;
+                                    node.@schemaName = perm.@schemaName;
+                                    node.@itemType = perm.@itemType;
+                                }
+                            }
+
                             /* foreign table hack: */
                             if (type == 'foreigntable') type = 'foreign_table';
                             if (type_label == 'ForeignTables') type_label = 'Foreign Tables';
-                            var category:XML = schema[type + 's'][0];
-                            var node:XML = category.(@label == type_label)[type].(@label == perm.@itemName)[0];
-                            node.@actions = perm.@actions;
-                            node.@oldActions = perm.@actions;
-                            node.@schemaName = perm.@schemaName;
-                            node.@itemType = perm.@itemType;
+                            if (type == 'routine') {
+                                type = 'function';
+                                type_label = 'Functions';
+                                apply_stuff(type, type_label);
+                                type = 'procedure';
+                                type_label = 'Procedures';
+                                apply_stuff(type, type_label);
+                            } else {
+                                apply_stuff(type, type_label);
+                            }
                         }
                     }
                 }
@@ -353,85 +375,54 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var grant_perms:Array = [];
                 var diff_schemas:XMLList = CustomFuncs.XMLdifference(datacopy.children(), original_data.children());
                 for each (var schema:XML in diff_schemas) {
-                    // skip this, no longer needed
-                    if (schema.hasOwnProperty('@actions') && false) {
-                        // done, simply apply perms to whole schema
-                        var f:Boolean = false;
-                        for each (var skip_node:XML in nodes_to_skip) {
-                            if (skip_node == schema && skip_node.@oldActions == schema.@actions) {
-                                f = true; break;
-                            }
-                        }
-                        if (f) continue;
-                        if (schema.hasOwnProperty('@oldActions')) {
-                            var to_grant:String = CustomFuncs.ArrDiff(String(schema.@actions).split(' '), String(schema.@oldActions).split(' ')).join(' ');
-                            var to_revoke:String = CustomFuncs.ArrDiff(String(schema.@oldActions).split(' '), String(schema.@actions).split(' ')).join(' ');
-                            grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + to_grant + '" />'));
-                            if (to_revoke != '') revoke_perms.push(new XML('<revoke level="schema" name="' + schema.@label + '" perms="' + to_revoke + '" />'));
-                        } else {
-                            grant_perms.push(new XML('<grant level="schema" name="' + schema.@label + '" perms="' + schema.@actions + '" />'));
-                        }
-                        // make list of old actions so we don't get these again on successful send
-                        nodes_to_skip.push(schema);
-                    } else {
-                        // gotta find individual tables and views with actions
-                        
-                        var tabs_and_views:XMLList = schema.children();
-                        for each (var tab_or_view:XML in tabs_and_views) {
-                            var type:String = "";
-                            if (tab_or_view.@label == 'Tables')
-                                type = 'table';
-                            else if (tab_or_view.@label == 'Views')
-                                type = 'view';
-                            else // foreign_table, function, procedure, jar
-                                type = String(tab_or_view).toLowerCase().replace(' ', '_').substring(0, -1);
-                            for each (var element:XML in tab_or_view.children()) {
-                                f = false;
-                                for each (skip_node in nodes_to_skip) {
-                                    if (skip_node == element && skip_node.@oldActions == element.@actions) {
-                                        f = true; break;
-                                    }
+                    // gotta find individual tables and views with actions
+                    
+                    var tabs_and_views:XMLList = schema.children();
+                    for each (var tab_or_view:XML in tabs_and_views) {
+                        var type:String = "";
+                        if (tab_or_view.@label == 'Tables')
+                            type = 'table';
+                        else if (tab_or_view.@label == 'Views')
+                            type = 'view';
+                        else // foreign_table, function, procedure, jar
+                            type = String(tab_or_view.@label).toLowerCase().replace(' ', '_').substr(0, String(tab_or_view.@label).length - 1);
+                        for each (var element:XML in tab_or_view.children()) {
+                            var f:Boolean = false;
+                            for each (var skip_node:XML in nodes_to_skip) {
+                                if (skip_node == element && skip_node.@oldActions == element.@actions) {
+                                    f = true; break;
                                 }
-                                if (f) continue;
-                                if (tab_or_view.hasOwnProperty('@actions') && tab_or_view.@actions != element.@actions) {
-                                    grant_perms.push(new XML('<grant level="item" type="' + type +
-                                        '" name="' + element.@label + '" schemaName="' + schema.@label +
-                                        '" perms="' + tab_or_view.@actions + '" />'));
-                                } else {
-                                    if (element.hasOwnProperty('@oldActions')) {
-                                        to_grant = CustomFuncs.ArrDiff(String(element.@actions).split(' '), String(element.@oldActions).split(' ')).join(' ');
-                                        to_revoke = CustomFuncs.ArrDiff(String(element.@oldActions).split(' '), String(element.@actions).split(' ')).join(' ');
-                                        if (to_grant != '') {
-                                            grant_perms.push(new XML('<grant level="item" type="' + type +
-                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
-                                            '" perms="' + to_grant + '" />'));
-                                        }
-                                        if (to_revoke != '') {
-                                            revoke_perms.push(new XML('<revoke level="item" type="' + type +
-                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
-                                            '" perms="' + to_revoke + '" />'));
-                                        }
-                                    } else if (element.@oldActions != element.@actions) {
+                            }
+                            if (f) continue;
+                            if (tab_or_view.hasOwnProperty('@actions') && tab_or_view.@actions != element.@actions) {
+                                grant_perms.push(new XML('<grant level="item" type="' + type +
+                                    '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                    '" perms="' + tab_or_view.@actions + '" />'));
+                            } else {
+                                if (element.hasOwnProperty('@oldActions')) {
+                                    var to_grant:String = CustomFuncs.ArrDiff(String(element.@actions).split(' '), String(element.@oldActions).split(' ')).join(' ');
+                                    var to_revoke:String = CustomFuncs.ArrDiff(String(element.@oldActions).split(' '), String(element.@actions).split(' ')).join(' ');
+                                    if (to_grant != '') {
                                         grant_perms.push(new XML('<grant level="item" type="' + type +
                                             '" name="' + element.@label + '" schemaName="' + schema.@label +
-                                            '" perms="' + element.@actions + '" />'));
+                                            '" perms="' + to_grant + '" />'));
                                     }
+                                    if (to_revoke != '') {
+                                        revoke_perms.push(new XML('<revoke level="item" type="' + type +
+                                            '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                            '" perms="' + to_revoke + '" />'));
+                                    }
+                                } else if (element.@oldActions != element.@actions) {
+                                    grant_perms.push(new XML('<grant level="item" type="' + type +
+                                        '" name="' + element.@label + '" schemaName="' + schema.@label +
+                                        '" perms="' + element.@actions + '" />'));
                                 }
-                                nodes_to_skip.push(element);
                             }
+                            nodes_to_skip.push(element);
                         }
-                       
                     }
                 }
                 // will not have any revokes until functionality is added in LucidDB
-                
-                /*if (grantee_type == 'role') {
-                    var grantEvent:UsersAndRolesEvent = new UsersAndRolesEvent('grantPermissions', '', '', grantee, '', '', grant_perms);
-                    var revokeEvent:UsersAndRolesEvent = new UsersAndRolesEvent('revokePermissions', '', '', grantee, '', '', revoke_perms);
-                } else if (grantee_type == 'user') {
-                    grantEvent = new UsersAndRolesEvent('grantPermissions', grantee, '', '', '', '', grant_perms);
-                    revokeEvent = new UsersAndRolesEvent('revokePermissions', grantee, '', '', '', '', revoke_perms);
-                }*/
                 
                 var args:Object = {};
                 var l_args:Array = [];
