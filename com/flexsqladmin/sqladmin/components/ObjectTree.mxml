@@ -101,6 +101,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             private var import_foreign_icon:Class;
             [Embed(source="/icons/page_white_text.png")]
             private var ddl_icon:Class;
+            [Embed(source="/icons/indexes2-16.png")]
+            private var indexicon:Class;
             
             private var clickx:int = 0;
             private var clicky:int = 0;
@@ -591,7 +593,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     {type: 'separator'},
                     con_row('Open', opentableicon),
                     gen_drop,
-                    con_row('Edit', updateicon)
+                    con_row('Edit', updateicon),
+                    {type: 'separator'},
+                    con_row('Create Indexes', indexicon)
                     //con_row('Storage Report', null),
                     //con_row('Analyze Table', null)
                     ],
@@ -640,9 +644,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             var td_event:TableDetailsEvent = new TableDetailsEvent(model.currentcatalogname,
                                 schema, context.selectedItem.@label, ActionEnum.GET);
                             CairngormEventDispatcher.getInstance().dispatchEvent(td_event);
-                        } else if (index == 8) {
-                            
+                        // 8 is sep
                         } else if (index == 9) {
+                            popup_new(NewSchemaWindow);
+                        } else if (index == 10) {
                             
                         }
 
