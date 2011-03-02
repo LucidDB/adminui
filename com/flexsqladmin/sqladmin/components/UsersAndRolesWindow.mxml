@@ -66,11 +66,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public function init() : void {
             }
             
-            public function set_user_mode(mode:String, name:String) : void {
+            public function set_user_mode(mode:String, name:String, force:Boolean=false) : void {
                 if (uw == null) {
                     callLater(set_user_mode, [mode, name]);
                 } else {
-                    uw.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
+                    var callit:Function = function():void {
                         uw.set_name(name);
                         uw.currentState = mode;
                         uw.modify_user.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
@@ -80,7 +80,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
                         dispatchEvent(new Event("stateChange"));
                         reset_perms();
-                    });
+                    };
+                    if (force)
+                        callit();
+                    else
+                        uw.addEventListener(FlexEvent.CREATION_COMPLETE, callit);
                 }
             }
 

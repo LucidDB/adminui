@@ -123,7 +123,7 @@ package com.flexsqladmin.sqladmin.commands
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewUser");
                     response = event.result;
                     if (response == "") {
-                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user);
+                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user, true);
                         model.object_tree.addItem('user', user, 'security', 'users');
                         Alert.show("New User Created", "Success", 4, null, function():void {
                             var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
