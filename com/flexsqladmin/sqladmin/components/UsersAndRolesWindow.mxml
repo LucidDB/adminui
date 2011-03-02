@@ -68,17 +68,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             public function set_user_mode(mode:String, name:String) : void {
                 if (uw == null) {
+                    trace('waiting...');
                     callLater(set_user_mode, [mode, name]);
                 } else {
-                    uw.set_name(name);
-                    uw.currentState = mode;
-                    uw.modify_user.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
-                        uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                    uw.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
+                        uw.set_name(name);
+                        uw.currentState = mode;
+                        uw.modify_user.addEventListener(FlexEvent.CREATION_COMPLETE, function():void {
+                            uw.modify_user.users.addEventListener(Event.CHANGE, reset_perms);
+                        });
+                        var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                        CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
+                        dispatchEvent(new Event("stateChange"));
+                        reset_perms();
                     });
-                    var rolesEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
-                    CairngormEventDispatcher.getInstance().dispatchEvent(rolesEvent);
-                    dispatchEvent(new Event("stateChange"));
-                    reset_perms();
                 }
             }
 

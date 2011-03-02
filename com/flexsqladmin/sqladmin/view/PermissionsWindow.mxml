@@ -460,6 +460,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                     CheckBox(cloj_this['p_' + permm]).enabled = false;
                                 }
                             }
+                            // (is this necessary?)
+                            var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getRolesDetails');
+                            CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
                         }
                     }}, 'UsersAndRolesService');
                 CairngormEventDispatcher.getInstance().dispatchEvent(grant_event);

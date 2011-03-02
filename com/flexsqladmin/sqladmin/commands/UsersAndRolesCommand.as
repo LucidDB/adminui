@@ -46,7 +46,6 @@ package com.flexsqladmin.sqladmin.commands
         private var role_name:String;
         private var added:String;
         private var with_grant:String;
-        private var perms_list:Array;
         
         private var total_calls:Number;
         private var call_successes:Array;
@@ -60,7 +59,6 @@ package com.flexsqladmin.sqladmin.commands
             role_name = UsersAndRolesEvent(event).role_name;
             added = UsersAndRolesEvent(event).added;
             with_grant = UsersAndRolesEvent(event).with_grant;
-            perms_list = UsersAndRolesEvent(event).perms_list;
             
             CursorManager.setBusyCursor();
             var delegate:GeneralDelegate = new GeneralDelegate(this, "UsersAndRolesService");
@@ -73,26 +71,7 @@ package com.flexsqladmin.sqladmin.commands
             call_fails = [];
             
             var args:Object;
-            if (perms_list != null) {
-                //call = call.slice(0, -1);
-                var grantee:String = (role_name == '') ? user : role_name;
-                for each (var perm:XML in perms_list) {
-                    var real_call:String = call;
-                    var perms:String = String(perm.@perms).replace(' ', ',').replace('ALL', 'ALL PRIVILEGES');
-                    if (perm.@level == 'schema') {
-                        real_call += 'OnSchema';
-                        args = {catalog: model.currentcatalogname, schema: perm.@name,
-                            permissions: perms, grantee: grantee};
-                    } else if (perm.@level == 'item') {
-                        args = {catalog: model.currentcatalogname, schema: perm.@schemaName,
-                            type: perm.@type, element: perm.@name, permissions: perms,
-                            grantee: grantee};
-                    }
-                    total_calls += 1;
-                    delegate.serviceDelegate(real_call, args);
-                }
-                return;
-            } else if (role_name == '') {
+            if (role_name == '') {
                 args = {user: user, password: pass};
             } else if (added != '') {
                 args = {user: user, role: role_name, added: added, with_grant: with_grant};
@@ -144,8 +123,8 @@ package com.flexsqladmin.sqladmin.commands
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-addNewUser");
                     response = event.result;
                     if (response == "") {
-                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user.toUpperCase());
-                        model.object_tree.addItem('user', user.toUpperCase(), 'security', 'users');
+                        model.tabs[String(UsersAndRolesWindow)][VBox(model.main_tabnav.selectedChild).id].set_user_mode('edit', user);
+                        model.object_tree.addItem('user', user, 'security', 'users');
                         Alert.show("New User Created", "Success", 4, null, function():void {
                             var usersEvent:UsersAndRolesEvent = new UsersAndRolesEvent('getUsersDetails');
                             CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
@@ -195,24 +174,6 @@ package com.flexsqladmin.sqladmin.commands
                         Alert.show("User Changed", "Success");
                     } else {
                         Alert.show("Could not change user: " + response, "Error");
-                    }
-                } else if (call == 'grantPermissions' || call == 'revokePermissions') {
-                    DebugWindow.log("UsersAndRolesCommand.as:onResult()-grant or revoke");
-                    response = event.result;
-                    if (response == "") {
-                        call_successes.push('');
-                    } else {
-                        call_fails.push(response);
-                    }
-                    if (call_successes.length + call_fails.length == total_calls) {
-                        usersEvent = new UsersAndRolesEvent('getRolesDetails');
-                        CairngormEventDispatcher.getInstance().dispatchEvent(usersEvent);
-                        if (call_fails.length == 0) {
-                            Alert.show("All permission changes successful", "Success");
-                        } else {
-                            var responses:String = call_fails.join("\n");
-                            Alert.show("Some permission changes failed, here are the details:\n" + responses, "Warning");
-                        }
                     }
                 }
             }

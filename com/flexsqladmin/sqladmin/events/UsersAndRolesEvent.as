@@ -31,11 +31,10 @@ package com.flexsqladmin.sqladmin.events
         public var role_name:String;
         public var added:String;
         public var with_grant:String;
-        public var perms_list:Array;
 
         public function UsersAndRolesEvent(call:String, un:String="", pw:String="",
                                            rn:String="", added:String='',
-                                           with_grant:String='', perms_list:Array=null) {
+                                           with_grant:String='') {
             DebugWindow.log("UsersAndRolesEvent.as");
             super(USERSANDROLES);
             
@@ -45,7 +44,6 @@ package com.flexsqladmin.sqladmin.events
             role_name = rn;
             this.added = added;
             this.with_grant = with_grant;
-            this.perms_list = perms_list;
         }
     }
 }

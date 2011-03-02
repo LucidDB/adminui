@@ -758,7 +758,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                             var urw:UsersAndRolesWindow = UsersAndRolesWindow(
                                 FlexGlobals.topLevelApplication.addTab('Users', UsersAndRolesWindow));
                             urw.currentState = 'users';
-                            urw.set_user_mode('edit', context.selectedItem.@label);
+                            callLater(urw.set_user_mode, ['edit', context.selectedItem.@label]);
                         } else if (index == 1) {
                             drop_remove_item('USER "' + context.selectedItem.@label + '" ', false,
                                 'Are you sure you want to\n' +
