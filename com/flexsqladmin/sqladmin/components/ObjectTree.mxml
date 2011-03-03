@@ -448,7 +448,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     var label:String = String(details.column[i].@name).toUpperCase() + ' (' + details.column[i].@datatype + ',';
                     label += (details.column[i].@isNullable == 'true') ? 'NULL' : 'NOT NULL';
                     label += ')';
-                    col_nodes += <column column={details.column[i].@name} label={label} />;
+                    col_nodes += <column column={String(details.column[i].@name).toUpperCase()} label={label} />;
                 }
                 var sql:String = "SELECT " + cols + " FROM &quot;" + schema + "&quot;.&quot;" + name + "&quot;";
                 var node:XML = <table label={name} sqlquery={sql}>
@@ -648,6 +648,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         // 8 is sep
                         } else if (index == 9) {
                            var iw:IndexesWindow = IndexesWindow(popup_new(IndexesWindow));
+                           iw.schema = get_schema(context);
                            iw.table = context.selectedItem.@label;
                         } else if (index == 10) {
                             

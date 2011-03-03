@@ -128,6 +128,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         , 'UsersAndRolesService'
                         , 'PerformanceCountersService'
                         , 'ForeignDataService'
+                        , 'AutoIndexService'
                         ];
                     for each (var name:String in services) {
                         var s:WebService = ServiceLocator.getInstance().getService(name) as WebService;

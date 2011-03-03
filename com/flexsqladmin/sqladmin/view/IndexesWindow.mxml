@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                creationComplete="init();"
                close="close_win();"
                width="800" height="600"
-               title="Create Table Indexes"
+               title="Table Indexes Manager"
                horizontalAlign="center"
                >
     
@@ -35,21 +35,32 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <s:Label text="Modify the threshold level to display columns which" />
     <s:Label text="have a low unique ratio for better index performance." />
     <s:HGroup>
-        <s:HSlider id="percent" liveDragging="true" dataTipPrecision="0" minimum="0" maximum="100"
-               value="50" thumbRelease="percent_change();" width="250" />
+        <s:HSlider id="percent" liveDragging="false" dataTipPrecision="0" minimum="0" maximum="100"
+               value="50" change="percent_change();" width="250" />
         <s:Label text="{Math.round(percent.value)}%" />
     </s:HGroup>
     <mx:DataGrid id="candidates" width="350" height="400" horizontalCenter="0" dataProvider="{candidate_list}">
         <mx:columns>
-            <mx:DataGridColumn headerText="Column Name" dataField="column_name" />
+            <mx:DataGridColumn headerText="Column Name" dataField="@column_name" />
         </mx:columns>
     </mx:DataGrid>
     <s:Button label="Create Shown Indexes" click="create_indexes();" />
     
     <fx:Script>
         <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.commands.GeneralCommand;
+            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import mx.controls.Alert;
+            import mx.core.FlexGlobals;
+            import mx.events.CloseEvent;
             import mx.managers.PopUpManager;
             
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            public var schema:String = "";
             [Bindable]
             public var table:String = "";
             [Bindable]
@@ -67,11 +78,37 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
             // user changes percent, repopulate
             public function percent_change() : void {
-              // service call, result: event.result.column;  
+                var cands_event:GeneralServiceEvent = new GeneralServiceEvent(GeneralCommand, 'getCandidates',
+                    {'catalog': model.currentcatalogname, 'schema': schema, 'table': table,
+                        'threshold': percent.value}, {'callback': function(r:*) : void {
+                            var data:XML = XML(XML(r)['return'].@result.toString());
+                            candidate_list = data.column;
+                        }}, 'AutoIndexService');
+                CairngormEventDispatcher.getInstance().dispatchEvent(cands_event);
             }
             
             public function create_indexes() : void {
-                
+                if (candidate_list.length() == 0)
+                    return;
+                var create_event:GeneralServiceEvent = new GeneralServiceEvent(GeneralCommand, 'createIndexes',
+                    {'catalog': model.currentcatalogname, 'schema': schema, 'table': table,
+                        'threshold': percent.value}, {'callback': function(r:*) : void {
+                            var msg:String = String(r);
+                            if (msg == '') {
+                                Alert.show('Indexes successfully created.', 'Success');
+                                percent_change();
+                            } else {
+                                Alert.show(msg, 'Error');
+                            }
+                        }}, 'AutoIndexService');
+                Alert.show('Index creation is an expensive operation which could' +
+                    ' take several minutes on large tables. Do you want to continue?', 'Warning',
+                    Alert.YES|Alert.NO, FlexGlobals.topLevelApplication as Sprite,
+                    function(event:CloseEvent):void { // confirm handler
+                        if (event.detail == Alert.YES) {
+                            CairngormEventDispatcher.getInstance().dispatchEvent(create_event);
+                        }
+                    }, model.object_tree.confirmicon, Alert.YES);
             }
         ]]>
     </fx:Script>

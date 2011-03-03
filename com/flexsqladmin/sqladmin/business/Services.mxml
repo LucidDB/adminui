@@ -63,10 +63,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     }, confirmicon, Alert.YES);
                 
                 */
-                
-                service_fault_alert = Alert.show("A service call has failed. Please check to see " +
-                    "if the server is running or try again.", "Error");
-                event.token.faultHandler(event);
+                if (event == null || event.token == null) {
+                    Alert.show("Flex failed to send a service call. Please inform the developers." +
+                        "(See About button.)", "Error");
+                } else {
+                    service_fault_alert = Alert.show("A service call has failed. Please check to see " +
+                        "if the server is running or try again.", "Error");
+                    event.token.faultHandler(event);
+                }
             }
 		]]>
 	</mx:Script>
@@ -310,5 +314,32 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         </mx:operation>
 
     </mx:WebService>
+    
+    <mx:WebService
+        id="AutoIndexService"
+        service="AutoIndexService"
+        useProxy="false"
+        makeObjectsBindable="false"
+        showBusyCursor="true"
+        requestTimeout="-1"
+        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'AutoIndexService Error');">
+        <mx:operation name="getCandidates" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+                <table></table>
+                <threshold></threshold>
+            </mx:request>
+        </mx:operation>
+        <mx:operation name="createIndexes" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
+            <mx:request>
+                <catalog></catalog>
+                <schema></schema>
+                <table></table>
+                <threshold></threshold>
+            </mx:request>
+        </mx:operation>
+    </mx:WebService>
+
 
 </cairngorm:ServiceLocator>
