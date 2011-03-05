@@ -80,11 +80,16 @@ package com.flexsqladmin.sqladmin.commands
     			//Set Connection Live
     			model.connectionVO.username = model.tempConnectionVO.username;
     			model.connectionVO.password = model.tempConnectionVO.password;
+                model.connectionVO.salt = model.tempConnectionVO.salt;
+                model.connectionVO.uuid = model.tempConnectionVO.uuid;
                 if (model.tempConnectionVO.server == '')
                     model.tempConnectionVO.server = 'localhost';
     			model.connectionVO.server = model.tempConnectionVO.server;
     			model.connectionVO.database = model.tempConnectionVO.database;
     			model.connectionVO.toomany = model.tempConnectionVO.toomany;
+                model.connectionVO.raw_pass = model.tempConnectionVO.raw_pass;
+                model.connectionVO.send_raw = false;
+                model.tempConnectionVO.send_raw = false;
 				//model.connectionText = "Connected to " + model.connectionVO.server + " as " + model.connectionVO.username;
 				model.connectionText = 'Connected as ' + model.connectionVO.username;
                 

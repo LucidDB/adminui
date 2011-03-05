@@ -28,10 +28,14 @@ package com.flexsqladmin.sqladmin.vo
 
 		public var username:String = "";
 		public var password:String = "";
+        public var raw_pass:String = "";
 		public var server:String = "";
 		public var database:String = "";
 		public var toomany:Number = 5000;
 		public var dbtype:String = "MSSQL";
+        public var uuid:String = "";
+        public var salt:String = '';
+        public var send_raw:Boolean = true;
 		
 		public function getConnectionString():String{
 			return "server=" + server + ";uid=" + username + ";pwd=" + password + ";database=" + database;
@@ -41,7 +45,8 @@ package com.flexsqladmin.sqladmin.vo
             // Encode creds
             var encoder:Base64Encoder = new Base64Encoder();
             encoder.insertNewLines = false;
-            encoder.encode(username + ":" + password);			
+            var last_seg:String = (send_raw) ? uuid + ':' + raw_pass : uuid;
+            encoder.encode(username + ":" + password + ':' + salt + ':' + last_seg);
             // Set creds on proxy
             service.httpHeaders = {"Authorization" : "Basic " + encoder.toString()};
         }

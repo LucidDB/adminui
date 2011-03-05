@@ -18,9 +18,46 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 package com.flexsqladmin.sqladmin.utils
 {
+    import flash.utils.ByteArray;
+    import flash.utils.Endian;
+    
     import mx.core.FlexGlobals;
 
     public final class CustomFuncs {
+        
+        public static function str2utf16le(str:String) : ByteArray {
+            var utf16:ByteArray = new ByteArray();
+            var i_char:uint;
+            
+            utf16.endian = Endian.LITTLE_ENDIAN;
+            //utf16.writeByte(0xFF);
+            //utf16.writeByte(0xFE);
+            for (var i:uint = 0; i < str.length; i++) {
+                i_char = str.charCodeAt(i);
+                if (i_char < 0xff) {
+                    // one byte char
+                    utf16.writeByte(i_char);
+                    utf16.writeByte(0);
+                } else {
+                    // two byte char
+                    utf16.writeByte(i_char & 0x00ff);
+                    utf16.writeByte(i_char >> 8);
+                }
+            }
+            return utf16;
+        }
+        
+        public static function random_string(
+            len:Number = 8,
+            alpha:String = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        ) : String {
+            var alpha_a:Array = alpha.split('');
+            var rand:String = '';
+            for (var i:Number = 0; i < len; i++) {
+                rand += alpha_a[Math.floor(Math.random() * alpha_a.length)];
+            }
+            return rand;
+        }
         
         // Blocks execution of a function until the given condition without blocking execution of the program.
         // (Experimental) This appears to fail when what is null.

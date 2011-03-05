@@ -29,13 +29,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	
 	<mx:Script>
 		<![CDATA[
-			import com.flexsqladmin.sqladmin.model.ModelLocator;
-		
-			import mx.managers.PopUpManager;
-			import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-			import com.flexsqladmin.sqladmin.events.LoginEvent;
-			import com.adobe.cairngorm.control.CairngormEventDispatcher;
-			import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.adobe.crypto.SHA256;
+            import com.flexsqladmin.sqladmin.components.DebugWindow;
+            import com.flexsqladmin.sqladmin.events.LoginEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+            
+            import mx.managers.PopUpManager;
+            import mx.utils.Base64Encoder;
+            import mx.utils.UIDUtil;
 			private var model:ModelLocator = ModelLocator.getInstance();
 			private var resultlimit:int;
 			
@@ -58,8 +62,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         	public function setProperties():void{
         		DebugWindow.log("login.mxml:setProperties()");
         		
+                var b64:Base64Encoder = new Base64Encoder();
+                b64.insertNewLines = false;
+                var pw_code:ByteArray = CustomFuncs.str2utf16le(password.text);
+                pw_code.position = 0;
+                var shd:String = SHA256.hashBytes(pw_code);
+                b64.encodeBytes(SHA256.digest);
+                var db_pw:String = b64.toString();
+                
+                model.tempConnectionVO.uuid = UIDUtil.createUID();
+                model.tempConnectionVO.salt = CustomFuncs.random_string();
+                
 				model.tempConnectionVO.username = username.text;
-            	model.tempConnectionVO.password = password.text;
+            	model.tempConnectionVO.password = SHA256.hash(model.tempConnectionVO.salt + db_pw);
+                model.tempConnectionVO.raw_pass = password.text;
             	
 				var event:LoginEvent = new LoginEvent("select '' from  (values (1))", "normal", this);
             	CairngormEventDispatcher.getInstance().dispatchEvent(event);
