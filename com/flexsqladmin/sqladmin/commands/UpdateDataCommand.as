@@ -58,9 +58,9 @@ package com.flexsqladmin.sqladmin.commands
             updatesql = "UPDATE \"" + table + "\" SET \"" + itemevent.dataField + "\""; 
 			if (newdatafield.text == "<NULL>")
 				updatesql += " = NULL";
-			else if(tablemetadata.getMetaData()[itemevent.dataField] == "MONEY" || tablemetadata.getMetaData()[itemevent.dataField] == "SMALLMONEY")
-				updatesql += " = " + newdatafield.text;
-			else if(tablemetadata.getMetaData()[itemevent.dataField] == "BOOLEAN" || tablemetadata.getMetaData()[itemevent.dataField] == "INTEGER")
+			else if(["MONEY", "SMALLMONEY", "INTEGER", "BOOLEAN", "DECIMAL", "REAL",
+                    "FLOAT", "DOUBLE", "TINYINT",
+                    "SMALLINT", "INT", "BIGINT"].indexOf(String(tablemetadata.getMetaData()[itemevent.dataField])) != -1)
 				updatesql += " = " + newdatafield.text;
 			else if(tablemetadata.getMetaData()[itemevent.dataField] == "DATE")
 				updatesql += " = date'" + newdatafield.text + "'";

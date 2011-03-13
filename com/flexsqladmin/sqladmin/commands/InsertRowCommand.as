@@ -61,15 +61,13 @@ package com.flexsqladmin.sqladmin.commands
     		insertsql += ") VALUES (";
     		for (x = 0; x < tablexml.NewDataSet.children().length(); x++){
     			if (formdata[x].text != ""){
-    				if (tablexml.NewDataSet.Table.DATATYPE[x] == "MONEY" || tablexml.NewDataSet.Table.DATATYPE[x] == "SMALLMONEY"){
-    					insertsql += formdata[x].text + ", ";
-    				} else if(tablexml.NewDataSet.Table.DATATYPE[x] == "INTEGER" || tablexml.NewDataSet.Table.DATATYPE[x] == "BOOLEAN"){
+    				if (["MONEY", "SMALLMONEY", "INTEGER", "BOOLEAN", "DECIMAL", "REAL",
+                        "FLOAT", "DOUBLE", "TINYINT",
+                        "SMALLINT", "INT", "BIGINT"].indexOf(String(tablexml.NewDataSet.Table.DATATYPE[x])) != -1){
     					insertsql += formdata[x].text + ", ";
     				} else if(tablexml.NewDataSet.Table.DATATYPE[x] == "DATE"){
     					insertsql += "date'" + formdata[x].text + "', ";
-    				}
-    				
-    				else {
+    				} else {
     					insertsql += "'" + formdata[x].text + "', ";
     				}
     			}
