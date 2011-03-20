@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
             import com.flexsqladmin.sqladmin.model.ModelLocator;
             import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.flexsqladmin.sqladmin.view.ForeignTableImportWindow;
             import com.flexsqladmin.sqladmin.view.IndexesWindow;
             import com.flexsqladmin.sqladmin.view.NewJarWindow;
             import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
@@ -715,14 +716,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     }
                 );
                 register_context('foreign_table', [con_row('Select As', selecticon),
-                    //con_row('Reimport', null),
+                    con_row('Copy Locally', import_foreign_icon),
                     gen_drop],
                     function (index:Number, context:ObjectTree) : void {
                         if (index == 0) {
                             script_as_query(context);
-                        } else if (0 == 1 && index == 1) {
-                            
                         } else if (index == 1) {
+                            var ftiw:ForeignTableImportWindow = ForeignTableImportWindow(popup_new(
+                                ForeignTableImportWindow));
+                            ftiw.schema = get_schema(context);
+                            ftiw.foreign_table = context.selectedItem.@label;
+                            ftiw.to_table = 'local_' + ftiw.foreign_table;
+                        } else if (index == 2) {
                             drop_remove_item('FOREIGN TABLE "' + context.model.currentcatalogname + '"."' +
                                 get_schema(context) + '"."' + context.selectedItem.@label + '" ', true,
                                 'Are you sure you want to\n' +

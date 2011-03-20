@@ -281,6 +281,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     fts.setLocalName('foreign_table');
                     node.appendChild(fts);
                 }
+                // if we didn't get any foreign stables, retry
+                if (tabs.length() == 0) {
+                    var get_remote_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
+                        'getForeignData', {'server_name': foreign_server},
+                        {'callback': load_foreign_data}
+                    );
+                    CairngormEventDispatcher.getInstance().dispatchEvent(get_remote_event);
+                }
             }
             
             public function move_across() : void {

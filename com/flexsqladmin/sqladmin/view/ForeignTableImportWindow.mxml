@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Dynamo Admin UI is a web service project for administering LucidDB
+Copyright (C) 2011 Dynamo Business Intelligence Corporation
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version approved by Dynamo Business Intelligence Corporation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+-->
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300"
+               creationComplete="init();"
+               close="close_win();"
+               title="Foreign Table Import"
+               >
+    
+    <s:Label text='Import foreign table:' />    
+    <s:Label text='"{schema}"."{foreign_table}"' fontWeight="bold" />
+    
+    <s:Label text="Into: " />
+    <s:HGroup>
+        <s:Label text='"' />
+        <mx:ComboBox id="to_schema" dataProvider="{model.metadata.schemas.children()}"
+                     labelField="@label" />
+        <s:Label text='"."' />
+        <s:TextInput text="{to_table}" />
+        <s:Label text='"' />
+    </s:HGroup>
+    
+    <s:Label text=" (Will auto-create)" />
+
+    <s:Button click="import_it();" label="Copy Table" />
+    <s:Label text="Warning: may take a long time." />
+    
+    <fx:Script>
+        <![CDATA[
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;
+            import com.flexsqladmin.sqladmin.commands.GeneralCommand;
+            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
+            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            
+            [Bindable]
+            public var schema:String = "";
+            [Bindable]
+            public var foreign_table:String = "";
+            [Bindable]
+            public var to_table:String = "";
+            
+            [Bindable]
+            private var model:ModelLocator = ModelLocator.getInstance();
+            
+            public function init() : void {
+                PopUpManager.centerPopUp(this);
+                def_schema();
+            }
+            
+            public function close_win() : void {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function def_schema() : void {
+                if (schema == '') {
+                    callLater(def_schema);
+                    return;
+                }
+                for (var i:Number = 0; i < to_schema.dataProvider.length; i++) {
+                    if (to_schema.dataProvider[i].@label == schema) {
+                        to_schema.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            public function import_it() : void {
+                var imp_event:GeneralServiceEvent = new GeneralServiceEvent(GeneralCommand, 'copyForeignTable',
+                    {'catalog': model.currentcatalogname, 'from_schema': schema, 'from_table': foreign_table,
+                        'to_schema': to_schema.text, 'to_table': to_table},
+                    {'callback': function(r:*) : void {
+                            var msg:String = String(r);
+                            if (msg == '') {
+                                model.object_tree.addTable(to_schema.text, to_table,
+                                    XML(model.object_tree.tree_data.schemas.schema.(@label == schema)[0].foreign_tables.(@label == foreign_table)[0]));
+                                Alert.show('Import successful.', 'Success');
+                            } else {
+                                Alert.show(msg, 'Error');
+                            }       
+                        }}, 'ForeignDataService');
+                CairngormEventDispatcher.getInstance().dispatchEvent(imp_event);
+            }
+            
+        ]]>
+    </fx:Script>
+</mx:TitleWindow>
