@@ -310,6 +310,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 <from_schema></from_schema>
                 <to_schema></to_schema>
                 <tables></tables>
+                <copy_local></copy_local>
             </mx:request>
         </mx:operation>
         <mx:operation name="copyForeignTable" resultFormat="object" result="basic_result_handler(event);" fault="basic_fault_handler(event);">

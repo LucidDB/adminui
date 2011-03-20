@@ -343,7 +343,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 var parent_list:XMLList = XMLList(item.parent().children());
                 for (var i:Number = 0; i < parent_list.length(); i++) {
                     if (parent_list[i] == item) {
-                        delete parent_list[i];
+                        try {
+                            delete parent_list[i];
+                        } catch (e:Error) {
+                        }
                         return true;
                     }
                 }

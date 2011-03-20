@@ -144,7 +144,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             </fx:Component>
         </mx:itemRenderer>
     </mx:Tree>
-        <s:Button label="Apply" click="import_data();" />
+        <s:HGroup>
+            <s:Button label="Apply" click="import_data();" />
+            <s:CheckBox label="Copy foreign tables into 'local_' table warehouses"
+                        direction="ltr" id="copy_local" selected="true" />
+        </s:HGroup>
+        <s:Label text="Warning: expensive operation, may take a long time." />
     </mx:VBox>
     
     <fx:Script>
@@ -223,7 +228,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         if (f_schema == null || f_schema == '') var f_schema_n:String = ' ';
                         else f_schema_n = f_schema;
                         var args:Object = {'server': foreign_server, 'from_schema': f_schema_n,
-                            'to_schema': to_schema.@label, 'tables': from_schemas[f_schema]};
+                            'to_schema': to_schema.@label, 'tables': from_schemas[f_schema],
+                                'copy_local': copy_local.selected};
                         var import_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
                             'importForeignSchema', args, {'callback': import_confirm,
                                 'callback_arg': args}
@@ -246,6 +252,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     for each (var ftn:String in sent_args['tables']) {
                         model.object_tree.addItem('foreign_table', ftn, 'schemas', 'schema@',
                             sent_args['to_schema'], 'foreign_tables');
+                        model.object_tree.addTable(sent_args['to_schema'], 'local_' + ftn,
+                            XML(model.object_tree.tree_data.schemas.schema.(
+                                @label == sent_args['to_schema'])[0].foreign_tables.(@label == ftn)[0]));
                     }
                 }
                 import_calls--;
@@ -259,6 +268,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 }
             }
             
+            private var repeats:Number = 0;
             public function load_foreign_data(r:*) : void {
                 var results:XML = XML(r);
                 trace(results.toXMLString());
@@ -282,12 +292,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     node.appendChild(fts);
                 }
                 // if we didn't get any foreign stables, retry
-                if (tabs.length() == 0) {
+                if (tabs.length() == 0 && results['return'].@error == "false" && repeats < 5) {
                     var get_remote_event:GeneralServiceEvent = new GeneralServiceEvent(ForeignDataCommand,
                         'getForeignData', {'server_name': foreign_server},
                         {'callback': load_foreign_data}
                     );
                     CairngormEventDispatcher.getInstance().dispatchEvent(get_remote_event);
+                    repeats++;
                 }
             }
             
