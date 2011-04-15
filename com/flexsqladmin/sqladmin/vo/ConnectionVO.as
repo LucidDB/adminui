@@ -45,8 +45,13 @@ package com.flexsqladmin.sqladmin.vo
             // Encode creds
             var encoder:Base64Encoder = new Base64Encoder();
             encoder.insertNewLines = false;
-            var last_seg:String = (send_raw) ? uuid + ':' + raw_pass : uuid;
-            encoder.encode(username + ":" + password + ':' + salt + ':' + last_seg);
+            // DEPRECATED
+            //var last_seg:String = (send_raw) ? uuid + ':' + raw_pass : uuid;
+            //encoder.encode(username + ":" + password + ':' + salt + ':' + last_seg);
+            if (send_raw)
+                encoder.encode(username + ':' + uuid + ':' + raw_pass);
+            else
+                encoder.encode(username + ':' + uuid);
             // Set creds on proxy
             service.httpHeaders = {"Authorization" : "Basic " + encoder.toString()};
         }

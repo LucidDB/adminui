@@ -76,6 +76,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 				model.tempConnectionVO.username = username.text;
             	model.tempConnectionVO.password = SHA256.hash(model.tempConnectionVO.salt + db_pw);
                 model.tempConnectionVO.raw_pass = password.text;
+                model.tempConnectionVO.send_raw = true;
             	
 				var event:LoginEvent = new LoginEvent("select '' from  (values (1))", "normal", this);
             	CairngormEventDispatcher.getInstance().dispatchEvent(event);
