@@ -48,10 +48,11 @@ package com.flexsqladmin.sqladmin.vo
             // DEPRECATED
             //var last_seg:String = (send_raw) ? uuid + ':' + raw_pass : uuid;
             //encoder.encode(username + ":" + password + ':' + salt + ':' + last_seg);
-            if (send_raw)
-                encoder.encode(username + ':' + uuid + ':' + raw_pass);
-            else
-                encoder.encode(username + ':' + uuid);
+            //if (send_raw)
+            //    encoder.encode(username + ':' + uuid + ':' + raw_pass);
+            //else
+            //    encoder.encode(username + ':' + uuid);
+			encoder.encode(username + ":" + raw_pass);
             // Set creds on proxy
             service.httpHeaders = {"Authorization" : "Basic " + encoder.toString()};
         }

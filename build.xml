@@ -5,7 +5,7 @@
   <property name="FLEX_HOME" value="/Users/ngoodman/dev/flex/4.1.0" />
 
   <property name="DEPLOY_DIR" value="${basedir}/deploy" />
-  <property name="LIBS" value="${basedir}/com/flexlib/,${basedir}/com/adobe/Cairngorm,${basedir}/com/as3corelib,${FLEX_HOME}/frameworks/libs/,${FLEX_HOME}/frameworks/projects/framework/bundles/en_US/,${FLEX_HOME}/frameworks/locale/en_US/" />
+  <property name="LIBS" value="${basedir}/libs,${FLEX_HOME}/frameworks/libs/,${FLEX_HOME}/frameworks/projects/framework/bundles/en_US/,${FLEX_HOME}/frameworks/locale/en_US/" />
   <property name="THEMES" value="${FLEX_HOME}/frameworks/themes/Halo/halo.swc" />
 
   <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />
