@@ -20,7 +20,7 @@
 
   <target name="compile" depends="init">
     <exec executable="${FLEX_HOME}/bin/mxmlc" failonerror="true">
-      <arg line="-theme=${THEMES} -compiler.library-path=${LIBS} -compiler.incremental -static-link-runtime-shared-libraries -locale=en_US -output=${DEPLOY_DIR}/SQLAdmin.swf SQLAdmin.mxml" />
+      <arg line="-source-path=${basedir}/src -theme=${THEMES} -compiler.library-path=${LIBS} -compiler.incremental -static-link-runtime-shared-libraries -locale=en_US -output=${DEPLOY_DIR}/SQLAdmin.swf ${basedir}/src/SQLAdmin.mxml" />
     </exec>
   </target>
 
