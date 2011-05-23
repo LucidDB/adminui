@@ -17,17 +17,17 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
-<components:QueryWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:components="com.flexsqladmin.sqladmin.components.*"
+<components:QueryWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:components="com.dynamobi.adminui.components.*"
                         creationComplete="init();init2();">
     
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
-            import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
-            import com.flexsqladmin.sqladmin.vo.QueryResultInfo;
+            import com.dynamobi.adminui.events.ExecuteSQLEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.view.NewSchemaWindow;
+            import com.dynamobi.adminui.vo.QueryHistoryVO;
+            import com.dynamobi.adminui.vo.QueryResultInfo;
             
             import mx.controls.Alert;
             import mx.core.FlexGlobals;

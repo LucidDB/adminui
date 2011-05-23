@@ -41,11 +41,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.ActionEnum;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.events.MetaDataEvent;
+            import com.dynamobi.adminui.events.TableDetailsEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.ActionEnum;
             
             import mx.controls.Alert;
             import mx.events.CloseEvent;

@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
            xmlns:flexlib="http://code.google.com/p/flexlib/"
-           xmlns:components="com.flexsqladmin.sqladmin.components.*"
+           xmlns:components="com.dynamobi.adminui.components.*"
            width="100%" height="100%"
            keyUp="handleShortcuts(event);"
            creationComplete="init();"
@@ -88,14 +88,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <![CDATA[
             import com.adobe.cairngorm.business.ServiceLocator;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.components.ColumnForm;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.ActionEnum;
-            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
-            import com.flexsqladmin.sqladmin.vo.TableDetailsVO;
+            import com.dynamobi.adminui.components.ColumnForm;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.events.ExecuteSQLEvent;
+            import com.dynamobi.adminui.events.TableDetailsEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.ActionEnum;
+            import com.dynamobi.adminui.view.NewSchemaWindow;
+            import com.dynamobi.adminui.vo.TableDetailsVO;
             
             import flash.events.Event;
             

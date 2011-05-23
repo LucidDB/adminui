@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
          xmlns:s="library://ns.adobe.com/flex/spark" 
          xmlns:mx="library://ns.adobe.com/flex/mx"
-         width="100%" height="100%" xmlns:components="com.flexsqladmin.sqladmin.components.*">
+         width="100%" height="100%" xmlns:components="com.dynamobi.adminui.components.*">
     <s:layout>
         <s:HorizontalLayout paddingTop="10" paddingLeft="10" paddingBottom="10" paddingRight="10" />
     </s:layout>
@@ -155,13 +155,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <fx:Script>
         <![CDATA[
             import mx.managers.PopUpManager;
-            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
+            import com.dynamobi.adminui.view.NewSchemaWindow;
             import mx.controls.Alert;
-            import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
-            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
+            import com.dynamobi.adminui.commands.ForeignDataCommand;
+            import com.dynamobi.adminui.events.GeneralServiceEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import mx.managers.DragManager;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.dynamobi.adminui.model.ModelLocator;
             import mx.events.DragEvent;
             
             [Bindable]

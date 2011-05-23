@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-package com.flexsqladmin.sqladmin.model
+package com.dynamobi.adminui.model
 {
     import com.adobe.cairngorm.model.ModelLocator;
-    import com.flexsqladmin.sqladmin.components.ObjectTree;
-    import com.flexsqladmin.sqladmin.components.SessionsWindow;
-    import com.flexsqladmin.sqladmin.vo.ConnectionVO;
-    import com.flexsqladmin.sqladmin.vo.ExecutionTimer;
-    import com.flexsqladmin.sqladmin.vo.QueryHistoryVO;
+    import com.dynamobi.adminui.components.ObjectTree;
+    import com.dynamobi.adminui.components.SessionsWindow;
+    import com.dynamobi.adminui.vo.ConnectionVO;
+    import com.dynamobi.adminui.vo.ExecutionTimer;
+    import com.dynamobi.adminui.vo.QueryHistoryVO;
     
     import flash.utils.Dictionary;
     
@@ -36,7 +36,7 @@ package com.flexsqladmin.sqladmin.model
     [Bindable]
     public class ModelLocator implements com.adobe.cairngorm.model.ModelLocator
     {
-    	private static var modelLocator:com.flexsqladmin.sqladmin.model.ModelLocator;
+    	private static var modelLocator:com.dynamobi.adminui.model.ModelLocator;
     	
     	public var querycount:int = 1;
 
@@ -58,10 +58,10 @@ package com.flexsqladmin.sqladmin.model
         
         public var object_tree:ObjectTree; // shut up compiler
     	
-        public static function getInstance():com.flexsqladmin.sqladmin.model.ModelLocator
+        public static function getInstance():com.dynamobi.adminui.model.ModelLocator
         {
             if (modelLocator == null)
-                modelLocator = new com.flexsqladmin.sqladmin.model.ModelLocator(); 
+                modelLocator = new com.dynamobi.adminui.model.ModelLocator(); 
             return modelLocator;
        	}
        
@@ -71,7 +71,7 @@ package com.flexsqladmin.sqladmin.model
 	   		connectionVO = new ConnectionVO();
 	   		tempConnectionVO = new ConnectionVO();
             
-	 	  	if ( com.flexsqladmin.sqladmin.model.ModelLocator.modelLocator != null )
+	 	  	if ( com.dynamobi.adminui.model.ModelLocator.modelLocator != null )
 	        	throw new Error( "Only one ModelLocator instance should be instantiated" );
 	   }
     }

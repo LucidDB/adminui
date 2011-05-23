@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-package com.flexsqladmin.sqladmin.components
+package com.dynamobi.adminui.components
 {
     import com.adobe.cairngorm.control.CairngormEventDispatcher;
     import com.adobe.serialization.json.JSON;
-    import com.flexsqladmin.sqladmin.events.ObjectTreeLoaderEvent;
+    import com.dynamobi.adminui.events.ObjectTreeLoaderEvent;
     
     import mx.collections.ICollectionView;
     import mx.collections.XMLListCollection;

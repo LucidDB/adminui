@@ -20,9 +20,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 <mx:Application
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	xmlns:flexlib="http://code.google.com/p/flexlib/"
-	xmlns:business="com.flexsqladmin.sqladmin.business.*" 
-	xmlns:control="com.flexsqladmin.sqladmin.control.*"
-	xmlns:components="com.flexsqladmin.sqladmin.components.*"
+	xmlns:business="com.dynamobi.adminui.business.*" 
+	xmlns:control="com.dynamobi.adminui.control.*"
+	xmlns:components="com.dynamobi.adminui.components.*"
 	layout="absolute" 
 	creationComplete="init();" 
 	keyUp="handleShortCuts(event);">
@@ -31,24 +31,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 		<![CDATA[
             import com.adobe.cairngorm.business.ServiceLocator;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.components.CreateEditTableWindow;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.components.ForeignDataWizard;
-            import com.flexsqladmin.sqladmin.components.PerformanceMonitor;
-            import com.flexsqladmin.sqladmin.components.QueryWindow;
-            import com.flexsqladmin.sqladmin.components.RolesWindow;
-            import com.flexsqladmin.sqladmin.components.SessionsWindow;
-            import com.flexsqladmin.sqladmin.components.UsersAndRolesWindow;
-            import com.flexsqladmin.sqladmin.components.UsersWindow;
-            import com.flexsqladmin.sqladmin.components.ViewWindow;
-            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.view.AboutWindow;
-            import com.flexsqladmin.sqladmin.view.LoginWindow;
-            import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+            import com.dynamobi.adminui.components.CreateEditTableWindow;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.components.ForeignDataWizard;
+            import com.dynamobi.adminui.components.PerformanceMonitor;
+            import com.dynamobi.adminui.components.QueryWindow;
+            import com.dynamobi.adminui.components.RolesWindow;
+            import com.dynamobi.adminui.components.SessionsWindow;
+            import com.dynamobi.adminui.components.UsersAndRolesWindow;
+            import com.dynamobi.adminui.components.UsersWindow;
+            import com.dynamobi.adminui.components.ViewWindow;
+            import com.dynamobi.adminui.events.ExecuteSQLEvent;
+            import com.dynamobi.adminui.events.MetaDataEvent;
+            import com.dynamobi.adminui.events.TableDetailsEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.view.AboutWindow;
+            import com.dynamobi.adminui.view.LoginWindow;
+            import com.dynamobi.adminui.view.OpenTableWindow;
+            import com.dynamobi.adminui.vo.ConnectionVO;
             
             import flexlib.containers.SuperTabNavigator;
             import flexlib.controls.SuperTabBar;

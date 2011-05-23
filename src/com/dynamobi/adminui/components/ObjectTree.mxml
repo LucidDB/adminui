@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
 <mx:Tree xmlns:mx="http://www.adobe.com/2006/mxml"
-         itemRenderer="com.flexsqladmin.sqladmin.components.ObjectTreeRenderer"
+         itemRenderer="com.dynamobi.adminui.components.ObjectTreeRenderer"
          dataDescriptor="{new ObjectTreeDataDescriptor()}"
          dragMoveEnabled="false" 
          height="95%" width="100%" 
@@ -32,21 +32,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.adobe.serialization.json.JSON;
-            import com.flexsqladmin.sqladmin.commands.ForeignDataCommand;
-            import com.flexsqladmin.sqladmin.commands.GenerateDdlCommand;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.components.ObjectTreeRenderer;
-            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
-            import com.flexsqladmin.sqladmin.events.MetaDataEvent;
-            import com.flexsqladmin.sqladmin.events.TableDetailsEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.ActionEnum;
-            import com.flexsqladmin.sqladmin.view.ForeignTableImportWindow;
-            import com.flexsqladmin.sqladmin.view.IndexesWindow;
-            import com.flexsqladmin.sqladmin.view.NewJarWindow;
-            import com.flexsqladmin.sqladmin.view.NewSchemaWindow;
-            import com.flexsqladmin.sqladmin.view.OpenTableWindow;
+            import com.dynamobi.adminui.commands.ForeignDataCommand;
+            import com.dynamobi.adminui.commands.GenerateDdlCommand;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.components.ObjectTreeRenderer;
+            import com.dynamobi.adminui.events.ExecuteSQLEvent;
+            import com.dynamobi.adminui.events.GeneralServiceEvent;
+            import com.dynamobi.adminui.events.MetaDataEvent;
+            import com.dynamobi.adminui.events.TableDetailsEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.ActionEnum;
+            import com.dynamobi.adminui.view.ForeignTableImportWindow;
+            import com.dynamobi.adminui.view.IndexesWindow;
+            import com.dynamobi.adminui.view.NewJarWindow;
+            import com.dynamobi.adminui.view.NewSchemaWindow;
+            import com.dynamobi.adminui.view.OpenTableWindow;
             
             import mx.containers.VBox;
             import mx.controls.Alert;

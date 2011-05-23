@@ -1,12 +1,12 @@
-package com.flexsqladmin.sqladmin.commands
+package com.dynamobi.adminui.commands
 {
     import com.adobe.cairngorm.business.Responder;
     import com.adobe.cairngorm.commands.Command;
     import com.adobe.cairngorm.control.CairngormEvent;
-    import com.flexsqladmin.sqladmin.business.GeneralDelegate;
-    import com.flexsqladmin.sqladmin.components.DebugWindow;
-    import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
-    import com.flexsqladmin.sqladmin.model.ModelLocator;
+    import com.dynamobi.adminui.business.GeneralDelegate;
+    import com.dynamobi.adminui.components.DebugWindow;
+    import com.dynamobi.adminui.events.GeneralServiceEvent;
+    import com.dynamobi.adminui.model.ModelLocator;
     
     import mx.utils.ObjectUtil;
     

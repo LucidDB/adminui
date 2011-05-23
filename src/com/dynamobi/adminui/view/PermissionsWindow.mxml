@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
-                xmlns:com="com.flexsqladmin.sqladmin.components.*"
+                xmlns:com="com.dynamobi.adminui.components.*"
                 title="Grant Permissions"
                 creationComplete="init();"
                 xmlns:treeClasses="mx.controls.treeClasses.*"
@@ -50,7 +50,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     <treeClasses:TreeItemRenderer>
                     <mx:Script>
                         <![CDATA[
-                            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+                            import com.dynamobi.adminui.utils.CustomFuncs;
                             
                             import mx.containers.HBox;
                             import mx.controls.Image;
@@ -193,17 +193,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:Script>
         <![CDATA[
             import mx.controls.Alert;
-            import com.flexsqladmin.sqladmin.commands.GeneralCommand;
-            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
+            import com.dynamobi.adminui.commands.GeneralCommand;
+            import com.dynamobi.adminui.events.GeneralServiceEvent;
             import mx.controls.Image;
-            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import com.dynamobi.adminui.utils.CustomFuncs;
             import mx.core.Container;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.events.UsersAndRolesEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
             
-            import com.flexsqladmin.sqladmin.components.FormItemWithImage;
+            import com.dynamobi.adminui.components.FormItemWithImage;
             
             import mx.events.CloseEvent;
             import mx.events.ListEvent;

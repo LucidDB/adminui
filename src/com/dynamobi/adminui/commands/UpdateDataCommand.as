@@ -16,18 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-package com.flexsqladmin.sqladmin.commands
+package com.dynamobi.adminui.commands
 {
 	import com.adobe.cairngorm.business.Responder;
 	import com.adobe.cairngorm.commands.Command;
 	import com.adobe.cairngorm.control.CairngormEvent;
-	import com.flexsqladmin.sqladmin.business.GeneralDelegate;
-	import com.flexsqladmin.sqladmin.components.DebugWindow;
-	import com.flexsqladmin.sqladmin.components.QueryWindow;
-	import com.flexsqladmin.sqladmin.events.UpdateDataEvent;
-	import com.flexsqladmin.sqladmin.model.ModelLocator;
-	import com.flexsqladmin.sqladmin.view.OpenTableWindow;
-	import com.flexsqladmin.sqladmin.vo.OpenTableData;
+	import com.dynamobi.adminui.business.GeneralDelegate;
+	import com.dynamobi.adminui.components.DebugWindow;
+	import com.dynamobi.adminui.components.QueryWindow;
+	import com.dynamobi.adminui.events.UpdateDataEvent;
+	import com.dynamobi.adminui.model.ModelLocator;
+	import com.dynamobi.adminui.view.OpenTableWindow;
+	import com.dynamobi.adminui.vo.OpenTableData;
 	
 	import mx.containers.VBox;
 	import mx.controls.Alert;

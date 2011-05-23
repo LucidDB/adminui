@@ -18,10 +18,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-           xmlns:components="com.flexsqladmin.sqladmin.components.*"
+           xmlns:components="com.dynamobi.adminui.components.*"
            width="100%"
            height="100%"
-           creationComplete="init();" xmlns:view="com.flexsqladmin.sqladmin.view.*"
+           creationComplete="init();" xmlns:view="com.dynamobi.adminui.view.*"
            >
 
     <mx:states>
@@ -70,12 +70,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.ExecuteSQLEvent;
-            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
-            import com.flexsqladmin.sqladmin.view.ModifyUserWindow;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.events.ExecuteSQLEvent;
+            import com.dynamobi.adminui.events.UsersAndRolesEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.CustomFuncs;
+            import com.dynamobi.adminui.view.ModifyUserWindow;
             
             import flash.text.TextLineMetrics;
             

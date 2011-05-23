@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-package com.flexsqladmin.sqladmin.events
+package com.dynamobi.adminui.events
 {
     import com.adobe.cairngorm.control.CairngormEvent;
-    import com.flexsqladmin.sqladmin.components.DebugWindow;
-    import com.flexsqladmin.sqladmin.utils.ActionEnum;
+    import com.dynamobi.adminui.components.DebugWindow;
+    import com.dynamobi.adminui.utils.ActionEnum;
     
     public class UsersAndRolesEvent extends CairngormEvent {
         public static var USERSANDROLES:String = "usersandroles";

@@ -46,9 +46,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <fx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.commands.GeneralCommand;
-            import com.flexsqladmin.sqladmin.events.GeneralServiceEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
+            import com.dynamobi.adminui.commands.GeneralCommand;
+            import com.dynamobi.adminui.events.GeneralServiceEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
             
             import mx.controls.Alert;
             import mx.managers.PopUpManager;

@@ -16,14 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-package com.flexsqladmin.sqladmin.business
+package com.dynamobi.adminui.business
 {
     import com.adobe.cairngorm.business.Responder;
     import com.adobe.cairngorm.business.ServiceLocator;
-    import com.flexsqladmin.sqladmin.business.Services;
-    import com.flexsqladmin.sqladmin.commands.TableDetailsCommand;
-    import com.flexsqladmin.sqladmin.components.DebugWindow;
-    import com.flexsqladmin.sqladmin.model.ModelLocator;
+    import com.dynamobi.adminui.business.Services;
+    import com.dynamobi.adminui.commands.TableDetailsCommand;
+    import com.dynamobi.adminui.components.DebugWindow;
+    import com.dynamobi.adminui.model.ModelLocator;
     
     import mx.rpc.AbstractOperation;
     import mx.rpc.AsyncToken;

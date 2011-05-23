@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	layout="absolute" width="400" height="300">
 	<mx:Script>
 		<![CDATA[
-			import com.flexsqladmin.sqladmin.events.InsertRowEvent;
+			import com.dynamobi.adminui.events.InsertRowEvent;
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import mx.controls.TextInput;
 			import mx.controls.Button;
@@ -35,8 +35,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			import mx.controls.Label;
 			import mx.controls.Alert;
         	import mx.managers.PopUpManager;
-        	import com.flexsqladmin.sqladmin.vo.OpenTableData;
-        	import com.flexsqladmin.sqladmin.components.DebugWindow;
+        	import com.dynamobi.adminui.vo.OpenTableData;
+        	import com.dynamobi.adminui.components.DebugWindow;
 		
 			private var tablemetadata:OpenTableData;	
 			private var tablexml:XML;

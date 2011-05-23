@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			import mx.controls.Image;
 			import mx.controls.Label;
 			import mx.core.UIComponent;  
-			import com.flexsqladmin.sqladmin.components.DebugWindow;
+			import com.dynamobi.adminui.components.DebugWindow;
             
             private var icons:Object = {
                   'FtrsIndexSearchRel' : 'search.gif'

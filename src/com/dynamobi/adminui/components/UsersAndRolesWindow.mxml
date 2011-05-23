@@ -18,8 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 -->
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-           xmlns:components="com.flexsqladmin.sqladmin.components.*"
-           xmlns:view="com.flexsqladmin.sqladmin.view.*"
+           xmlns:components="com.dynamobi.adminui.components.*"
+           xmlns:view="com.dynamobi.adminui.view.*"
            width="100%" height="100%"
            creationComplete="init();"
            >
@@ -54,9 +54,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     <mx:Script>
         <![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.events.UsersAndRolesEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
+            import com.dynamobi.adminui.events.UsersAndRolesEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.CustomFuncs;
             
             import mx.events.FlexEvent;
            

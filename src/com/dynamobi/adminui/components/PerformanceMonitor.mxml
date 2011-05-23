@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 width="100%" height="100%"
                 paddingLeft="10" paddingRight="10" paddingTop="10" paddingBottom="10"
                 liveDragging="true"
-                creationComplete="init();" xmlns:components="com.flexsqladmin.sqladmin.components.*">
+                creationComplete="init();" xmlns:components="com.dynamobi.adminui.components.*">
 
     <mx:VBox height="100%" width="50%">
         <mx:HBox>
@@ -109,7 +109,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import mx.charts.PieChart;
             import mx.events.ListEvent;
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
-            import com.flexsqladmin.sqladmin.events.PerformanceEvent;
+            import com.dynamobi.adminui.events.PerformanceEvent;
             
             import mx.binding.utils.BindingUtils;
             import mx.charts.AxisRenderer;

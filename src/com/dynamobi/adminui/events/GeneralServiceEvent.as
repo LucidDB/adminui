@@ -1,8 +1,8 @@
-package com.flexsqladmin.sqladmin.events
+package com.dynamobi.adminui.events
 {
     import com.adobe.cairngorm.control.CairngormEvent;
-    import com.flexsqladmin.sqladmin.components.DebugWindow;
-    import com.flexsqladmin.sqladmin.control.Controller;
+    import com.dynamobi.adminui.components.DebugWindow;
+    import com.dynamobi.adminui.control.Controller;
     
     public dynamic class GeneralServiceEvent extends CairngormEvent {
         

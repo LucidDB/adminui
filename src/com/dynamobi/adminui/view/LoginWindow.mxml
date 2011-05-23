@@ -31,11 +31,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 		<![CDATA[
             import com.adobe.cairngorm.control.CairngormEventDispatcher;
             import com.adobe.crypto.SHA256;
-            import com.flexsqladmin.sqladmin.components.DebugWindow;
-            import com.flexsqladmin.sqladmin.events.LoginEvent;
-            import com.flexsqladmin.sqladmin.model.ModelLocator;
-            import com.flexsqladmin.sqladmin.utils.CustomFuncs;
-            import com.flexsqladmin.sqladmin.vo.ConnectionVO;
+            import com.dynamobi.adminui.components.DebugWindow;
+            import com.dynamobi.adminui.events.LoginEvent;
+            import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.CustomFuncs;
+            import com.dynamobi.adminui.vo.ConnectionVO;
             
             import mx.managers.PopUpManager;
             import mx.utils.Base64Encoder;
