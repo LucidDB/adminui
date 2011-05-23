@@ -252,9 +252,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                     for each (var ftn:String in sent_args['tables']) {
                         model.object_tree.addItem('foreign_table', ftn, 'schemas', 'schema@',
                             sent_args['to_schema'], 'foreign_tables');
-                        model.object_tree.addTable(sent_args['to_schema'], 'local_' + ftn,
-                            XML(model.object_tree.tree_data.schemas.schema.(
-                                @label == sent_args['to_schema'])[0].foreign_tables.(@label == ftn)[0]));
+                        if (copy_local.selected)
+                            model.object_tree.addTable(sent_args['to_schema'], 'local_' + ftn,
+                                XML(model.object_tree.tree_data.schemas.schema.(
+                                    @label == sent_args['to_schema'])[0].foreign_tables.(@label == ftn)[0]));
                     }
                 }
                 import_calls--;
