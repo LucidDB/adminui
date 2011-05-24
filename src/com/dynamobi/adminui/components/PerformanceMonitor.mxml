@@ -336,7 +336,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 if (name == '') {
                     //trace(data.toXMLString());
                     perf_counters = <counters />;
-                    for each (var el:XML in data['return']) {
+                    for each (var el:XML in data['return'].counters) {
                         var node:XML = <counter label={el.counterName} selected="false" />;
                         var possible_cat:XML = perf_counters.category.(@label == el.counterCategory)[0];
                         if (possible_cat) {
