@@ -222,7 +222,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             public function load_options(r:*) : void {
                 var results:XML = XML(r);
-                for each (var el:XML in results.children()) {
+                for each (var el:XML in results['return'].children()) {
                     wrapper_options.push({'name': '"' + el.@name + '"', 'default_value': el.@value,
                         'value': el.@value, 'shown_name': el.@name, 'send': (el.@required == 'true'),
                         'required': el.@required, 'desc': el.@desc, 'type': el.@type});
@@ -273,7 +273,7 @@ desc="Lets importer know the database name of tables, strongly suggested." type=
             
             public function load_prior_result(r:*) : void {
                 var results:XML = XML(r);
-                for each (var el:XML in results.children()) {
+                for each (var el:XML in results['return'].children()) {
                     var found:Boolean = false;
                     wrapper_options.every(function(item:*, index:int, array:Array) : Boolean {
                         if (Object(item)['name'] == '"' + el.@name + '"') {
@@ -358,7 +358,7 @@ desc="Lets importer know the database name of tables, strongly suggested." type=
                     extended_start = -1;
                 }
                 extended_start = wrapper_options.length;
-                for each (var el:XML in results.children()) {
+                for each (var el:XML in results['return'].children()) {
                     if (Number(el.@ordinal) < wrapper_options.length) {
                         continue;
                     }
