@@ -94,13 +94,13 @@ package com.dynamobi.adminui.commands
                 if (call == 'getCurrentSessions') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getCurrentSessions");
                     var scroll:Number = model.session_tab.session_info.verticalScrollPosition;
-                    model.session_tab.session_info_data = new XMLList(XML(event.result).children());
+                    model.session_tab.session_info_data = new XMLList(XML(event.result)['return'].sessions);
                     model.session_tab.session_info.invalidateDisplayList();
                     model.session_tab.session_info.validateNow();
                     model.session_tab.session_info.verticalScrollPosition = scroll;
                 } else if (call == 'getUsersDetails') {
                     DebugWindow.log("UsersAndRolesCommand.as:onResult()-getUsersDetails");
-                    model.users_details = new XMLList(XML(event.result).children());
+                    model.users_details = new XMLList(XML(event.result)['return'].user_details);
                     model.users_list = new Array();
                     for each (var el:XML in model.users_details) {
                         model.users_list.push(el.@name);
