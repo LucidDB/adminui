@@ -85,6 +85,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			<mx:Canvas id="history" label="History" icon="@Embed(source='/icons/history.png')">
 				<mx:TextArea htmlText="{result_info.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
 			</mx:Canvas>
+            <mx:Canvas id="rawtext" label="Raw Result" icon="@Embed(source='/icons/page_white_text.png')">
+                <mx:TextArea text="{result_info.querydata.toXMLString()}" width="100%" height="100%"
+                             wordWrap="true" editable="true" />
+            </mx:Canvas>
 		</mx:TabNavigator>
 	</mx:Box>
 	
