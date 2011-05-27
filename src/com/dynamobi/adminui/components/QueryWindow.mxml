@@ -85,9 +85,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			<mx:Canvas id="history" label="History" icon="@Embed(source='/icons/history.png')">
 				<mx:TextArea htmlText="{result_info.queryHistoryVO.history}" width="100%" height="100%" wordWrap="false" horizontalScrollPolicy="auto" editable="false" id="txtHistory"/>
 			</mx:Canvas>
-            <mx:Canvas id="rawtext" label="Raw Result" icon="@Embed(source='/icons/page_white_text.png')">
-                <mx:TextArea text="{result_info.querydata.toXMLString()}" width="100%" height="100%"
+            <mx:Canvas id="rawtext" label="Raw Result" icon="@Embed(source='/icons/page_white_text.png')"
+                       render="changeraw()"
+                       >
+                <mx:VBox width="100%" height="100%">
+                <mx:HBox>
+                    <mx:Label paddingLeft="5" text="Output format: " />
+                    <mx:RadioButtonGroup id="display_type" change="changeraw()" />
+                    <mx:RadioButton groupName="display_type" value="xml" label="XML" selected="true" />
+                    <mx:RadioButton groupName="display_type" value="vertical" label="Vertical" />
+                    <mx:RadioButton groupName="display_type" value="csv" label="CSV" />
+                </mx:HBox>
+                <mx:TextArea id="rawtextvalue" text="{result_info.querydata.toXMLString()}"
+                             width="100%" height="100%" fontFamily="monospace"
                              wordWrap="true" editable="true" />
+                </mx:VBox>
             </mx:Canvas>
 		</mx:TabNavigator>
 	</mx:Box>
@@ -99,6 +111,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.dynamobi.adminui.components.DebugWindow;
             import com.dynamobi.adminui.events.ExecuteSQLEvent;
             import com.dynamobi.adminui.model.ModelLocator;
+            import com.dynamobi.adminui.utils.CustomFuncs;
             import com.dynamobi.adminui.vo.QueryHistoryVO;
             import com.dynamobi.adminui.vo.QueryResultInfo;
             
@@ -282,6 +295,52 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 
             }
 
+            public function changeraw():void {
+                if (result_info.querydata == null)
+                    return;
+                var res:XMLList = result_info.querydata.source;
+                if (display_type.selectedValue == 'xml')
+                    rawtextvalue.text = result_info.querydata.toXMLString();
+                else if (display_type.selectedValue == 'vertical') {
+                    rawtextvalue.text = '';
+                    var longest:Number = 0;
+                    for each (var tags:XML in res[0].children()) {
+                        var tag:String = tags.localName();
+                        longest = (tag.length > longest) ? tag.length : longest;
+                    }
+                    for each (var top:XML in res) {
+                        for each (tags in top.children()) {
+                            tag = tags.localName();
+                            rawtextvalue.text += tag + '  ';
+                            if (tag.length < longest)
+                                rawtextvalue.text += CustomFuncs.wordMult(' ', longest - tag.length - 1);
+                            rawtextvalue.text += String(tags) + "\n";
+                        }
+                        rawtextvalue.text += "\n";
+                    }
+                } else if (display_type.selectedValue == 'csv') {
+                    rawtextvalue.text = '';
+                    var first:Boolean = true;
+                    for each (tags in res[0].children()) {
+                        if (!first)
+                            rawtextvalue.text += ",";
+                        else
+                            first = false;
+                        rawtextvalue.text += "'" + tags.localName().replace("'", "\\'") + "'";
+                    }
+                    for each (top in res) {
+                        rawtextvalue.text += "\n";
+                        first = true;
+                        for each (tags in top.children()) {
+                            if (!first)
+                                rawtextvalue.text += ",";
+                            else
+                                first = false;
+                            rawtextvalue.text += "'" + String(tags).replace("'", "\\'") + "'";
+                        }
+                    }
+                }
+            }
 			
 		]]>
 	</mx:Script>
