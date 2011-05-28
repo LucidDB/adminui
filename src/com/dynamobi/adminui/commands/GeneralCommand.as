@@ -57,6 +57,8 @@ package com.dynamobi.adminui.commands
         public function onFault(event:*=null) : void {
             CursorManager.removeBusyCursor();
             DebugWindow.log("GeneralCommand.as:onFault()");
+            if (extra_args.hasOwnProperty('error'))
+                extra_args['error'](event);
         }
     }
 }
