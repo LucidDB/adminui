@@ -138,7 +138,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="true"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'DBService Error');" >
+        >
         <mx:operation name="getTableDetails" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
@@ -163,7 +163,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="false"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'UsersAndRolesService Error');" >
+        >
         <mx:operation name="getCurrentSessions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
             </mx:request>
@@ -243,7 +243,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="false"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'PerformanceCountersService Error');" >
+        >
         <mx:operation name="findPerformanceCounterByName" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <counterName></counterName>
@@ -267,7 +267,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="true"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'ForeignDataService Error');" >
+        >
         <mx:operation name="getWrapperOptions" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <wrapper></wrapper>
@@ -329,7 +329,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         makeObjectsBindable="false"
         showBusyCursor="true"
         requestTimeout="-1"
-        fault="mx.controls.Alert.show('Error loading WSDL--is your AdminUI Server running?', 'AutoIndexService Error');">
+        >
         <mx:operation name="getCandidates" resultFormat="e4x" result="basic_result_handler(event);" fault="basic_fault_handler(event);">
             <mx:request>
                 <catalog></catalog>
