@@ -99,7 +99,8 @@ package com.dynamobi.adminui.commands
                     querycols = queryxml.datamap.split(",");
                 
                 for(var x:int = 0; x < querycols.length; x++){
-                    var querycolumn:AdvancedDataGridColumn = new AdvancedDataGridColumn(querycols[x]);
+                    var querycolumn:AdvancedDataGridColumn = new AdvancedDataGridColumn(
+                        querycols[x].replace('ﾠ', ' '));
                     querycolumn.dataTipField = querycols[x];
                     querycolumn.dataField = querycols[x];
                     querycolumn.editable = false;
