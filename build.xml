@@ -55,6 +55,10 @@
       title="SQLAdmin" template="express-installation" bgcolor="#869ca7"
       version-major="10" version-minor="0" version-revision="0"
       />
+    <mkdir dir="${DEPLOY_DIR}/icons" />
+    <copy todir="${DEPLOY_DIR}/icons">
+      <fileset dir="${basedir}/src/icons/" />
+    </copy>
   </target>
 
   <macrodef name="generateHtmlWrapper" description="Generates HTML Wrapper using custom template">
