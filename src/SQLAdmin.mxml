@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import com.dynamobi.adminui.events.TableDetailsEvent;
             import com.dynamobi.adminui.model.ModelLocator;
             import com.dynamobi.adminui.view.AboutWindow;
+            import com.dynamobi.adminui.view.FeedbackWindow;
             import com.dynamobi.adminui.view.LoginWindow;
             import com.dynamobi.adminui.view.OpenTableWindow;
             import com.dynamobi.adminui.vo.ConnectionVO;
@@ -231,6 +232,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 				aboutWindow.setStyle("borderAlpha", 0.8);
 				aboutWindow.showCloseButton = true;
 			}
+            
+            private function toggleFeedback():void {
+                var feedWin:FeedbackWindow = FeedbackWindow(PopUpManager.createPopUp(this, FeedbackWindow, true));
+                feedWin.setStyle("borderAlpha", 0.8);
+                feedWin.showCloseButton = true;
+            }
 			
 			private function handleShortCuts(e:KeyboardEvent):void{
 				if (e.ctrlKey && e.keyCode == 84) // ctrl+T
@@ -342,6 +349,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
           </mx:ComboBox>
 					<mx:Spacer width="100%"/>
                     <mx:Button label="Debug Window" click="toggleDebugWindow();" visible="{DEBUG}" />
+                    <mx:Button label="Send Us Feedback" toolTip="Send Us Feedback" click="toggleFeedback();"
+                               icon="@Embed(source='/icons/comment.png')" />
 					<mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>
 				</mx:HBox>
 				<flexlib:SuperTabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8"

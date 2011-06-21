@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                xmlns:s="library://ns.adobe.com/flex/spark" 
+                xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" width="400" height="400"
+                close="closeWin();"
+                creationComplete="init();"
+                title="Feedback Form"
+                >
+    <fx:Declarations>
+        <!-- Place non-visual elements (e.g., services, value objects) here -->
+        <s:HTTPService id="feedbackCommand"
+                       url="http://www.dynamobi.com/c/company/contact-us/#usermessage3b" method="POST"
+                       resultFormat="text" showBusyCursor="true"
+                       result="success();" fault="fail();">
+            <s:request>
+                <inquiry_reason>Community</inquiry_reason>
+                <email></email>
+                <firstname></firstname>
+                <lastname></lastname>
+                <title>Feedback User</title>
+                <companyname>Feedback User</companyname>
+                <company_size>0_10</company_size>
+                <country>United States of America</country>
+                <project_start>0-2 Months</project_start>
+                <Comments></Comments>
+                <formid>8736d1d2-3553-43a0-b843-613b1f54a508</formid>
+                <cid>LF_d403a150</cid>
+                <sendbutton3>Contact Us</sendbutton3>
+            </s:request>
+        </s:HTTPService>
+    </fx:Declarations>
+
+    <mx:Form>
+        <mx:FormHeading label="* fields required" />
+        <mx:FormItem label="First Name*: ">
+            <s:TextInput width="200" id="firstname" />
+        </mx:FormItem>
+        <mx:FormItem label="Last Name: ">
+            <s:TextInput width="200" id="lastname" />
+        </mx:FormItem>
+        <mx:FormItem label="Email: ">
+            <s:TextInput width="200" id="email" />
+        </mx:FormItem>
+        <mx:FormItem label="Feedback*: ">
+            <s:TextArea width="200" id="feedback" />
+        </mx:FormItem>
+        <mx:FormItem>
+            <s:Button click="submit();" label="Send" />
+        </mx:FormItem>
+        <mx:FormItem>
+            <s:Label text="Feel free to send any feedback you have" />
+            <s:Label text="such as comments, questions, or bugs." />
+        </mx:FormItem>
+    </mx:Form>
+    
+    <fx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+            import mx.managers.PopUpManager;
+            
+            private function init():void {
+                PopUpManager.centerPopUp(this);
+            }
+            
+            private function closeWin():void {
+                PopUpManager.removePopUp(this);
+            }
+            
+            private function submit():void {
+                if (firstname.text == '') {
+                    Alert.show('Please provide us a name.', 'Error');
+                    return;
+                }
+                if (feedback.text == '') {
+                    Alert.show('Please provide a message.', 'Error');
+                    return;
+                }
+                var ln:String = lastname.text == '' ? 'Surnameless' : lastname.text;
+                var em:String = email.text == '' ? 'not@given.com' : email.text;
+                var params:Object = feedbackCommand.request;
+                params.firstname = firstname.text;
+                params.lastname = ln;
+                params.email = em;
+                params.Comments = feedback.text;
+                feedbackCommand.send(params);
+            }
+            
+            private function success():void {
+                Alert.show('Thank you for your input.', 'Message Sent');
+            }
+            
+            private function fail():void {
+                Alert.show('A problem occurred with sending your message. Please try again later.', 'Failure');
+            }
+            
+        ]]>
+    </fx:Script>
+</mx:TitleWindow>
