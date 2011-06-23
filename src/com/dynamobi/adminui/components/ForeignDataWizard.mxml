@@ -255,8 +255,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             }
             
             public function add_mysql() : void {
-                load_prior_result(<vals><el name="SCHEMA_NAME" value=""
-desc="Lets importer know the database name of tables, strongly suggested." type="STRING" /></vals>);
+                load_prior_result(<vals><return><el name="SCHEMA_NAME" value=""
+desc="Lets importer know the database name of tables, strongly suggested." type="STRING" />
+                    <el name="useCursorFetch" value="true"
+desc="If connected to MySQL &gt; 5.0.2, and setFetchSize() &gt; 0 on a statement, should that statement use cursor-based fetching to retrieve rows?" type="BOOLEAN" />
+</return></vals>);
             }
             
             public function load_prior_values(server:String) : void {
