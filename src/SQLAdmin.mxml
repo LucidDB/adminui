@@ -258,9 +258,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 			}   
 
             private function add_item_click(event:DropdownEvent) : void {
-                // Hack to only continue if they clicked inside the items box.
-                if (event.triggerEvent != null || !(573 > this.contentMouseX && this.contentMouseX > 360 &&
-                    35 < this.contentMouseY && this.contentMouseY < 35 + 25*5))
+                // Only continue if they've clicked in the box.
+                var pt:Point = add_item_list.globalToLocal(new Point(this.contentMouseX, this.contentMouseY));
+                if (event.triggerEvent != null || pt.x < add_item_list.x ||
+                    pt.x > add_item_list.x + add_item_list.width || pt.y < add_item_list.y ||
+                pt.y > add_item_list.height*5.5)
                     return;
                 add_item_change(event as ListEvent);
             }
