@@ -61,8 +61,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             import mx.controls.ComboBox;
             import mx.events.DropdownEvent;
             import mx.events.ListEvent;
+            import mx.graphics.ImageSnapshot;
             import mx.managers.PopUpManager;
             import mx.rpc.soap.mxml.WebService;
+            import mx.utils.Base64Encoder;
 			
 			public var debug_win:DebugWindow;
 			private var exectimer:Timer;
@@ -285,6 +287,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 }
             }
             
+            private function snapshot(src:IBitmapDrawable) : String {
+                var snap:ImageSnapshot = ImageSnapshot.captureImage(src);
+                var encoder:Base64Encoder = new Base64Encoder();
+                encoder.insertNewLines = false;
+                encoder.encodeBytes(snap.data);
+                return encoder.toString();
+            }
 		]]>
 	</mx:Script>
 	
@@ -325,51 +334,53 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
         }
     </mx:Style>
     
-	<mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true">
-		
-		<mx:VBox height="100%" width="35%" >
-			<mx:HBox width="100%">
-				<!--<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>-->
-				<mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="changeHandler(event)"/>
+    <mx:HDividedBox width="100%" height="100%" horizontalGap="5" liveDragging="true" id="topbox">
+        
+        <mx:VBox height="100%" width="35%" >
+            <mx:HBox width="100%">
+                <!--<mx:Button click="loadMetaData();" icon="@Embed(source='/icons/cog.png')" toolTip="(CTRL-R) Refresh Object Browser" label="Refresh"/>-->
+                <mx:ComboBox id ="mycatalog" dataProvider="{model.catalogdata}" labelField="CATALOG_NAME" selectedIndex="0" close="changeHandler(event)"/>
                 <mx:Button click="new_metadata_tree.init();" icon="@Embed(source='/icons/arrow_refresh.png')" label="Refresh" />
-			</mx:HBox>
+            </mx:HBox>
             <components:ObjectTree id="new_metadata_tree" />
-			<!--<components:ObjectBrowser id="metadata_tree" dataProvider="{model.metadata}"/>-->
-            </mx:VBox>
-		
-		<mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">
-			
-			<mx:Box width="100%" height="50%">
-				<mx:HBox width="100%">
-          <mx:ComboBox id="add_item_list" close="add_item_click(event);" height="25">
-            <mx:Object label="Launch Query Tab" action="query" />
-            <mx:Object label="New Table" action="table" />
-            <mx:Object label="New User" action="users" />
-            <mx:Object label="New Role" action="roles" />
-            <mx:Object label="New View" action="views" />
-            <mx:Object label="New Foreign Data Server" action="foreign_data" />
-          </mx:ComboBox>
-					<mx:Spacer width="100%"/>
+            <!--<components:ObjectBrowser id="metadata_tree" dataProvider="{model.metadata}"/>-->
+        </mx:VBox>
+        
+        <mx:VDividedBox width="100%" height="100%" verticalGap="5" liveDragging="true">
+            
+            <mx:Box width="100%" height="50%">
+                <mx:HBox width="100%">
+                    <mx:ComboBox id="add_item_list" close="add_item_click(event);" height="25">
+                        <mx:Object label="Launch Query Tab" action="query" />
+                        <mx:Object label="New Table" action="table" />
+                        <mx:Object label="New User" action="users" />
+                        <mx:Object label="New Role" action="roles" />
+                        <mx:Object label="New View" action="views" />
+                        <mx:Object label="New Foreign Data Server" action="foreign_data" />
+                    </mx:ComboBox>
+                    <mx:Spacer width="100%"/>
+                    
                     <mx:Button label="Debug Window" click="toggleDebugWindow();" visible="{DEBUG}" />
                     <mx:Button label="Send Us Feedback" toolTip="Send Us Feedback" click="toggleFeedback();"
                                icon="@Embed(source='/icons/comment.png')" />
-					<mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>
-				</mx:HBox>
-				<flexlib:SuperTabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8"
-										   stopScrollingEvent="{MouseEvent.MOUSE_OUT}" startScrollingEvent="{MouseEvent.MOUSE_OVER}"
-										   horizontalGap="0" tabClose="destroyTab(event);"
-										   closePolicy="{SuperTab.CLOSE_ALWAYS}"
+                    <mx:Button click="showAboutWindow();" icon="@Embed(source='/icons/information.png')" label="About" toolTip="About"/>
+               
+                </mx:HBox>
+                <flexlib:SuperTabNavigator id="tabnavigator" width="100%" height="100%" alpha=".8"
+                                           stopScrollingEvent="{MouseEvent.MOUSE_OUT}" startScrollingEvent="{MouseEvent.MOUSE_OVER}"
+                                           horizontalGap="0" tabClose="destroyTab(event);"
+                                           closePolicy="{SuperTab.CLOSE_ALWAYS}"
                                            editableTabLabels="true"
-										   />
-				
-			</mx:Box>
-			<mx:HBox width="100%">
-				<mx:Label fontWeight="bold" text="Elapsed Execution Time: {model.exectimer.time} sec(s)"/>
-				<mx:Spacer width="100%"/>
-				<mx:Button click="showLogin();" label="Reconnect" icon="@Embed(source='/icons/connect.png')"/>
-				<mx:Label fontWeight="bold" text="{model.connectionText}"/>
-			</mx:HBox>
-	
-		</mx:VDividedBox>
-	</mx:HDividedBox>
+                                           />
+                
+            </mx:Box>
+            <mx:HBox width="100%">
+                <mx:Label fontWeight="bold" text="Elapsed Execution Time: {model.exectimer.time} sec(s)"/>
+                <mx:Spacer width="100%"/>
+                <mx:Button click="showLogin();" label="Reconnect" icon="@Embed(source='/icons/connect.png')"/>
+                <mx:Label fontWeight="bold" text="{model.connectionText}"/>
+            </mx:HBox>
+            
+        </mx:VDividedBox>
+    </mx:HDividedBox>
 </mx:Application>
