@@ -33,6 +33,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
       <mx:Button click="submitShowPlanQuery();" icon="@Embed(source='/icons/exec_plan.png')" label="Show Execution Plan" toolTip="Show Execution Plan"/>
       <!--<mx:CheckBox label="Include Execution Plan" id="spflag"/>-->
       <mx:Button click="makeView();" label="Make View From Query" toolTip="Make View From Query" icon="{VWimg}" />
+      <mx:Spacer width="100%"/>
+      <mx:LinkButton label="LucidDB SQL Reference"
+                     labelPlacement="left"
+                     icon="@Embed(source='/icons/link_go.png')"
+                     click="navigateToURL(new URLRequest(
+                     'http://pub.eigenbase.org/wiki/LucidDbSqlReference'), '_blank')"/>
   </mx:HBox>
 
     <mx:HBox width="100%" left="10" right="10" id="view_info" visible="false">
