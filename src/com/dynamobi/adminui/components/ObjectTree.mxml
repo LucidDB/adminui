@@ -233,10 +233,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         myMenu.show(clickx + 25, clicky);
                         if (clicky > 400)
                             myMenu.y -= myMenu.height;
+                        var oldselected:int = selectedIndex;
                         myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
                             menu_info['handler'](event.index, context);
                             clearInterval(click_interval);
                             menu_closed = true;
+                        });
+                        myMenu.addEventListener(MenuEvent.MENU_HIDE, function():void {
+                            if (selectedIndex != oldselected) {
+                                clearInterval(click_interval);
+                                menu_closed = true;
+                            }
                         });
                     } else {
                         menu_closed = true;
