@@ -117,6 +117,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             public var tree_data:XML = new XML();
             
             private var object_menus:Object = new Object();
+            private var SYS_NETWORK:String = 'SYS_NETWORK';
             
             public function debug(e:KeyboardEvent) : void {
                 if (!FlexGlobals.topLevelApplication.DEBUG) { return; }
@@ -161,16 +162,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         <sessions label="Active User Sessions" />
                     </system>
                     </tree>;
-                    /*<networks label="Networks">
-                        <network label="network.dynamobi.com">
-                            <package label="SFDC package" />
-                            <package label="Stats package" />
-                            <package label="Zendesk package" />
-                            <package label="Google Analytics package" />
-                        </network>
-                    </networks>
-                    </tree>
-                    ;*/
                 tree_data = skeleton;
                 
                 var expandTree:Function = function():void {
@@ -235,14 +226,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                         menu_closed = false;
                         var context:ObjectTree = this;
                         var menu_info:Object = object_menus[XML(selectedItem).localName()];
+                        // Hack for sys_network:
+                        if (XML(selectedItem).localName() == 'schema' && XML(selectedItem).@label == SYS_NETWORK)
+                            menu_info = object_menus['schema:' + SYS_NETWORK];
                         var myMenu:Menu = Menu.createMenu(null, menu_info['info']);
                         myMenu.show(clickx + 25, clicky);
                         if (clicky > 400)
                             myMenu.y -= myMenu.height;
                         myMenu.addEventListener(MenuEvent.ITEM_CLICK, function(event:MenuEvent):void {
                             menu_info['handler'](event.index, context);
+                            clearInterval(click_interval);
+                            menu_closed = true;
                         });
-                        myMenu.addEventListener(Event.CLOSE, function():void { menu_closed = true; });
                     } else {
                         menu_closed = true;
                     }
@@ -581,6 +576,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                                 'getSchemaDdl', {'catalog' : model.currentcatalogname, 
                                     'schema': context.selectedItem.@label}); 
                             CairngormEventDispatcher.getInstance().dispatchEvent(gen);
+                        }
+                    }
+                );
+                register_context("schema:" + SYS_NETWORK, [con_row('do something', null),
+                    con_row('something else', null)],
+                    function (index:Number, context:ObjectTree) : void {
+                        if (index == 0) {
+                            
+                        } else if (index == 1) {
+                            
                         }
                     }
                 );
