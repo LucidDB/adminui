@@ -230,8 +230,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 options_grid.dataProvider = wrapper_options;
                 
                 // Wrapper-specific behavior:
-                if (wrappers_list.selectedLabel == "SYS_JDBC")
+                if (wrappers_list.selectedLabel == "SYS_JDBC") {
                     driver_suggestions.visible = true;
+                    
+                    load_prior_result(<vals><return><el name="ASSUME_PUSHDOWN_VALID" value="false"
+                    desc="Optimizing option to push certain data filters and aggregations down to the remote server." type="BOOLEAN" />
+                    </return></vals>); 
+                }
             }
             
             public function suggest_driver(driver:String, url:String) : void {
