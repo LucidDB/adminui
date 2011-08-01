@@ -333,8 +333,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
             
             public function addData(data:XML, names:String) : void {
                 for each (var name:String in names.split(',')) {
-                if (name == '') {
-                    //trace(data.toXMLString());
+                if (name == '') { // only run for tree of counters
                     perf_counters = <counters />;
                     for each (var el:XML in data['return'].counters) {
                         var node:XML = <counter label={el.counterName} selected="false" />;
@@ -361,9 +360,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
                 
                 if (!data_collections.hasOwnProperty(name))
                     continue;
+                el = null;
                 for each (el in data['return'])
                     if (el.counterName == name)
                         break;
+                if (el.counterName != name) { //hack...
+                    for each (el in data['return'].counters)
+                        if (el.counterName == name)
+                            break;
+                }
                 if (!el.hasOwnProperty('counterUnits') || el.counterUnits == 'null')
                     el.counterUnits = 'scalar';
                 var val:Number = convert_amount(Number(el.counterValue),
